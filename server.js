@@ -4,6 +4,14 @@ const mongoose = require('mongoose');
 
 // إعداد خادم Express وبوت تليجرام باستخدام المتغيرات البيئية Safe Environment
 const app = express();
+// تشغيل تلمس ملفات الويب الثابتة من مجلد public
+app.use(express.static('public'));
+app.use(express.json());
+
+// مسار تجريبي للتأكد من أن السيرفر يعرض صفحة الويب
+app.get('/test', (req, res) => {
+    res.send('سيرفر نكسورا يعمل ويستضيف واجهة الويب بنجاح! 🚀');
+});
 const PORT = process.env.PORT || 5000;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
