@@ -2,34 +2,47 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Nexora - تسجيل الدخول</title>
+    <title>Nexora - التعدين</title>
     <style>
-        body { background: #0b0c10; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }
-        .box { background: #1f2833; padding: 30px; border-radius: 20px; display: inline-block; width: 90%; max-width: 400px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: none; }
-        button { background: #c5a059; color: #000; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        body { background: #0b0c10; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
+        .box { background: #1f2833; padding: 20px; border-radius: 20px; display: inline-block; width: 100%; max-width: 400px; }
+        button { background: #c5a059; color: #000; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>Nexora تسجيل</h2>
-        <input type="text" id="fullName" placeholder="الاسم الثلاثي">
-        <input type="tel" id="phoneNumber" placeholder="رقم الهاتف">
-        <button onclick="register()">إنشاء الحساب</button>
+        <h2>⛏️ منصة نكسورا</h2>
+        <div id="status">مرحباً بك!</div>
+        <button onclick="startMining()">⛏️ ابدأ التعدين</button>
+        <button onclick="collectPoints()" style="background: #45a049;">💰 حصاد النقاط</button>
     </div>
 
     <script>
-        async function register() {
-            const fullName = document.getElementById('fullName').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            // ملاحظة: telegramId هنا سيتم جلبه من إطار عمل تليجرام
-            const response = await fetch('/api/register', {
+        // سنستخدم ID ثابت للتجربة الآن، لاحقاً سنربطه بـ Telegram
+        const telegramId = "12345"; 
+
+        async function startMining() {
+            const res = await fetch('/api/mine', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId: "12345", fullName, phoneNumber }) 
+                body: JSON.stringify({ telegramId })
             });
-            const data = await response.json();
-            alert(data.message);
+            const data = await res.json();
+            document.getElementById('status').innerText = data.message;
+        }
+
+        async function collectPoints() {
+            const res = await fetch('/api/collect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId })
+            });
+            const data = await res.json();
+            if(data.success) {
+                document.getElementById('status').innerText = "تم الحصاد! رصيدك: " + data.totalPoints;
+            } else {
+                document.getElementById('status').innerText = data.message;
+            }
         }
     </script>
 </body>
