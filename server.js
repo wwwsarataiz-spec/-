@@ -75,10 +75,19 @@ bot.hears('💰 مكافأة يومية', async (ctx) => {
     ctx.reply('🎉 مبروك! حصلت على 20 نقطة هدية يومية.');
 });
 
-// ميزة حسابي
+// ميزة حسابي مع زر لوحة التحكم
 bot.hears('👤 حسابي', async (ctx) => {
-    const user = await User.findOne({ telegramId: ctx.chat.id.toString() });
-    if(user) ctx.reply(`رصيدك الحالي: ${user.points.toFixed(2)} نقطة.`);
+    const chatId = ctx.chat.id.toString();
+    const user = await User.findOne({ telegramId: chatId });
+    if (!user) return ctx.reply('يجب التسجيل أولاً.');
+    
+    // تأكد من استبدال الرابط أدناه برابط موقعك الحقيقي على Render
+    const webLink = `https://nexora-backend-ko1u.onrender.com/?id=${chatId}`;
+    
+    ctx.reply(`رصيدك الحالي: ${user.points.toFixed(2)} نقطة.\n\nيمكنك إدارة التعدين من لوحة التحكم:`, 
+    Markup.inlineKeyboard([
+        [Markup.button.webApp('🌐 افتح لوحة التحكم', webLink)]
+    ]));
 });
 
 bot.on('text', async (ctx) => {
