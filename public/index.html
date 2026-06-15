@@ -2,178 +2,35 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexora - Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Nexora - تسجيل الدخول</title>
     <style>
-        :root {
-            --bg-color: #0b0c10;
-            --card-bg: #1f2833;
-            --accent-gold: #c5a059;
-            --text-main: #ffffff;
-            --text-muted: #c5a059aa;
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            overflow: hidden;
-        }
-        .login-container {
-            background: linear-gradient(135deg, #1f2833 0%, #151a22 100%);
-            width: 100%;
-            max-width: 400px;
-            padding: 35px 25px;
-            border-radius: 25px;
-            border: 1px solid rgba(197, 160, 89, 0.2);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-        .logo {
-            font-size: 2.2rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-        }
-        .logo span {
-            color: var(--accent-gold);
-        }
-        .subtitle {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-            text-align: right;
-        }
-        .input-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--accent-gold);
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        .input-field {
-            width: 100%;
-            padding: 14px 45px 14px 15px;
-            background-color: rgba(11, 12, 16, 0.7);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .input-field:focus {
-            border-color: var(--accent-gold);
-        }
-        .input-group i {
-            position: absolute;
-            right: 15px;
-            top: 43px;
-            color: rgba(255,255,255,0.4);
-            font-size: 1.1rem;
-        }
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #c5a059, #e5c07b);
-            border: none;
-            border-radius: 12px;
-            color: #0b0c10;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .submit-btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
-        }
+        body { background: #0b0c10; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .box { background: #1f2833; padding: 30px; border-radius: 20px; display: inline-block; width: 90%; max-width: 400px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: none; }
+        button { background: #c5a059; color: #000; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo">NEXORA<span>.</span></div>
-        <p class="subtitle">منصة الاستثمار والتعدين الذكي</p>
-        <form id="loginForm">
-            <div class="input-group">
-                <label>الاسم الكامل</label>
-                <i class="fa-solid fa-user"></i>
-                <input type="text" id="fullName" class="input-field" placeholder="أدخل اسمك الثلاثي" required>
-            </div>
-            <div class="input-group">
-                <label>رقم الهاتف</label>
-                <i class="fa-solid fa-phone"></i>
-                <input type="tel" id="phoneNumber" class="input-field" placeholder="77xxxxxxx" style="text-align: left; direction: ltr;" required>
-            </div>
-            <button type="submit" class="submit-btn" id="btnText">إنشاء الحساب والدخول</button>
-        </form>
+    <div class="box">
+        <h2>Nexora تسجيل</h2>
+        <input type="text" id="fullName" placeholder="الاسم الثلاثي">
+        <input type="tel" id="phoneNumber" placeholder="رقم الهاتف">
+        <button onclick="register()">إنشاء الحساب</button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // استخراج بيانات مستخدم تليجرام تلقائياً
-        const userRawData = tg.initDataUnsafe?.user;
-        const telegramId = userRawData?.id ? userRawData.id.toString() : "123456789"; // رقم افتراضي للتجربة بالمتصفح
-        const username = userRawData?.username || "no_username";
-
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const fullName = document.getElementById('fullName').value.trim();
-            const phoneNumber = document.getElementById('phoneNumber').value.trim();
-            const btnText = document.getElementById('btnText');
-
-            btnText.innerText = "جاري الحفظ والتحقق...";
-            btnText.disabled = true;
-
-            try {
-                // إرسال البيانات إلى مسار السيرفر الجديد الذي أنشأناه
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ telegramId, username, fullName, phoneNumber })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    if (tg.showAlert) {
-                        tg.showAlert(result.message);
-                    } else {
-                        alert(result.message);
-                    }
-                    // هنا مستقبلاً: سنقوم بتوجيهه إلى الصفحة الرئيسية للمنصة بعد نجاح التسجيل
-                } else {
-                    alert(result.message || "فشل التسجيل، حاول مجدداً");
-                    btnText.innerText = "إنشاء الحساب والدخول";
-                    btnText.disabled = false;
-                }
-            } catch (error) {
-                console.error(error);
-                alert("حدث خطأ أثناء الاتصال بالسيرفر!");
-                btnText.innerText = "إنشاء الحساب والدخول";
-                btnText.disabled = false;
-            }
-        });
+        async function register() {
+            const fullName = document.getElementById('fullName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            // ملاحظة: telegramId هنا سيتم جلبه من إطار عمل تليجرام
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegramId: "12345", fullName, phoneNumber }) 
+            });
+            const data = await response.json();
+            alert(data.message);
+        }
     </script>
 </body>
 </html>
