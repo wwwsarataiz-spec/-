@@ -12,6 +12,39 @@ app.use(express.json());
 app.get('/test', (req, res) => {
     res.send('سيرفر نكسورا يعمل ويستضيف واجهة الويب بنجاح! 🚀');
 });
+// مسار استقبال بيانات التسجيل وحفظها في قاعدة البيانات
+app.post('/api/register', async (req, res) => {
+    try {
+        const { telegramId, username, fullName, phoneNumber } = req.body;
+
+        if (!telegramId || !fullName || !phoneNumber) {
+            return res.status(400).json({ success: false, message: 'جميع الحقول مطلوبة!' });
+        }
+
+        // التحقق إذا كان المستخدم مسجلاً مسبقاً
+        let user = await User.findOne({ telegramId });
+        if (user) {
+            return res.json({ success: true, message: 'مرحباً بعودتك!', user });
+        }
+
+        // إنشاء الحساب الجديد في قاعدة البيانات
+        user = new User({
+            telegramId,
+            username: username || 'لا يوجد',
+            fullName,
+            phoneNumber,
+            points: 0,
+            isMining: false
+        });
+
+        await user.save();
+        res.json({ success: true, message: 'تم إنشاء حسابك في نكسورا بنجاح! 🚀', user });
+
+    } catch (error) {
+        console.error('خطأ في التسجيل:', error);
+        res.status(500).json({ success: false, message: 'حدث خطأ في السيرفر أثناء التسجيل.' });
+    }
+});
 const PORT = process.env.PORT || 5000;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
