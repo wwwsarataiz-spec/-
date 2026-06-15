@@ -122,16 +122,57 @@
                 <i class="fa-solid fa-phone"></i>
                 <input type="tel" id="phoneNumber" class="input-field" placeholder="77xxxxxxx" style="text-align: left; direction: ltr;" required>
             </div>
-            <button type="submit" class="submit-btn">إنشاء الحساب والدخول</button>
+            <button type="submit" class="submit-btn" id="btnText">إنشاء الحساب والدخول</button>
         </form>
     </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+
+        // استخراج بيانات مستخدم تليجرام تلقائياً
+        const userRawData = tg.initDataUnsafe?.user;
+        const telegramId = userRawData?.id ? userRawData.id.toString() : "123456789"; // رقم افتراضي للتجربة بالمتصفح
+        const username = userRawData?.username || "no_username";
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const fullName = document.getElementById('fullName').value.trim();
-            alert(`أهلاً بك يا ${fullName}، جاري حفظ بياناتك...`);
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const btnText = document.getElementById('btnText');
+
+            btnText.innerText = "جاري الحفظ والتحقق...";
+            btnText.disabled = true;
+
+            try {
+                // إرسال البيانات إلى مسار السيرفر الجديد الذي أنشأناه
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, username, fullName, phoneNumber })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (tg.showAlert) {
+                        tg.showAlert(result.message);
+                    } else {
+                        alert(result.message);
+                    }
+                    // هنا مستقبلاً: سنقوم بتوجيهه إلى الصفحة الرئيسية للمنصة بعد نجاح التسجيل
+                } else {
+                    alert(result.message || "فشل التسجيل، حاول مجدداً");
+                    btnText.innerText = "إنشاء الحساب والدخول";
+                    btnText.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("حدث خطأ أثناء الاتصال بالسيرفر!");
+                btnText.innerText = "إنشاء الحساب والدخول";
+                btnText.disabled = false;
+            }
         });
     </script>
 </body>
