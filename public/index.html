@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nexora - تسجيل الدخول</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #1f2833;
+            --accent-gold: #c5a059;
+            --text-main: #ffffff;
+            --text-muted: #c5a059aa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* كارت التسجيل الاحترافي لجميع الهواتف */
+        .login-container {
+            background: linear-gradient(135deg, #1f2833 0%, #151a22 100%);
+            width: 100%;
+            max-width: 400px;
+            padding: 35px 25px;
+            border-radius: 25px;
+            border: 1px solid rgba(197, 160, 89, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .logo span {
+            color: var(--accent-gold);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        /* حقول الإدخال */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 45px 14px 15px;
+            background-color: rgba(11, 12, 16, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .input-group i {
+            position: absolute;
+            right: 15px;
+            top: 43px;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.1rem;
+        }
+
+        /* زر الإرسال الفخم */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #c5a059, #e5c07b);
+            border: none;
+            border-radius: 12px;
+            color: #0b0c10;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo">NEXORA<span>.</span></div>
+        <p class="subtitle">منصة الاستثمار والتعدين الذكي</p>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>الاسم الكامل</label>
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="fullName" class="input-field" placeholder="أدخل اسمك الثلاثي" required>
+            </div>
+
+            <div class="input-group">
+                <label>رقم الهاتف</label>
+                <i class="fa-solid fa-phone"></i>
+                <input type="tel" id="phoneNumber" class="input-field" placeholder="77xxxxxxx" style="text-align: left; direction: ltr;" required>
+            </div>
+
+            <button type="submit" class="submit-btn">إنشاء الحساب والدخول</button>
+        </form>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            
+            // تجهيز البيانات لإرسالها للسيرفر لاحقاً
+            if(tg.showAlert) {
+                tg.showAlert(`أهلاً بك يا ${fullName}، جاري حفظ بياناتك...`);
+            } else {
+                alert(`أهلاً بك يا ${fullName}، جاري حفظ بياناتك...`);
+            }
+            
+            // في الخطوة القادمة سنربط هذا الزر برمز السيرفر الفعلي لحفظ الاسم والهاتف في المونجو
+        });
+    </script>
+</body>
+</html>
