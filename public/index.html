@@ -1,53 +1,30 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>Nexora Dashboard</title>
-    <style>
-        body { background: #0b0c10; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
-        .card { background: #1f2833; padding: 30px; border-radius: 25px; display: inline-block; width: 90%; max-width: 400px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        h1 { color: #c5a059; }
-        .balance { font-size: 2em; margin: 20px 0; font-weight: bold; }
-        button { background: #c5a059; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
-        button:hover { background: #b08d48; }
-        .collect-btn { background: #45a049; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>Nexora</h1>
-        <div class="balance" id="balance">0.00 نقطة</div>
-        <button onclick="startMining()">⛏️ ابدأ التعدين</button>
-        <button class="collect-btn" onclick="collectPoints()">💰 حصاد النقاط</button>
-        <p id="msg" style="margin-top:20px; color: #aaa;"></p>
-    </div>
+<head><meta charset="UTF-8"><title>Nexora</title></head>
+<body style="background:#0b0c10; color:#fff; text-align:center; padding:50px;">
+    <h1>رصيدك الحالي</h1>
+    <div id="balance" style="font-size:3em; color:#c5a059;">0.00</div>
+    <button onclick="startMining()">⛏️ ابدأ التعدين</button>
+    <button onclick="collectPoints()">💰 حصاد</button>
 
     <script>
-        const telegramId = "12345"; // لاحقاً سنجعله متغيراً ديناميكياً
+        const telegramId = new URLSearchParams(window.location.search).get('id');
+        async function update() {
+            const res = await fetch('/api/status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ telegramId })
+            });
+            const data = await res.json();
+            if(data.success) document.getElementById('balance').innerText = data.points;
+        }
+        setInterval(update, 1000); // تحديث كل ثانية
 
         async function startMining() {
-            const res = await fetch('/api/mine', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId })
-            });
-            const data = await res.json();
-            document.getElementById('msg').innerText = data.message;
+            await fetch('/api/mine', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegramId}) });
         }
-
         async function collectPoints() {
-            const res = await fetch('/api/collect', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ telegramId })
-            });
-            const data = await res.json();
-            if(data.success) {
-                document.getElementById('balance').innerText = data.totalPoints + " نقطة";
-                document.getElementById('msg').innerText = "تم الحصاد بنجاح!";
-            } else {
-                document.getElementById('msg').innerText = data.message;
-            }
+            await fetch('/api/collect', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegramId}) });
         }
     </script>
 </body>
