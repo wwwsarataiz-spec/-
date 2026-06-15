@@ -10,105 +10,74 @@ const PORT = process.env.PORT || 5000;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
 
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('تم الاتصال بنجاح'))
-  .catch(err => console.error('خطأ:', err));
+mongoose.connect(MONGO_URI).then(() => console.log('تم الاتصال بقاعدة البيانات')).catch(err => console.error(err));
 
-const userSchema = new mongoose.Schema({
+const User = mongoose.model('User', new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   fullName: String,
-  phoneNumber: String,
   points: { type: Number, default: 0 },
   isMining: { type: Boolean, default: false },
   miningStartedAt: Date,
-  referredBy: String,
   lastDailyBonus: Date
-});
-const User = mongoose.model('User', userSchema);
+}));
 
-// مسارات الويب
-app.post('/api/register', async (req, res) => {
+// --- المسارات ---
+app.post('/api/status', async (req, res) => {
     try {
-        const { telegramId, fullName, phoneNumber, referrerId } = req.body;
+        const { telegramId } = req.body;
         let user = await User.findOne({ telegramId });
-        if (user) return res.json({ success: true, message: 'أهلاً بعودتك!', user });
-        user = new User({ telegramId, fullName, phoneNumber, points: 10, referredBy: referrerId });
-        if (referrerId) await User.findOneAndUpdate({ telegramId: referrerId }, { $inc: { points: 1 } });
+        if (!user) return res.status(404).json({ success: false });
+        let currentPoints = user.points;
+        if (user.isMining) {
+            const diffInHours = (new Date() - user.miningStartedAt) / (1000 * 60 * 60);
+            currentPoints += (diffInHours * 5);
+        }
+        res.json({ success: true, points: currentPoints.toFixed(2), isMining: user.isMining });
+    } catch (e) { res.status(500).json({ success: false }); }
+});
+
+app.post('/api/mine', async (req, res) => {
+    try {
+        const { telegramId } = req.body;
+        let user = await User.findOne({ telegramId });
+        if (user.isMining) return res.json({ success: false, message: 'التعدين يعمل بالفعل!' });
+        user.isMining = true;
+        user.miningStartedAt = new Date();
         await user.save();
-        res.json({ success: true, message: 'تم التسجيل!', user });
-    } catch (error) { res.status(500).json({ success: false, message: 'خطأ' }); }
+        res.json({ success: true, message: '⛏️ بدأ التعدين!' });
+    } catch (e) { res.status(500).json({ success: false }); }
 });
 
-// إعداد البوت
+app.post('/api/collect', async (req, res) => {
+    try {
+        const { telegramId } = req.body;
+        let user = await User.findOne({ telegramId });
+        const diffInHours = (new Date() - user.miningStartedAt) / (1000 * 60 * 60);
+        user.points += (diffInHours * 5);
+        user.isMining = false;
+        await user.save();
+        res.json({ success: true, totalPoints: user.points.toFixed(2) });
+    } catch (e) { res.status(500).json({ success: false }); }
+});
+
+// --- البوت ---
 const bot = new Telegraf(BOT_TOKEN);
-const registrationState = {};
-
 bot.start(async (ctx) => {
-  const chatId = ctx.chat.id.toString();
-  let user = await User.findOne({ telegramId: chatId });
-  if (user) return ctx.reply(`أهلاً بك يا ${user.fullName}!`, Markup.keyboard([['⛏️ ابدأ التعدين', '💰 مكافأة يومية'], ['🏆 لوحة الصدارة', '👤 حسابي']]).resize());
-  registrationState[chatId] = { step: 'WAITING_FOR_NAME', referrerId: ctx.payload };
-  ctx.reply('مرحباً في نكسورا! أرسل اسمك الثلاثي:');
+    ctx.reply('مرحباً! استخدم الأزرار أدناه.', Markup.keyboard([['⛏️ ابدأ التعدين', '💰 مكافأة يومية'], ['🏆 لوحة الصدارة', '👤 حسابي']]).resize());
 });
 
-// ميزة لوحة الصدارة
 bot.hears('🏆 لوحة الصدارة', async (ctx) => {
     const topUsers = await User.find().sort({ points: -1 }).limit(5);
-    let message = '🏆 **أغنى 5 مستخدمين في نكسورا:**\n\n';
-    topUsers.forEach((u, index) => {
-        message += `${index + 1}. ${u.fullName}: ${u.points.toFixed(2)} نقطة\n`;
-    });
-    ctx.replyWithMarkdown(message);
+    let msg = '🏆 أغنى 5 مستخدمين:\n';
+    topUsers.forEach((u, i) => msg += `${i+1}. ${u.fullName}: ${u.points.toFixed(2)}\n`);
+    ctx.reply(msg);
 });
 
-bot.hears('💰 مكافأة يومية', async (ctx) => {
-    const chatId = ctx.chat.id.toString();
-    let user = await User.findOne({ telegramId: chatId });
-    if (!user) return ctx.reply('يجب التسجيل أولاً.');
-    const now = new Date();
-    if (user.lastDailyBonus && (now - user.lastDailyBonus) < (24 * 60 * 60 * 1000)) {
-        return ctx.reply('لقد حصلت على مكافأتك بالفعل! انتظر 24 ساعة.');
-    }
-    user.points += 20;
-    user.lastDailyBonus = now;
-    await user.save();
-    ctx.reply('🎉 مبروك! حصلت على 20 نقطة هدية يومية.');
-});
-
-// ميزة حسابي مع زر لوحة التحكم
 bot.hears('👤 حسابي', async (ctx) => {
     const chatId = ctx.chat.id.toString();
-    const user = await User.findOne({ telegramId: chatId });
-    if (!user) return ctx.reply('يجب التسجيل أولاً.');
-    
-    // تأكد من استبدال الرابط أدناه برابط موقعك الحقيقي على Render
     const webLink = `https://nexora-backend-ko1u.onrender.com/?id=${chatId}`;
-    
-    ctx.reply(`رصيدك الحالي: ${user.points.toFixed(2)} نقطة.\n\nيمكنك إدارة التعدين من لوحة التحكم:`, 
-    Markup.inlineKeyboard([
-        [Markup.button.webApp('🌐 افتح لوحة التحكم', webLink)]
-    ]));
-});
-
-bot.on('text', async (ctx) => {
-  const chatId = ctx.chat.id.toString();
-  const text = ctx.message.text.trim();
-  const state = registrationState[chatId];
-  if (state && state.step === 'WAITING_FOR_NAME') {
-    registrationState[chatId].fullName = text;
-    registrationState[chatId].step = 'WAITING_FOR_PHONE';
-    return ctx.reply('شكراً. الآن أرسل رقم هاتفك:');
-  }
-  if (state && state.step === 'WAITING_FOR_PHONE') {
-    try {
-      const newUser = new User({ telegramId: chatId, fullName: registrationState[chatId].fullName, phoneNumber: text, points: 10, referredBy: registrationState[chatId].referrerId });
-      await newUser.save();
-      if (registrationState[chatId].referrerId) await User.findOneAndUpdate({ telegramId: registrationState[chatId].referrerId }, { $inc: { points: 1 } });
-      delete registrationState[chatId];
-      return ctx.reply('✅ تم التسجيل!', Markup.keyboard([['⛏️ ابدأ التعدين', '💰 مكافأة يومية'], ['🏆 لوحة الصدارة', '👤 حسابي']]).resize());
-    } catch (e) { ctx.reply('خطأ، أرسل /start'); }
-  }
+    ctx.reply('إدارة حسابك:', Markup.inlineKeyboard([[Markup.button.webApp('🌐 افتح لوحة التحكم', webLink)]]));
 });
 
 bot.launch();
-app.listen(PORT, () => console.log(`الخادم يعمل على المنفذ: ${PORT}`));
+app.listen(PORT, () => console.log(`الخادم يعمل على المنفذ ${PORT}`));
