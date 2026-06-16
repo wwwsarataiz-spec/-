@@ -1,64 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Elite | Official Dashboard</title>
-    <style>
-        :root { --gold: #c5a059; --bg: #0b0e14; --card: #161b22; --text: #e2e8f0; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        
-        /* القسم العلوي - الهوية */
-        .header-bar { padding: 20px; text-align: center; border-bottom: 1px solid #30363d; }
-        
-        /* بطاقة الرصيد - التصميم الفاخر */
-        .balance-card { margin: 20px; padding: 25px; background: var(--card); border: 1px solid var(--gold); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .balance-val { font-size: 2.5rem; font-weight: bold; color: var(--gold); margin: 10px 0; }
-        
-        /* الأزرار الاحترافية */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .btn { padding: 12px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; }
-        .btn-gold { background: var(--gold); color: #000; }
-        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
-        
-        /* مساحة المحتوى */
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        
-        /* شريط التنقل السفلي - مثل BitTiger */
-        .nav-bar { display: flex; justify-content: space-around; padding: 15px 0; background: #0f1218; border-top: 1px solid #30363d; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: #8b949e; }
-        .nav-item:hover { color: var(--gold); }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Nexora Elite | Premium Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* دمج CSS الكامل */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Kufi Arabic", Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(255, 215, 0, 0.16), transparent 55%),
+                  radial-gradient(900px 700px at 90% 25%, rgba(255, 184, 0, 0.12), transparent 55%),
+                  linear-gradient(180deg, #06070a 0%, #070815 45%, #04040a 100%);
+      color: #e9e9f3;
+      overflow-x: hidden;
+    }
+    .app { min-height: 100svh; display: flex; flex-direction: column; }
+    .topbar { padding: 14px 16px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand__logo { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(255,215,0,0.30), rgba(255,165,0,0.08)); border: 1px solid rgba(255,215,0,0.25); display: grid; place-items: center; }
+    .brand__logo i { color: rgba(255, 217, 68, 0.95); font-size: 18px; }
+    .brand__title { font-weight: 800; font-size: 14px; }
+    .brand__subtitle { font-size: 12px; color: rgba(233, 233, 243, 0.62); }
+    .content { padding: 0 14px 12px; flex: 1; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .card { border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); backdrop-filter: blur(14px); padding: 20px; }
+    .balance__amount { font-size: 28px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; color: transparent; }
+    .btn { border-radius: 16px; padding: 12px 14px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; cursor: pointer; border: none; background: rgba(255,255,255,0.04); color: white; width: 100%; }
+    .btn--gold { background: linear-gradient(135deg, #ffd700, #ffa500); color: #171100; }
+    .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(7, 8, 21, 0.9); backdrop-filter: blur(14px); border-top: 1px solid rgba(255,255,255,0.10); display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px; }
+    .nav-item { border: none; background: transparent; color: white; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .safe-spacer { height: 92px; }
+  </style>
 </head>
 <body>
-
-    <div class="header-bar">Nexora Elite</div>
-
-    <div class="balance-card">
-        <div style="font-size: 0.9rem; color: #8b949e;">الرصيد الإجمالي (USDT)</div>
-        <div class="balance-val" id="balance">0.00</div>
-        <div class="action-grid">
-            <button class="btn btn-gold">تعبئة رصيد</button>
-            <button class="btn btn-outline">سحب</button>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand__logo"><i class="fa-solid fa-gem"></i></div>
+        <div class="brand__text">
+          <div class="brand__title">Nexora Elite</div>
+          <div class="brand__subtitle">تعدين • استثمار • نمو</div>
         </div>
-    </div>
+      </div>
+    </header>
 
-    <div class="main-content" id="content">
-        </div>
+    <main class="content">
+      <section class="grid">
+        <article class="card">
+          <div class="card__title"><i class="fa-solid fa-wallet"></i> الرصيد الحالي</div>
+          <div class="balance__amount" id="balanceAmount">0.00</div>
+          <button class="btn btn--gold" id="btnRefresh">تحديث البيانات</button>
+        </article>
+      </section>
+      <div class="safe-spacer"></div>
+    </main>
 
-    <div class="nav-bar">
-        <div class="nav-item" onclick="loadPage('home')">🏠<span>بيت</span></div>
-        <div class="nav-item" onclick="loadPage('tasks')">📋<span>مهام</span></div>
-        <div class="nav-item" onclick="loadPage('ads')">📺<span>إعلانات</span></div>
-        <div class="nav-item" onclick="loadPage('team')">👥<span>فريق</span></div>
-    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+      <button class="nav-item"><i class="fa-solid fa-list-check"></i><span>المهام</span></button>
+      <button class="nav-item"><i class="fa-solid fa-users"></i><span>الفريق</span></button>
+      <button class="nav-item"><i class="fa-solid fa-user"></i><span>الملف</span></button>
+    </nav>
+  </div>
 
-    <script>
-        // دالة لجلب الرصيد (لا نعدل فيها لضمان الاتصال بالسيرفر)
-        fetch('/api/user-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telegramId: "7018561132" }) })
-        .then(res => res.json()).then(data => { document.getElementById('balance').innerText = (data.points || 0).toFixed(2); });
-
-        function loadPage(p) { document.getElementById('content').innerHTML = `<h3>قسم ${p}</h3>`; }
-    </script>
+  <script>
+    // ربط الـ API
+    document.getElementById('btnRefresh').addEventListener('click', async () => {
+        try {
+            const res = await fetch('/api/user-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telegramId: "7018561132" }) });
+            const data = await res.json();
+            document.getElementById('balanceAmount').textContent = (data.points || 0).toFixed(2);
+        } catch (e) { alert("خطأ في الاتصال"); }
+    });
+  </script>
 </body>
 </html>
