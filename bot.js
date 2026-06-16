@@ -3,58 +3,40 @@ const { User } = require('./database');
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const ADMIN_ID = "7018561132";
 
-// 0. تسجيل المستخدم تلقائياً
 bot.use(async (ctx, next) => {
     if (ctx.chat && ctx.chat.id) {
         let user = await User.findOne({ telegramId: ctx.chat.id.toString() });
         if (!user) {
-            await User.create({ telegramId: ctx.chat.id.toString(), points: 0, miningLevel: 1 });
+            // معالجة الإحالة عند التسجيل الأول
+            const startPayload = ctx.startPayload; 
+            await User.create({ 
+                telegramId: ctx.chat.id.toString(), 
+                referredBy: startPayload || null 
+            });
         }
     }
     return next();
 });
 
-// 1. أمر البداية
 bot.start((ctx) => {
-    ctx.reply('مرحباً بك في "نكسورا"! ⛏️\nاستخدم /app لفتح التطبيق.');
+    ctx.reply('مرحباً بك في عالم "Nexora Elite" 💎\nنظام التعدين الأقوى والأكثر أماناً.\n\nاستخدم /app لفتح لوحة التحكم الخاصة بك.');
 });
 
-// 2. أمر فتح تطبيق الويب (تم تحديث الرابط الصحيح هنا)
 bot.command('app', (ctx) => {
-    ctx.reply('اضغط على الزر أدناه لفتح واجهة "نكسورا":', Markup.inlineKeyboard([
-        Markup.button.webApp('فتح تطبيق نكسورا 🚀', 'https://nexora-backend-ko1u.onrender.com/')
+    ctx.reply('اضغط للوصول إلى مركز تحكم Nexora Elite:', Markup.inlineKeyboard([
+        Markup.button.webApp('فتح التطبيق 🚀', 'https://nexora-backend-ko1u.onrender.com/')
     ]));
 });
 
-// 3. نظام السحب
-bot.command('withdraw', async (ctx) => {
-    const parts = ctx.message.text.split(' ');
-    if (parts.length < 3) return ctx.reply('استخدم: /withdraw [المحفظة] [المبلغ]');
-    const user = await User.findOne({ telegramId: ctx.chat.id.toString() });
-    const amount = parseInt(parts[2]);
-    if (!user || user.points < 500 || amount > user.points) return ctx.reply('❌ رصيد غير كافٍ.');
-    bot.telegram.sendMessage(ADMIN_ID, `💸 طلب سحب جديد!\nالمستخدم: ${ctx.chat.id}\nالمبلغ: ${amount}\nالمحفظة: ${parts[1]}`);
-    ctx.reply('✅ تم إرسال طلب السحب للإدارة.');
-});
-
-// 4. نظام المكافأة
-bot.command('bonus', async (ctx) => {
-    const userId = ctx.chat.id.toString();
-    const user = await User.findOne({ telegramId: userId });
-    const now = new Date();
-    if (user.lastBonusDate && (now - user.lastBonusDate) < (24 * 60 * 60 * 1000)) {
-        return ctx.reply(`⏳ لقد حصلت على مكافأتك بالفعل.`);
-    }
-    user.points += 50;
-    user.lastBonusDate = now;
-    await user.save();
-    ctx.reply(`🎉 مبروك! رصيدك الحالي: ${user.points}`);
+bot.command('refer', (ctx) => {
+    const link = `https://t.me/YOUR_BOT_USERNAME?start=${ctx.chat.id}`;
+    ctx.reply(`رابط الإحالة الخاص بك:\n${link}\n\nشارك الرابط واحصل على 50 نقطة لكل صديق!`);
 });
 
 bot.command('stats', async (ctx) => {
     if (ctx.chat.id.toString() !== ADMIN_ID) return;
     const count = await User.countDocuments();
-    ctx.reply(`📊 عدد المستخدمين: ${count}`);
+    ctx.reply(`📊 إحصائيات Nexora Elite:\nعدد المستخدمين: ${count}`);
 });
 
 module.exports = bot;
