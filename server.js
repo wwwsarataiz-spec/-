@@ -9,7 +9,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
-const ADMIN_ID = "7018561132"; // رقم تعريفك الخاص (المدير)
+const ADMIN_ID = "7018561132"; 
 
 mongoose.connect(MONGO_URI).catch(err => console.error(err));
 
@@ -39,6 +39,20 @@ app.post('/api/status', async (req, res) => {
     } catch (e) { res.status(500).json({ success: false }); }
 });
 
+app.post('/api/upgrade', async (req, res) => {
+    try {
+        const { telegramId } = req.body;
+        let user = await User.findOne({ telegramId });
+        const costs = { 1: 100, 2: 300 };
+        if (user.miningLevel >= 3) return res.json({ success: false, message: 'وصلت للمستوى الأقصى!' });
+        if (user.points < costs[user.miningLevel]) return res.json({ success: false, message: 'نقاط غير كافية!' });
+        user.points -= costs[user.miningLevel];
+        user.miningLevel += 1;
+        await user.save();
+        res.json({ success: true, message: '✅ تمت الترقية بنجاح!' });
+    } catch (e) { res.status(500).json({ success: false }); }
+});
+
 // --- أوامر البوت ---
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -47,45 +61,50 @@ bot.start(async (ctx) => {
     Markup.keyboard([
         ['⛏️ ابدأ التعدين', '💰 مكافأة يومية'], 
         ['🏆 لوحة الصدارة', '👤 حسابي'],
-        ['📥 إيداع']
+        ['📥 إيداع', '💸 سحب الأرباح']
     ]).resize());
 });
 
-bot.hears('📥 إيداع', async (ctx) => {
-    ctx.reply('لإتمام الإيداع، أرسل صورة إيصال التحويل (Screenshot) هنا، وسيقوم المدير بمراجعته.');
-});
+// نظام الإيداع
+bot.hears('📥 إيداع', (ctx) => ctx.reply('أرسل صورة إيصال التحويل للمراجعة.'));
 
-// استقبال صور الإيداع
 bot.on('photo', async (ctx) => {
     const chatId = ctx.chat.id.toString();
     const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-
-    // إرسال تنبيه للمدير
     bot.telegram.sendPhoto(ADMIN_ID, photoId, {
-        caption: `طلب إيداع جديد من: ${chatId}\n\nهل تقبل الإيداع؟`,
-        ...Markup.inlineKeyboard([
-            [Markup.button.callback('✅ قبول', `approve_${chatId}`), Markup.button.callback('❌ رفض', `reject_${chatId}`)]
-        ])
+        caption: `طلب إيداع من ${chatId}\nقبول الإيداع؟`,
+        ...Markup.inlineKeyboard([[Markup.button.callback('✅ قبول', `approve_${chatId}`), Markup.button.callback('❌ رفض', `reject_${chatId}`)]])
     });
-    ctx.reply('تم إرسال الإيصال للمراجعة، انتظر التأكيد.');
+    ctx.reply('تم إرسال طلبك للمراجعة.');
 });
 
-// التعامل مع أزرار الإدارة
+// نظام السحب
+bot.hears('💸 سحب الأرباح', (ctx) => ctx.reply('لطلب السحب أرسل رسالة بالصيغة: /withdraw [رقم المحفظة] [المبلغ]'));
+
+bot.command('withdraw', async (ctx) => {
+    const parts = ctx.message.text.split(' ');
+    if (parts.length < 3) return ctx.reply('صيغة خاطئة! استخدم: /withdraw [محفظة] [مبلغ]');
+    const [wallet, amount] = [parts[1], parts[2]];
+    bot.telegram.sendMessage(ADMIN_ID, `💸 طلب سحب:\nالمستخدم: ${ctx.chat.id}\nالمحفظة: ${wallet}\nالمبلغ: ${amount}`, {
+        ...Markup.inlineKeyboard([[Markup.button.callback('✅ تم التحويل', `pay_${ctx.chat.id}_${amount}`), Markup.button.callback('❌ رفض', `cancel_${ctx.chat.id}`)]])
+    });
+    ctx.reply('تم إرسال طلب السحب للإدارة.');
+});
+
+// أزرار الإدارة
 bot.action(/approve_(.+)/, async (ctx) => {
-    const userId = ctx.match[1];
-    await User.findOneAndUpdate({ telegramId: userId }, { $inc: { points: 50 } }); 
-    bot.telegram.sendMessage(userId, '✅ تم قبول الإيداع! تم إضافة 50 نقطة لرصيدك.');
-    ctx.editMessageCaption('تم قبول الإيداع بنجاح.');
+    await User.findOneAndUpdate({ telegramId: ctx.match[1] }, { $inc: { points: 50 } });
+    ctx.editMessageCaption('✅ تم قبول الإيداع.');
 });
 
-bot.action(/reject_(.+)/, async (ctx) => {
-    const userId = ctx.match[1];
-    bot.telegram.sendMessage(userId, '❌ تم رفض الإيداع. يرجى التأكد من بيانات التحويل.');
-    ctx.editMessageCaption('تم رفض الإيداع.');
+bot.action(/pay_(.+)_(.+)/, async (ctx) => {
+    await User.findOneAndUpdate({ telegramId: ctx.match[1] }, { $inc: { points: -ctx.match[2] } });
+    ctx.editMessageText('✅ تمت عملية السحب بنجاح.');
 });
 
-// الأوامر الأخرى (حسابي، تعدين، الخ..)
-bot.hears('👤 حسابي', async (ctx) => {
+bot.action(/reject_(.+)|cancel_(.+)/, (ctx) => ctx.editMessageText('❌ تم رفض الطلب.'));
+
+bot.hears('👤 حسابي', (ctx) => {
     const webLink = `https://nexora-backend-ko1u.onrender.com/?id=${ctx.chat.id}`;
     ctx.reply('إدارة حسابك:', Markup.inlineKeyboard([[Markup.button.webApp('🌐 افتح لوحة التحكم', webLink)]]));
 });
