@@ -27,11 +27,29 @@ app.post('/api/status', async (req, res) => {
     res.json(user ? { success: true, points: user.points.toFixed(2), miningLevel: user.miningLevel } : { success: false });
 });
 
+// مسار المتجر الجديد
+app.post('/api/shop', async (req, res) => {
+    const { telegramId, item } = req.body;
+    let user = await User.findOne({ telegramId });
+    if (!user) return res.json({ success: false });
+
+    const prices = { 'level2': 200, 'level3': 500 };
+    const targetLevel = item === 'level2' ? 2 : 3;
+
+    if (user.miningLevel >= targetLevel) return res.json({ success: false, message: 'لديك هذا المستوى بالفعل!' });
+    if (user.points < prices[item]) return res.json({ success: false, message: 'نقاط غير كافية!' });
+    
+    user.points -= prices[item];
+    user.miningLevel = targetLevel;
+    await user.save();
+    res.json({ success: true, message: '✅ تم شراء الترقية بنجاح!' });
+});
+
 // --- أوامر البوت ---
 const bot = new Telegraf(BOT_TOKEN);
 
 bot.start(async (ctx) => {
-    const referrerId = ctx.payload; // الحصول على ID الشخص الذي دعا المستخدم
+    const referrerId = ctx.payload;
     const userId = ctx.chat.id.toString();
 
     let user = await User.findOne({ telegramId: userId });
