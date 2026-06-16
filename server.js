@@ -9,54 +9,40 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
-const ADMIN_ID = "7018561132"; 
+const ADMIN_ID = "7018561132";
 
 mongoose.connect(MONGO_URI).catch(err => console.error(err));
 
 const User = mongoose.model('User', new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
-  fullName: String,
   points: { type: Number, default: 0 },
-  isMining: { type: Boolean, default: false },
-  miningStartedAt: Date,
   miningLevel: { type: Number, default: 1 },
-  lastDailyBonus: Date
+  referredBy: String
 }));
 
-// --- المسارات (API) ---
+// --- API ---
 app.post('/api/status', async (req, res) => {
-    try {
-        const { telegramId } = req.body;
-        let user = await User.findOne({ telegramId });
-        if (!user) return res.status(404).json({ success: false });
-        let currentPoints = user.points;
-        if (user.isMining) {
-            const diffInHours = (new Date() - user.miningStartedAt) / (1000 * 60 * 60);
-            const rates = { 1: 1, 2: 1.5, 3: 2 };
-            currentPoints += (diffInHours * (rates[user.miningLevel] || 1));
-        }
-        res.json({ success: true, points: currentPoints.toFixed(2), miningLevel: user.miningLevel });
-    } catch (e) { res.status(500).json({ success: false }); }
-});
-
-app.post('/api/upgrade', async (req, res) => {
-    try {
-        const { telegramId } = req.body;
-        let user = await User.findOne({ telegramId });
-        const costs = { 1: 100, 2: 300 };
-        if (user.miningLevel >= 3) return res.json({ success: false, message: 'وصلت للمستوى الأقصى!' });
-        if (user.points < costs[user.miningLevel]) return res.json({ success: false, message: 'نقاط غير كافية!' });
-        user.points -= costs[user.miningLevel];
-        user.miningLevel += 1;
-        await user.save();
-        res.json({ success: true, message: '✅ تمت الترقية بنجاح!' });
-    } catch (e) { res.status(500).json({ success: false }); }
+    const { telegramId } = req.body;
+    let user = await User.findOne({ telegramId });
+    res.json(user ? { success: true, points: user.points.toFixed(2), miningLevel: user.miningLevel } : { success: false });
 });
 
 // --- أوامر البوت ---
 const bot = new Telegraf(BOT_TOKEN);
 
 bot.start(async (ctx) => {
+    const referrerId = ctx.payload; // الحصول على ID الشخص الذي دعا المستخدم
+    const userId = ctx.chat.id.toString();
+
+    let user = await User.findOne({ telegramId: userId });
+    if (!user) {
+        user = await User.create({ telegramId: userId, referredBy: referrerId });
+        if (referrerId) {
+            await User.findOneAndUpdate({ telegramId: referrerId }, { $inc: { points: 10 } });
+            bot.telegram.sendMessage(referrerId, '🎉 انضم صديق جديد عبر رابطك! حصلت على 10 نقاط.');
+        }
+    }
+
     ctx.reply('مرحباً في نكسورا! استخدم الأزرار:', 
     Markup.keyboard([
         ['⛏️ ابدأ التعدين', '💰 مكافأة يومية'], 
@@ -65,49 +51,31 @@ bot.start(async (ctx) => {
     ]).resize());
 });
 
-// نظام الإيداع
-bot.hears('📥 إيداع', (ctx) => ctx.reply('أرسل صورة إيصال التحويل للمراجعة.'));
-
-bot.on('photo', async (ctx) => {
-    const chatId = ctx.chat.id.toString();
-    const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-    bot.telegram.sendPhoto(ADMIN_ID, photoId, {
-        caption: `طلب إيداع من ${chatId}\nقبول الإيداع؟`,
-        ...Markup.inlineKeyboard([[Markup.button.callback('✅ قبول', `approve_${chatId}`), Markup.button.callback('❌ رفض', `reject_${chatId}`)]])
-    });
-    ctx.reply('تم إرسال طلبك للمراجعة.');
-});
-
-// نظام السحب
-bot.hears('💸 سحب الأرباح', (ctx) => ctx.reply('لطلب السحب أرسل رسالة بالصيغة: /withdraw [رقم المحفظة] [المبلغ]'));
-
+// نظام السحب المحمي
 bot.command('withdraw', async (ctx) => {
     const parts = ctx.message.text.split(' ');
-    if (parts.length < 3) return ctx.reply('صيغة خاطئة! استخدم: /withdraw [محفظة] [مبلغ]');
+    if (parts.length < 3) return ctx.reply('الرجاء استخدام الصيغة: /withdraw [المحفظة] [المبلغ]');
+    
+    const user = await User.findOne({ telegramId: ctx.chat.id.toString() });
+    if (user.points < 500) return ctx.reply('❌ الحد الأدنى للسحب هو 500 نقطة.');
+    
     const [wallet, amount] = [parts[1], parts[2]];
-    bot.telegram.sendMessage(ADMIN_ID, `💸 طلب سحب:\nالمستخدم: ${ctx.chat.id}\nالمحفظة: ${wallet}\nالمبلغ: ${amount}`, {
-        ...Markup.inlineKeyboard([[Markup.button.callback('✅ تم التحويل', `pay_${ctx.chat.id}_${amount}`), Markup.button.callback('❌ رفض', `cancel_${ctx.chat.id}`)]])
+    bot.telegram.sendMessage(ADMIN_ID, `💸 طلب سحب!\nالمستخدم: ${ctx.chat.id}\nالرصيد: ${user.points}\nالمحفظة: ${wallet}\nالمبلغ: ${amount}`, {
+        ...Markup.inlineKeyboard([
+            [Markup.button.callback('✅ تم التحويل', `pay_${ctx.chat.id}_${amount}`), Markup.button.callback('❌ رفض', `cancel_${ctx.chat.id}`)]
+        ])
     });
-    ctx.reply('تم إرسال طلب السحب للإدارة.');
+    ctx.reply('تم إرسال طلب السحب للإدارة للمراجعة.');
 });
 
-// أزرار الإدارة
-bot.action(/approve_(.+)/, async (ctx) => {
-    await User.findOneAndUpdate({ telegramId: ctx.match[1] }, { $inc: { points: 50 } });
-    ctx.editMessageCaption('✅ تم قبول الإيداع.');
-});
-
+// معالجة القبول والرفض
 bot.action(/pay_(.+)_(.+)/, async (ctx) => {
-    await User.findOneAndUpdate({ telegramId: ctx.match[1] }, { $inc: { points: -ctx.match[2] } });
-    ctx.editMessageText('✅ تمت عملية السحب بنجاح.');
+    const [userId, amount] = ctx.match.slice(1);
+    await User.findOneAndUpdate({ telegramId: userId }, { $inc: { points: -amount } });
+    ctx.editMessageText('✅ تمت معالجة السحب.');
 });
 
-bot.action(/reject_(.+)|cancel_(.+)/, (ctx) => ctx.editMessageText('❌ تم رفض الطلب.'));
-
-bot.hears('👤 حسابي', (ctx) => {
-    const webLink = `https://nexora-backend-ko1u.onrender.com/?id=${ctx.chat.id}`;
-    ctx.reply('إدارة حسابك:', Markup.inlineKeyboard([[Markup.button.webApp('🌐 افتح لوحة التحكم', webLink)]]));
-});
+bot.action(/cancel_(.+)/, (ctx) => ctx.editMessageText('❌ تم رفض السحب.'));
 
 bot.launch();
 app.listen(PORT, () => console.log(`الخادم يعمل...`));
