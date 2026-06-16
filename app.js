@@ -45,4 +45,3 @@ const { telegramId, adId } = req.body;
 });
 
 app.listen(process.env.PORT || 5000, () => console.log('🌐 Server is running...'));
-
