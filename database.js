@@ -1,34 +1,20 @@
 const mongoose = require('mongoose');
 
+// ربط قاعدة البيانات
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ DB Connected'))
-  .catch(err => console.error('❌ DB Error:', err));
+  .then(() => console.log('✅ Connected to Database'))
+  .catch(err => console.error('❌ Database Connection Error:', err));
 
-// 1. هيكل المستخدم (تم تحديثه)
+// تعريف مستخدم النظام
 const UserSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
-  points: { type: Number, default: 0 },
-  walletAddress: String
-});
-
-// 2. هيكل الإعلانات (للمعلنين)
-const AdSchema = new mongoose.Schema({
-  title: String,
-  link: String,
-  budget: Number,       // الميزانية الإجمالية للحملة
-  costPerView: Number,  // تكلفة المشاهدة الواحدة
-  isActive: { type: Boolean, default: true }
-});
-
-// 3. سجل المشاهدات (لمنع الغش - حماية 24 ساعة)
-const AdLogSchema = new mongoose.Schema({
-  telegramId: String,
-  adId: mongoose.Schema.Types.ObjectId,
-  viewedAt: { type: Date, default: Date.now }
+  fullName: String,
+  phoneNumber: String,
+  balance: { type: Number, default: 0 },
+  walletAddress: { type: String, default: "" },
+  miningLevel: { type: Number, default: 1 }
 });
 
 const User = mongoose.model('User', UserSchema);
-const Ad = mongoose.model('Ad', AdSchema);
-const AdLog = mongoose.model('AdLog', AdLogSchema);
 
-module.exports = { User, Ad, AdLog };
+module.exports = { User };
