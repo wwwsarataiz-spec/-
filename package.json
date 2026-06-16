@@ -1,15 +1,23 @@
 {
-  "name": "nexora-core",
-  "version": "1.0.0",
-  "description": "Core system for Nexora platform",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "mongoose": "^8.4.1",
-    "telegraf": "^4.16.3",
-    "dotenv": "^16.4.5"
-  }
+
+"name": "nexora-core",
+
+"version": "1.0.0",
+
+"description": "Core system for Nexora platform",
+
+"main": "app.js",
+
+"scripts": {
+
+"start": "node app.js" 
+
+},
+
+"dependencies": {
+
+"express": "^4.19.2", "mongoose": "^8.4.1", "telegraf": "^4.16.3", "dotenv": "^16.4.5" 
+
+}
+
 }
