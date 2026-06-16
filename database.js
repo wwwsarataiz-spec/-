@@ -11,12 +11,29 @@ const UserSchema = new mongoose.Schema({
   phoneNumber: { type: String, default: 'غير محدد' },
   points: { type: Number, default: 0 },
   miningLevel: { type: Number, default: 1 },
-  referredBy: { type: String, default: null }, // رابط الإحالة
+  referredBy: { type: String, default: null },
   lastBonusDate: { type: Date, default: null },
-  walletAddress: { type: String, default: '' }, // لمحفظة السحب
-  pendingWithdrawals: { type: Number, default: 0 } // طلبات السحب المعلقة
+  walletAddress: { type: String, default: '' },
+  pendingWithdrawals: { type: Number, default: 0 }
+});
+
+// --- إضافة نظام الإعلانات (إضافة فقط دون التأثير على ما سبق) ---
+const AdSchema = new mongoose.Schema({
+  title: String,
+  link: String,
+  budget: { type: Number, default: 0 },
+  costPerView: { type: Number, default: 0 },
+  isActive: { type: Boolean, default: true }
+});
+
+const AdLogSchema = new mongoose.Schema({
+  telegramId: String,
+  adId: mongoose.Schema.Types.ObjectId,
+  viewedAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', UserSchema);
+const Ad = mongoose.model('Ad', AdSchema);
+const AdLog = mongoose.model('AdLog', AdLogSchema);
 
-module.exports = { User };
+module.exports = { User, Ad, AdLog };
