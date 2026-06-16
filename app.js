@@ -7,23 +7,31 @@ const app = express();
 app.use(express.static('public'));
 app.use(express.json());
 
-// API المتجر (ليربط الواجهة بقاعدة البيانات)
-app.post('/api/shop', async (req, res) => {
-    const { telegramId, item } = req.body;
-    let user = await User.findOne({ telegramId });
-    if (!user) return res.json({ success: false });
+// وسيط حماية للتأكد من هوية المستخدم
+const authMiddleware = async (req, res, next) => {
+    const { telegramId } = req.body;
+    const user = await User.findOne({ telegramId });
+    if (!user) return res.status(403).json({ success: false, message: 'غير مصرح لك' });
+    req.user = user; // تمرير بيانات المستخدم للمسار التالي
+    next();
+};
+
+// API المتجر محمية بـ authMiddleware
+app.post('/api/shop', authMiddleware, async (req, res) => {
+    const { item } = req.body;
+    const user = req.user; // نستخدم المستخدم الذي تحققنا منه
 
     const prices = { 'level2': 200, 'level3': 500 };
-    const targetLevel = item === 'level2' ? 2 : 3;
-
+    if (!prices[item]) return res.json({ success: false, message: 'عنصر غير موجود!' });
+    
     if (user.points < prices[item]) return res.json({ success: false, message: 'نقاطك غير كافية!' });
     
     user.points -= prices[item];
-    user.miningLevel = targetLevel;
+    user.miningLevel = item === 'level2' ? 2 : 3;
     await user.save();
+    
+    console.log(`[LOG] تم شراء ${item} بواسطة ${user.telegramId}`);
     res.json({ success: true, message: '✅ تم شراء الترقية بنجاح!' });
 });
 
-// تشغيل البوت والسيرفر
-bot.launch().then(() => console.log('🤖 البوت يعمل...'));
-app.listen(process.env.PORT || 5000, () => console.log('🌐 السيرفر يعمل...'));
+app.listen(process.env.PORT || 5000, () => console.log('🌐 السيرفر يعمل مع الحماية...'));
