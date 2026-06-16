@@ -17,10 +17,17 @@ bot.use(async (ctx, next) => {
 
 // 1. أمر البداية (الترحيب)
 bot.start((ctx) => {
-    ctx.reply('مرحباً بك في "نكسورا"! ⛏️\n\nأنت الآن مسجل في النظام. الأوامر المتاحة:\n/bonus - للحصول على مكافأة يومية\n/withdraw - لسحب أرباحك');
+    ctx.reply('مرحباً بك في "نكسورا"! ⛏️\n\nاستخدم /app لفتح تطبيق الويب أو الأوامر التالية:\n/bonus - مكافأة يومية\n/withdraw - سحب أرباحك');
 });
 
-// 2. نظام السحب
+// 2. أمر فتح تطبيق الويب (Web App)
+bot.command('app', (ctx) => {
+    ctx.reply('اضغط على الزر أدناه لفتح واجهة "نكسورا" وتسجيل بياناتك:', Markup.inlineKeyboard([
+        Markup.button.webApp('فتح تطبيق نكسورا 🚀', 'https://nexora-backend-kofu.onrender.com')
+    ]));
+});
+
+// 3. نظام السحب
 bot.command('withdraw', async (ctx) => {
     const parts = ctx.message.text.split(' ');
     if (parts.length < 3) return ctx.reply('استخدم: /withdraw [المحفظة] [المبلغ]');
@@ -35,7 +42,7 @@ bot.command('withdraw', async (ctx) => {
     ctx.reply('✅ تم إرسال طلب السحب للإدارة.');
 });
 
-// 3. نظام المكافأة اليومية
+// 4. نظام المكافأة اليومية
 bot.command('bonus', async (ctx) => {
     const userId = ctx.chat.id.toString();
     const user = await User.findOne({ telegramId: userId });
@@ -55,7 +62,7 @@ bot.command('bonus', async (ctx) => {
     ctx.reply(`🎉 مبروك! حصلت على 50 نقطة مكافأة.\nرصيدك الحالي: ${user.points}`);
 });
 
-// 4. نظام الإدارة
+// 5. نظام الإدارة
 bot.command('admin', async (ctx) => {
     if (ctx.chat.id.toString() !== ADMIN_ID) return;
     ctx.reply('🛠 لوحة التحكم:\n/stats - الإحصائيات');
