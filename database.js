@@ -5,7 +5,8 @@ const UserSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   points: { type: Number, default: 0 },
   miningLevel: { type: Number, default: 1 },
-  referredBy: String
+  referredBy: String,
+  lastBonusDate: { type: Date, default: null } // تم إضافة الحقل الجديد هنا
 });
 
 const User = mongoose.model('User', UserSchema);
