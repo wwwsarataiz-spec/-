@@ -7,69 +7,52 @@ const { User } = require('./database');
 
 const app = express();
 app.use(express.json());
-
-// --- إعدادات الملفات الثابتة ---
 app.use(express.static('public'));
-app.use(express.static(__dirname));
 
 // --- تشغيل البوت ---
-bot.launch().then(() => {
-    console.log('🤖 البوت يعمل الآن...');
-}).catch((err) => {
-    console.error('❌ خطأ في تشغيل البوت:', err);
-});
+bot.launch().then(() => console.log('🤖 Nexora Elite Bot is live!')).catch(console.error);
 
-// --- حل مشكلة Not Found (توجيه ديناميكي) ---
+// --- توجيه الواجهة الأساسي ---
 app.get('/', (req, res) => {
-    const publicPath = path.join(__dirname, 'public', 'index.html');
-    const rootPath = path.join(__dirname, 'index.html');
-
-    if (fs.existsSync(publicPath)) {
-        res.sendFile(publicPath);
-    } else if (fs.existsSync(rootPath)) {
-        res.sendFile(rootPath);
-    } else {
-        res.status(404).send('❌ الملف index.html غير موجود في المجلد public أو المجلد الرئيسي.');
-    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// --- وسيط حماية ---
-const authMiddleware = async (req, res, next) => {
+// --- API إدارة المستخدمين والإيداع والسحب ---
+app.post('/api/user-data', async (req, res) => {
     const { telegramId } = req.body;
     const user = await User.findOne({ telegramId });
-    if (!user) return res.status(403).json({ success: false, message: 'غير مصرح لك' });
-    req.user = user; 
-    next();
-};
+    res.json(user || { error: 'User not found' });
+});
 
-// --- API حفظ البيانات ---
-app.post('/api/save-user', async (req, res) => {
-    const { telegramId, fullName, phoneNumber } = req.body;
-    try {
-        const user = await User.findOneAndUpdate(
-            { telegramId: telegramId.toString() },
-            { fullName, phoneNumber },
-            { new: true, upsert: true }
-        );
-        res.json({ success: true, message: '✅ تم حفظ بياناتك بنجاح!' });
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'خطأ في السيرفر' });
+app.post('/api/withdraw', async (req, res) => {
+    const { telegramId, amount, wallet } = req.body;
+    const user = await User.findOne({ telegramId });
+    if (user && user.points >= amount) {
+        user.points -= amount;
+        user.pendingWithdrawals += amount;
+        await user.save();
+        res.json({ success: true, message: '✅ تم إرسال طلب السحب للإدارة.' });
+    } else {
+        res.json({ success: false, message: '❌ رصيد غير كافٍ.' });
     }
 });
 
-// --- API المتجر ---
-app.post('/api/shop', authMiddleware, async (req, res) => {
-    const { item } = req.body;
-    const user = req.user; 
+app.post('/api/deposit-notify', async (req, res) => {
+    const { telegramId, amount } = req.body;
+    // هنا نرسل إشعار للمدير عبر البوت
+    bot.telegram.sendMessage("7018561132", `💰 إشعار إيداع جديد!\nالمستخدم: ${telegramId}\nالمبلغ: ${amount}`);
+    res.json({ success: true, message: 'تم إخطار الإدارة بنجاح.' });
+});
 
-    const prices = { 'level2': 200, 'level3': 500 };
-    if (!prices[item]) return res.json({ success: false, message: 'عنصر غير موجود!' });
-    if (user.points < prices[item]) return res.json({ success: false, message: 'نقاطك غير كافية!' });
-    
-    user.points -= prices[item];
-    user.miningLevel = item === 'level2' ? 2 : 3;
-    await user.save();
-    res.json({ success: true, message: '✅ تم شراء الترقية بنجاح!' });
+// --- API الإدارة (صلاحيات كاملة) ---
+app.post('/api/admin-action', async (req, res) => {
+    const { adminId, targetId, action, value } = req.body;
+    if (adminId !== "7018561132") return res.status(403).json({ success: false });
+
+    if (action === 'addPoints') {
+        await User.findOneAndUpdate({ telegramId: targetId }, { $inc: { points: value } });
+    }
+    res.json({ success: true });
 });
 
 app.listen(process.env.PORT || 5000, () => console.log('🌐 السيرفر يعمل على المنفذ 5000...'));
