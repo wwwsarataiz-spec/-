@@ -20,10 +20,10 @@ bot.start((ctx) => {
     ctx.reply('مرحباً بك في "نكسورا"! ⛏️\n\nاستخدم /app لفتح تطبيق الويب أو الأوامر التالية:\n/bonus - مكافأة يومية\n/withdraw - سحب أرباحك');
 });
 
-// 2. أمر فتح تطبيق الويب (Web App)
+// 2. أمر فتح تطبيق الويب (Web App) بالرابط الصحيح
 bot.command('app', (ctx) => {
     ctx.reply('اضغط على الزر أدناه لفتح واجهة "نكسورا" وتسجيل بياناتك:', Markup.inlineKeyboard([
-        Markup.button.webApp('فتح تطبيق نكسورا 🚀', 'https://nexora-backend-kofu.onrender.com/')
+        Markup.button.webApp('فتح تطبيق نكسورا 🚀', 'https://nexora-backend-kofu.onrender.com')
     ]));
 });
 
