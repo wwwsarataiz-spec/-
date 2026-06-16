@@ -1,21 +1,75 @@
-<div id="terms-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; display:flex; align-items:center; justify-content:center;">
-    <div class="card">
-        <h2>الشروط والأحكام</h2>
-        <p style="text-align:right; font-size: 0.8em;">1. يمنع استخدام حسابات متعددة.<br>2. الإيداع والسحب يتم بمسؤولية المستخدم.<br>3. الإدارة تحتفظ بحق إيقاف الحساب المخالف.</p>
-        <button onclick="agreeTerms()">أوافق على الشروط</button>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora Dashboard</title>
+    <style>
+        :root { --primary: #c5a059; --bg: #0b0c10; --card: #1f2833; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .card { background: var(--card); padding: 30px; border-radius: 25px; display: inline-block; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: var(--primary); }
+        #balance { font-size: 3em; font-weight: bold; margin: 20px 0; color: #fff; text-shadow: 0 0 10px var(--primary); }
+        .upgrade-btn { background: #45a049; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; margin-top: 10px; cursor: pointer; }
+        #terms-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:999; display:flex; align-items:center; justify-content:center; }
+    </style>
+</head>
+<body>
+
+    <div id="terms-overlay">
+        <div class="card">
+            <h2>الشروط والأحكام</h2>
+            <p style="text-align:right; font-size: 0.9em;">1. يمنع استخدام حسابات متعددة.<br>2. الإيداع والسحب مسؤوليتك الشخصية.<br>3. الإدارة تحتفظ بحق إيقاف الحساب المخالف.</p>
+            <button onclick="agreeTerms()" style="padding:10px 20px; cursor:pointer;">أوافق</button>
+        </div>
     </div>
-</div>
 
-<script>
-    function agreeTerms() {
-        document.getElementById('terms-overlay').style.display = 'none';
-        localStorage.setItem('acceptedTerms', 'true');
-    }
+    <div class="card">
+        <h1>Nexora</h1>
+        <div id="balance">0.00</div>
+        <p>المستوى الحالي: <span id="level">1</span></p>
+        
+        <h3>🛒 متجر الترقيات</h3>
+        <button class="upgrade-btn" onclick="buyItem('level2')">ترقية للمستوى 2 (200 نقطة)</button>
+        <button class="upgrade-btn" onclick="buyItem('level3')">ترقية للمستوى 3 (500 نقطة)</button>
+        <div id="msg" style="margin-top:15px; color:#ffcc00;"></div>
+    </div>
 
-    // التحقق عند فتح الصفحة
-    window.onload = () => {
-        if(localStorage.getItem('acceptedTerms')) {
+    <script>
+        const telegramId = new URLSearchParams(window.location.search).get('id');
+
+        // منطق الشروط
+        function agreeTerms() {
             document.getElementById('terms-overlay').style.display = 'none';
+            localStorage.setItem('acceptedTerms', 'true');
         }
-    };
-</script>
+        window.onload = () => { if(localStorage.getItem('acceptedTerms')) document.getElementById('terms-overlay').style.display = 'none'; updateStatus(); };
+
+        // تحديث الحالة
+        async function updateStatus() {
+            const res = await fetch('/api/status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ telegramId })
+            });
+            const data = await res.json();
+            if(data.success) {
+                document.getElementById('balance').innerText = data.points;
+                document.getElementById('level').innerText = data.miningLevel;
+            }
+        }
+
+        // منطق الشراء
+        async function buyItem(item) {
+            const res = await fetch('/api/shop', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ telegramId, item })
+            });
+            const data = await res.json();
+            document.getElementById('msg').innerText = data.message;
+            if(data.success) updateStatus();
+        }
+    </script>
+</body>
+</html>
