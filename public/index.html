@@ -3,58 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Elite | Premium Platform</title>
+    <title>Nexora Elite | Official Dashboard</title>
     <style>
-        :root { --gold: #c5a059; --bg-gradient: linear-gradient(135deg, #0b0e14 0%, #161b22 100%); }
-        body { margin: 0; padding: 0; background: var(--bg-gradient); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        :root { --gold: #c5a059; --bg: #0b0e14; --card: #161b22; --text: #e2e8f0; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        .header { padding: 25px; text-align: center; border-bottom: 1px solid rgba(197, 160, 89, 0.3); }
-        .header h1 { color: var(--gold); margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
-
-        .balance-card { margin: 20px; padding: 30px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(197, 160, 89, 0.2); border-radius: 25px; text-align: center; backdrop-filter: blur(10px); }
-        .balance-label { color: #8b949e; font-size: 0.9rem; margin-bottom: 10px; }
-        .balance-amount { font-size: 3rem; font-weight: 700; color: #fff; margin: 5px 0; }
+        /* القسم العلوي - الهوية */
+        .header-bar { padding: 20px; text-align: center; border-bottom: 1px solid #30363d; }
         
-        .action-btns { display: flex; gap: 15px; margin-top: 25px; }
-        .btn { flex: 1; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; transition: 0.4s; }
+        /* بطاقة الرصيد - التصميم الفاخر */
+        .balance-card { margin: 20px; padding: 25px; background: var(--card); border: 1px solid var(--gold); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .balance-val { font-size: 2.5rem; font-weight: bold; color: var(--gold); margin: 10px 0; }
+        
+        /* الأزرار الاحترافية */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .btn { padding: 12px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; }
         .btn-gold { background: var(--gold); color: #000; }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(197, 160, 89, 0.3); }
-        .btn-sec { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--gold); }
-
-        #content { flex: 1; padding: 20px; overflow-y: auto; }
+        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
         
-        .navbar { background: #0f1218; padding: 15px; display: flex; justify-content: space-around; border-top: 1px solid rgba(197, 160, 89, 0.3); }
-        .nav-item { cursor: pointer; color: #8b949e; transition: 0.3s; }
+        /* مساحة المحتوى */
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        /* شريط التنقل السفلي - مثل BitTiger */
+        .nav-bar { display: flex; justify-content: space-around; padding: 15px 0; background: #0f1218; border-top: 1px solid #30363d; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: #8b949e; }
         .nav-item:hover { color: var(--gold); }
     </style>
 </head>
 <body>
-    <div class="header"><h1>Nexora Elite</h1></div>
-    
+
+    <div class="header-bar">Nexora Elite</div>
+
     <div class="balance-card">
-        <div class="balance-label">الرصيد الإجمالي (USDT)</div>
-        <div class="balance-amount" id="balance">0.00</div>
-        <div class="action-btns">
-            <button class="btn btn-gold">إيداع</button>
-            <button class="btn btn-sec">سحب</button>
+        <div style="font-size: 0.9rem; color: #8b949e;">الرصيد الإجمالي (USDT)</div>
+        <div class="balance-val" id="balance">0.00</div>
+        <div class="action-grid">
+            <button class="btn btn-gold">تعبئة رصيد</button>
+            <button class="btn btn-outline">سحب</button>
         </div>
     </div>
 
-    <div id="content"></div>
+    <div class="main-content" id="content">
+        </div>
 
-    <div class="navbar">
-        <div class="nav-item" onclick="loadTab('البيت')">🏠</div>
-        <div class="nav-item" onclick="loadTab('مهام')">📋</div>
-        <div class="nav-item" onclick="loadTab('إعلانات')">📺</div>
-        <div class="nav-item" onclick="loadTab('فريق')">👥</div>
+    <div class="nav-bar">
+        <div class="nav-item" onclick="loadPage('home')">🏠<span>بيت</span></div>
+        <div class="nav-item" onclick="loadPage('tasks')">📋<span>مهام</span></div>
+        <div class="nav-item" onclick="loadPage('ads')">📺<span>إعلانات</span></div>
+        <div class="nav-item" onclick="loadPage('team')">👥<span>فريق</span></div>
     </div>
 
     <script>
-        // هذا الكود يتصل بـ API الخاص بك دون المساس بأي منطق خلفي
+        // دالة لجلب الرصيد (لا نعدل فيها لضمان الاتصال بالسيرفر)
         fetch('/api/user-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telegramId: "7018561132" }) })
         .then(res => res.json()).then(data => { document.getElementById('balance').innerText = (data.points || 0).toFixed(2); });
 
-        function loadTab(t) { document.getElementById('content').innerHTML = `<h3 style="text-align:center; color:var(--gold)">${t}</h3>`; }
+        function loadPage(p) { document.getElementById('content').innerHTML = `<h3>قسم ${p}</h3>`; }
     </script>
 </body>
 </html>
