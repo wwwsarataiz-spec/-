@@ -23,6 +23,22 @@ const authMiddleware = async (req, res, next) => {
     next();
 };
 
+// API لحفظ بيانات المستخدم من تطبيق الويب
+app.post('/api/save-user', async (req, res) => {
+    const { telegramId, fullName, phoneNumber } = req.body;
+    try {
+        const user = await User.findOneAndUpdate(
+            { telegramId: telegramId.toString() },
+            { fullName, phoneNumber },
+            { new: true, upsert: true }
+        );
+        res.json({ success: true, message: '✅ تم حفظ بياناتك بنجاح!' });
+    } catch (err) {
+        console.error('❌ خطأ في حفظ بيانات المستخدم:', err);
+        res.status(500).json({ success: false, message: 'خطأ في السيرفر' });
+    }
+});
+
 // API المتجر محمية بـ authMiddleware
 app.post('/api/shop', authMiddleware, async (req, res) => {
     const { item } = req.body;
