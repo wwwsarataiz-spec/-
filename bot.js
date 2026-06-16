@@ -23,7 +23,7 @@ bot.start((ctx) => {
 // 2. أمر فتح تطبيق الويب (Web App)
 bot.command('app', (ctx) => {
     ctx.reply('اضغط على الزر أدناه لفتح واجهة "نكسورا" وتسجيل بياناتك:', Markup.inlineKeyboard([
-        Markup.button.webApp('فتح تطبيق نكسورا 🚀', 'https://nexora-backend-kofu.onrender.com')
+        Markup.button.webApp('فتح تطبيق نكسورا 🚀', 'https://nexora-backend-kofu.onrender.com/')
     ]));
 });
 
