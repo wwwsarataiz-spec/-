@@ -3,78 +3,290 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Nexora Elite | Premium Platform</title>
+  <title>Nexora Elite • Premium WebApp</title>
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  
   <style>
-    /* دمج CSS الكامل */
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    /* =========================
+       التنسيق العام والنمط الداكن الفخم
+    ========================= */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Kufi Arabic", Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 20% 0%, rgba(255, 215, 0, 0.16), transparent 55%),
-                  radial-gradient(900px 700px at 90% 25%, rgba(255, 184, 0, 0.12), transparent 55%),
-                  linear-gradient(180deg, #06070a 0%, #070815 45%, #04040a 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Kufi Arabic", sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1a1508 0%, #06070a 60%);
       color: #e9e9f3;
       overflow-x: hidden;
     }
-    .app { min-height: 100svh; display: flex; flex-direction: column; }
-    .topbar { padding: 14px 16px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand__logo { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, rgba(255,215,0,0.30), rgba(255,165,0,0.08)); border: 1px solid rgba(255,215,0,0.25); display: grid; place-items: center; }
-    .brand__logo i { color: rgba(255, 217, 68, 0.95); font-size: 18px; }
-    .brand__title { font-weight: 800; font-size: 14px; }
-    .brand__subtitle { font-size: 12px; color: rgba(233, 233, 243, 0.62); }
-    .content { padding: 0 14px 12px; flex: 1; }
-    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    .card { border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)); backdrop-filter: blur(14px); padding: 20px; }
-    .balance__amount { font-size: 28px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; color: transparent; }
-    .btn { border-radius: 16px; padding: 12px 14px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; cursor: pointer; border: none; background: rgba(255,255,255,0.04); color: white; width: 100%; }
-    .btn--gold { background: linear-gradient(135deg, #ffd700, #ffa500); color: #171100; }
-    .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(7, 8, 21, 0.9); backdrop-filter: blur(14px); border-top: 1px solid rgba(255,255,255,0.10); display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px; }
-    .nav-item { border: none; background: transparent; color: white; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .safe-spacer { height: 92px; }
+
+    .app { min-height: 100svh; display: flex; flex-direction: column; padding-bottom: 90px; }
+
+    /*Topbar*/
+    .topbar { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 215, 0, 0.05); }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand i { color: #ffd700; font-size: 20px; filter: drop-shadow(0 0 8px #ffd700); }
+    .brand__title { font-weight: 800; font-size: 16px; color: #ffd700; }
+    
+    /* الـ Cards بنمط الـ Glassmorphic الفاخر */
+    .content { padding: 14px; flex: 1; }
+    .tab-section { display: none; }
+    .tab-section.active { display: block; animation: fadeIn 0.4s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border: 1px solid rgba(255, 215, 0, 0.15);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    /* قسم الرصيد */
+    .balance-box { text-align: center; padding: 10px 0; }
+    .balance-label { font-size: 13px; color: rgba(233, 233, 243, 0.6); }
+    .balance-amount { font-size: 36px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 8px 0; }
+    
+    /* الأزرار الاحترافية */
+    .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+    .btn {
+      padding: 14px; border-radius: 16px; border: none; font-weight: 800; font-size: 14px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-deposit { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2); }
+    .btn-withdraw { background: rgba(255, 255, 255, 0.06); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+    .btn:active { transform: scale(0.98); }
+
+    /* شاشة التعدين الدائرية المتطورة */
+    .mining-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; }
+    .mining-circle {
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0.6) 70%);
+      border: 4px dashed rgba(255, 215, 0, 0.4);
+      display: grid; place-items: center; position: relative; cursor: pointer;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    .mining-circle:active { transform: scale(0.95); box-shadow: 0 0 50px rgba(255, 215, 0, 0.2); }
+    .mining-circle i { font-size: 50px; color: #ffd700; filter: drop-shadow(0 0 15px #ffd700); }
+    .mining-status { margin-top: 15px; background: rgba(255,215,0,0.1); padding: 6px 16px; border-radius: 999px; font-size: 12px; color: #ffd700; border: 1px solid rgba(255,215,0,0.2); }
+
+    /* شريط تقدم الطاقة */
+    .energy-box { width: 100%; margin-top: 20px; }
+    .energy-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: rgba(233,233,243,0.7); }
+    .energy-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+    .energy-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #b8860b, #ffd700); border-radius: 999px; transition: width 0.1s ease; }
+
+    /* قاعة المهام و VIP */
+    .vip-list, .task-list { display: flex; flex-direction: column; gap: 12px; }
+    .vip-item, .task-item {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .vip-info, .task-info { display: flex; align-items: center; gap: 12px; }
+    .vip-icon, .task-icon { width: 40px; height: 40px; background: rgba(255,215,0,0.1); border-radius: 12px; display: grid; place-items: center; color: #ffd700; }
+    .vip-title, .task-title { font-weight: 700; font-size: 14px; }
+    .vip-profit, .task-reward { font-size: 12px; color: #ffd700; margin-top: 4px; }
+
+    /* شريط التنقل السفلي الثابت الفاخر */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
+      background: rgba(6, 7, 10, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 215, 0, 0.15);
+      display: grid; grid-template-columns: repeat(5, 1fr); padding: 5px 10px; z-index: 999;
+    }
+    .nav-item {
+      background: none; border: none; color: rgba(233, 233, 243, 0.5);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 5px; cursor: pointer; transition: all 0.2s ease; font-size: 11px; font-weight: 600;
+    }
+    .nav-item i { font-size: 18px; transition: all 0.2s ease; }
+    .nav-item.active { color: #ffd700; }
+    .nav-item.active i { transform: translateY(-4px); filter: drop-shadow(0 0 8px #ffd700); }
+
+    /* حقول الإدخال */
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 12px; color: rgba(233,233,243,0.6); margin-bottom: 6px; }
+    .input-field { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; color: #fff; outline: none; }
+    .input-field:focus { border-color: #ffd700; }
   </style>
 </head>
 <body>
+
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <div class="brand__logo"><i class="fa-solid fa-gem"></i></div>
-        <div class="brand__text">
-          <div class="brand__title">Nexora Elite</div>
-          <div class="brand__subtitle">تعدين • استثمار • نمو</div>
-        </div>
+        <i class="fa-solid fa-cubes-nordic"></i>
+        <div class="brand__title">Nexora Elite</div>
       </div>
+      <div style="font-size: 12px; color: #ffd700; background: rgba(255,215,0,0.1); padding: 4px 10px; border-radius: 8px;">VIP 1</div>
     </header>
 
     <main class="content">
-      <section class="grid">
+
+      <section id="sec-home" class="tab-section active">
         <article class="card">
-          <div class="card__title"><i class="fa-solid fa-wallet"></i> الرصيد الحالي</div>
-          <div class="balance__amount" id="balanceAmount">0.00</div>
-          <button class="btn btn--gold" id="btnRefresh">تحديث البيانات</button>
+          <div class="balance-box">
+            <div class="balance-label">الرصيد الإجمالي (USDT)</div>
+            <div class="balance-amount" id="balanceAmount">177.85</div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-deposit" onclick="switchTab('sec-wallet')">إيداع</button>
+            <button class="btn btn-withdraw" onclick="switchTab('sec-wallet')">سحب</button>
+          </div>
+        </article>
+
+        <article class="card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
+          <div>
+            <div style="font-size: 11px; color: rgba(233,233,243,0.5);">الربح لكل نقرة</div>
+            <div style="color: #ffd700; font-weight: bold; margin-top: 5px;">+1 TON</div>
+          </div>
+          <div style="border-right: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 11px; color: rgba(233,233,243,0.5);">الربح السلبي/ثانية</div>
+            <div style="color: #ffd700; font-weight: bold; margin-top: 5px;">+0 TON</div>
+          </div>
         </article>
       </section>
-      <div class="safe-spacer"></div>
+
+      <section id="sec-mining" class="tab-section">
+        <div class="mining-container">
+          <div class="mining-circle" id="miningBtn">
+            <i class="fa-solid fa-pickaxe"></i>
+          </div>
+          <div class="mining-status">...جارِ التعدين</div>
+          
+          <div class="energy-box">
+            <div class="energy-header">
+              <span><i class="fa-solid fa-bolt" style="color: #ffd700;"></i> الطاقة المتبقية</span>
+              <span id="energyText">1000 / 1000</span>
+            </div>
+            <div class="energy-bar-bg">
+              <div class="energy-bar-fill" id="energyFill"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-tasks" class="tab-section">
+        <h3 style="color: #ffd700; margin-bottom: 15px;">قاعة المهام ومستويات VIP</h3>
+        <div class="vip-list">
+          <div class="vip-item">
+            <div class="vip-info">
+              <div class="vip-icon"><i class="fa-solid fa-lock-open"></i></div>
+              <div>
+                <div class="vip-title">مستوى VIP 1</div>
+                <div class="vip-profit">عمولة الطلب $5.00</div>
+              </div>
+            </div>
+            <span style="color: #00ffaa; font-size: 12px;">نشط</span>
+          </div>
+          <div class="vip-item" style="opacity: 0.6;">
+            <div class="vip-info">
+              <div class="vip-icon"><i class="fa-solid fa-lock"></i></div>
+              <div>
+                <div class="vip-title">مستوى VIP 2</div>
+                <div class="vip-profit">عمولة الطلب $26.00</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-key" style="color: #ffd700;"></i>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-team" class="tab-section">
+        <article class="card">
+          <div style="font-size: 12px; color: rgba(233,233,243,0.6);">رابط الإحالة الخاص بك</div>
+          <input type="text" class="input-field" value="https://nexora.elite/reg?ref=7018561132" readonly style="margin: 10px 0; text-align: left; direction: ltr;">
+          <button class="btn btn-deposit" style="padding: 8px;">نسخ الرابط</button>
+        </article>
+      </section>
+
+      <section id="sec-wallet" class="tab-section">
+        <article class="card">
+          <h3 style="color: #ffd700; margin-top: 0;">عمليات السحب والإيداع</h3>
+          <div class="input-group">
+            <label>المبلغ المطلوب (USDT)</label>
+            <input type="number" class="input-field" placeholder="0.00" id="txAmount">
+          </div>
+          <div class="input-group">
+            <label>عنوان المحفظة (TRC20)</label>
+            <input type="text" class="input-field" placeholder="أدخل العنوان هنا">
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-deposit" id="btnDepositSubmit">تأكيد الإيداع</button>
+            <button class="btn btn-withdraw" id="btnWithdrawSubmit">طلب سحب</button>
+          </div>
+        </article>
+      </section>
+
     </main>
 
     <nav class="bottom-nav">
-      <button class="nav-item"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
-      <button class="nav-item"><i class="fa-solid fa-list-check"></i><span>المهام</span></button>
-      <button class="nav-item"><i class="fa-solid fa-users"></i><span>الفريق</span></button>
-      <button class="nav-item"><i class="fa-solid fa-user"></i><span>الملف</span></button>
+      <button class="nav-item active" onclick="switchTab('sec-home', this)"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+      <button class="nav-item" onclick="switchTab('sec-mining', this)"><i class="fa-solid fa-fire"></i><span>التعدين</span></button>
+      <button class="nav-item" onclick="switchTab('sec-tasks', this)"><i class="fa-solid fa-list-check"></i><span>المهام</span></button>
+      <button class="nav-item" onclick="switchTab('sec-team', this)"><i class="fa-solid fa-users"></i><span>الفريق</span></button>
+      <button class="nav-item" onclick="switchTab('sec-wallet', this)"><i class="fa-solid fa-user"></i><span>الملف</span></button>
     </nav>
   </div>
 
   <script>
-    // ربط الـ API
-    document.getElementById('btnRefresh').addEventListener('click', async () => {
-        try {
-            const res = await fetch('/api/user-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telegramId: "7018561132" }) });
-            const data = await res.json();
-            document.getElementById('balanceAmount').textContent = (data.points || 0).toFixed(2);
-        } catch (e) { alert("خطأ في الاتصال"); }
+    // نظام التنقل الفوري بين التبويبات (Tabs) دون عمل Refresh للمتصفح
+    function switchTab(tabId, buttonElement) {
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      
+      if(buttonElement) {
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        buttonElement.classList.add('active');
+      }
+    }
+
+    // تفاعل زر التعدين ونظام عدّاد الطاقة المتناقصة
+    let currentEnergy = 1000;
+    const miningBtn = document.getElementById('miningBtn');
+    const energyText = document.getElementById('energyText');
+    const energyFill = document.getElementById('energyFill');
+
+    miningBtn.addEventListener('click', () => {
+      if(currentEnergy > 0) {
+        currentEnergy -= 10; // خصم طاقة عند الضغط
+        energyText.textContent = `${currentEnergy} / 1000`;
+        energyFill.style.width = `${(currentEnergy / 1000) * 100}%`;
+        
+        // تأثير اهتزاز خفيف للزر أثناء الضغط الفعلي
+        miningBtn.style.transform = 'scale(0.92)';
+        setTimeout(() => miningBtn.style.transform = 'scale(1)', 50);
+      } else {
+        alert("انتهت الطاقة! يرجى الانتظار حتى إعادة الشحن.");
+      }
+    });
+
+    // ==========================================
+    // أماكن ربط السيرفر والـ API الخاص بك (لم يتم المساس بالمنطق)
+    // ==========================================
+    
+    // 1. تحديث الرصيد عند فتح التطبيق
+    async function fetchUserData() {
+      try {
+        // // API Connection Here
+        // const res = await fetch('/api/user-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telegramId: "7018561132" }) });
+        // const data = await res.json();
+        // document.getElementById('balanceAmount').textContent = data.balance;
+      } catch (err) { console.log(err); }
+    }
+    fetchUserData();
+
+    // 2. ربط عملية الإيداع
+    document.getElementById('btnDepositSubmit').addEventListener('click', async () => {
+      const amt = document.getElementById('txAmount').value;
+      // // API Connection Here (أضف fetch الخاص بك هنا)
+      alert(`تم تسجيل طلب إيداع بمبلغ ${amt} - بانتظار ربط السيرفر`);
     });
   </script>
 </body>
