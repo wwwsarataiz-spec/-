@@ -6,15 +6,14 @@
     <title>Nexora Elite</title>
     <style>
         body { background: #f4f6f8; font-family: sans-serif; margin: 0; padding-bottom: 70px; }
-        /* الرأس والرصيد */
         .header { background: #0b3d2e; color: white; padding: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; text-align: center; }
         .balance-card { background: white; margin: -30px 20px 20px 20px; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        /* الشبكة */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
         .btn-action { background: #c5a059; color: white; padding: 15px; border-radius: 10px; text-decoration: none; display: block; text-align: center; }
-        /* القائمة السفلية */
         .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
-        .nav a { color: #555; text-decoration: none; font-size: 0.8em; }
+        .nav a { color: #555; text-decoration: none; font-size: 0.8em; cursor: pointer; }
+        /* تنسيق الإعلانات */
+        .ad-box { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 10px; border-right: 5px solid #c5a059; }
     </style>
 </head>
 <body>
@@ -38,21 +37,47 @@
     </div>
 
     <div class="nav">
-        <a href="#" onclick="loadTab('home')">🏠 البيت</a>
-        <a href="#" onclick="loadTab('tasks')">📋 مهام</a>
-        <a href="#" onclick="loadTab('team')">👥 فريق</a>
-        <a href="#" onclick="loadTab('profile')">👤 أنا</a>
+        <a onclick="loadTab('home')">🏠 البيت</a>
+        <a onclick="loadTab('tasks')">📋 مهام</a>
+        <a onclick="loadTab('ads')">📺 إعلانات</a>
+        <a onclick="loadTab('team')">👥 فريق</a>
+        <a onclick="loadTab('profile')">👤 أنا</a>
     </div>
 
     <script>
-        // دالة تبديل الصفحات (التبويبات)
-        function loadTab(tab) {
+        // دالة تبديل الصفحات (تم دمج الإعلانات بها)
+        async function loadTab(tab) {
             const content = document.getElementById('content');
-            if(tab === 'team') {
+            if(tab === 'ads') {
+                content.innerHTML = '<h3>الإعلانات المتاحة</h3><div id="ads-list">جاري التحميل...</div>';
+                const res = await fetch('/api/get-ads', { method: 'POST' });
+                const ads = await res.json();
+                document.getElementById('ads-list').innerHTML = ads.map(ad => `
+                    <div class="ad-box">
+                        <p>${ad.title}</p>
+                        <button onclick="watchAd('${ad._id}', '${ad.link}')">شاهد واربح ${ad.costPerView} USDT</button>
+                    </div>
+                `).join('');
+            } else if(tab === 'team') {
                 content.innerHTML = `<h3>فريق Nexora</h3><p>رابط الإحالة: https://nexora.com/ref/12345</p>`;
             } else {
                 content.innerHTML = `<h3>قاعة المهام</h3><p>المحتوى الأساسي هنا...</p>`;
             }
+        }
+
+        // منطق المشاهدة مع المؤقت
+        async function watchAd(adId, link) {
+            window.open(link, '_blank');
+            alert("يرجى البقاء في الإعلان لمدة 15 ثانية!");
+            setTimeout(async () => {
+                const res = await fetch('/api/watch-ad', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ telegramId: "7018561132", adId })
+                });
+                const data = await res.json();
+                alert(data.message);
+            }, 15000);
         }
     </script>
 </body>
