@@ -1,13 +1,16 @@
 require('dotenv').config();
 const express = require('express');
-const path = require('path'); // استيراد مكتبة المسارات
-const bot = require('./bot'); 
+const path = require('path');
+const fs = require('fs');
+const bot = require('./bot');
 const { User } = require('./database');
 
 const app = express();
 app.use(express.json());
-// التأكد من أن المسار للمجلد public صحيح
-app.use(express.static(path.join(__dirname, 'public')));
+
+// --- إعدادات الملفات الثابتة ---
+app.use(express.static('public'));
+app.use(express.static(__dirname));
 
 // --- تشغيل البوت ---
 bot.launch().then(() => {
@@ -16,13 +19,21 @@ bot.launch().then(() => {
     console.error('❌ خطأ في تشغيل البوت:', err);
 });
 
-// --- حل مشكلة Not Found ---
-// هذا السطر يضمن أن أي دخول للرابط الرئيسي يفتح index.html
+// --- حل مشكلة Not Found (توجيه ديناميكي) ---
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const publicPath = path.join(__dirname, 'public', 'index.html');
+    const rootPath = path.join(__dirname, 'index.html');
+
+    if (fs.existsSync(publicPath)) {
+        res.sendFile(publicPath);
+    } else if (fs.existsSync(rootPath)) {
+        res.sendFile(rootPath);
+    } else {
+        res.status(404).send('❌ الملف index.html غير موجود في المجلد public أو المجلد الرئيسي.');
+    }
 });
 
-// وسيط حماية
+// --- وسيط حماية ---
 const authMiddleware = async (req, res, next) => {
     const { telegramId } = req.body;
     const user = await User.findOne({ telegramId });
@@ -31,7 +42,7 @@ const authMiddleware = async (req, res, next) => {
     next();
 };
 
-// API لحفظ بيانات المستخدم
+// --- API حفظ البيانات ---
 app.post('/api/save-user', async (req, res) => {
     const { telegramId, fullName, phoneNumber } = req.body;
     try {
@@ -46,7 +57,7 @@ app.post('/api/save-user', async (req, res) => {
     }
 });
 
-// API المتجر
+// --- API المتجر ---
 app.post('/api/shop', authMiddleware, async (req, res) => {
     const { item } = req.body;
     const user = req.user; 
@@ -61,4 +72,4 @@ app.post('/api/shop', authMiddleware, async (req, res) => {
     res.json({ success: true, message: '✅ تم شراء الترقية بنجاح!' });
 });
 
-app.listen(process.env.PORT || 5000, () => console.log('🌐 السيرفر يعمل...'));
+app.listen(process.env.PORT || 5000, () => console.log('🌐 السيرفر يعمل على المنفذ 5000...'));
