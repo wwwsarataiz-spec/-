@@ -1,170 +1,105 @@
-<script>
-    const TELEGRAM_ID =
-        window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString()
-        || "7018561132";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora Elite</title>
+    <style>
+        :root { --gold: #c5a059; --dark: #0f172a; }
+        body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        .header { background: linear-gradient(135deg, #0b3d2e, #064e3b); padding: 30px 20px; text-align: center; border-bottom: 2px solid var(--gold); }
+        .balance-card { background: #1e293b; margin: -30px 20px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); text-align: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .btn-action { background: var(--gold); color: white; padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; }
+        .nav { position: fixed; bottom: 0; width: 100%; background: #0f172a; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #334155; }
+        .nav a { color: #94a3b8; font-size: 0.8em; cursor: pointer; text-decoration: none; }
+        .ad-box { background: #1e293b; padding: 15px; margin: 10px; border-radius: 15px; border-right: 5px solid var(--gold); }
+        .modal { display: none; position: fixed; top: 20%; left: 10%; width: 80%; background: #1e293b; padding: 20px; border-radius: 20px; z-index: 100; border: 1px solid var(--gold); text-align: center; }
+    </style>
+</head>
+<body>
 
-    async function fetchUserData() {
-        try {
-            const res = await fetch('/api/user-data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    telegramId: TELEGRAM_ID
-                })
-            });
+    <div class="header"><h1>Nexora Elite</h1></div>
 
-            const user = await res.json();
+    <div class="balance-card">
+        <p>الرصيد الإجمالي (USDT)</p>
+        <h2 id="balance">0.00</h2>
+        <div class="grid">
+            <button class="btn-action" onclick="openModal('deposit')">تعبئة رصيد</button>
+            <button class="btn-action" onclick="openModal('withdraw')">سحب</button>
+        </div>
+    </div>
 
-            if (user && user.points !== undefined) {
-                document.getElementById('balance').innerText =
-                    Number(user.points).toFixed(2);
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
+    <div id="content" style="padding: 20px;"></div>
 
-    async function watchAd(adId, link) {
+    <div class="nav">
+        <a onclick="loadTab('home')">🏠 البيت</a>
+        <a onclick="loadTab('tasks')">📋 مهام</a>
+        <a onclick="loadTab('ads')">📺 إعلانات</a>
+        <a onclick="loadTab('team')">👥 فريق</a>
+    </div>
 
-        window.open(link, '_blank');
+    <div id="modal" class="modal">
+        <h3 id="modalTitle">عنوان</h3>
+        <p id="modalBody"></p>
+        <button class="btn-action" onclick="closeModal()">إغلاق</button>
+    </div>
 
-        setTimeout(async () => {
+    <script>
+        const TELEGRAM_ID = "7018561132"; 
 
+        async function fetchUserData() {
             try {
+                const res = await fetch('/api/user-data', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ telegramId: TELEGRAM_ID }) 
+                });
+                const user = await res.json();
+                if (user.points !== undefined) document.getElementById('balance').innerText = user.points.toFixed(2);
+            } catch (e) { console.error("Error fetching user:", e); }
+        }
 
+        async function loadTab(tab) {
+            const content = document.getElementById('content');
+            if(tab === 'ads') {
+                const res = await fetch('/api/get-ads', { method: 'POST' });
+                const ads = await res.json();
+                content.innerHTML = '<h3>الإعلانات المتاحة</h3>' + ads.map(ad => `
+                    <div class="ad-box">
+                        <p>${ad.title}</p>
+                        <button class="btn-action" onclick="watchAd('${ad._id}', '${ad.link}')">شاهد واربح ${ad.costPerView}</button>
+                    </div>`).join('');
+            } else {
+                content.innerHTML = `<h3>قسم ${tab}</h3><p>مرحباً بك في منصة Nexora Elite.</p>`;
+            }
+        }
+
+        async function watchAd(adId, link) {
+            window.open(link, '_blank');
+            alert("يرجى البقاء في الإعلان لمدة 15 ثانية!");
+            setTimeout(async () => {
                 const res = await fetch('/api/watch-ad', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        telegramId: TELEGRAM_ID,
-                        adId
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ telegramId: TELEGRAM_ID, adId })
                 });
-
-                const result = await res.json();
-
-                alert(result.message);
-
-                if (result.success) {
-                    fetchUserData();
-                }
-
-            } catch (err) {
-                console.error(err);
-                alert('حدث خطأ أثناء تسجيل المشاهدة');
-            }
-
-        }, 3000);
-    }
-
-    async function loadTab(tab) {
-
-        const content = document.getElementById('content');
-
-        if (tab === 'home') {
-
-            content.innerHTML = `
-                <h3>الرئيسية</h3>
-                <p>مرحباً بك في منصة Nexora Elite</p>
-            `;
-
+                const data = await res.json();
+                alert(data.message);
+                fetchUserData(); // تحديث الرصيد بعد المشاهدة
+            }, 15000);
         }
 
-        else if (tab === 'tasks') {
-
-            content.innerHTML = `
-                <h3>المهام</h3>
-                <p>سيتم إضافة المهام قريباً.</p>
-            `;
-
+        function openModal(type) {
+            document.getElementById('modal').style.display = 'block';
+            document.getElementById('modalTitle').innerText = type === 'deposit' ? 'تعبئة رصيد' : 'طلب سحب';
+            document.getElementById('modalBody').innerText = type === 'deposit' ? 'حول لعنوان المحفظة: USDT-TRC20' : 'أدخل المبلغ للسحب:';
         }
 
-        else if (tab === 'team') {
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-            content.innerHTML = `
-                <h3>الفريق</h3>
-                <p>نظام الإحالات قيد التطوير.</p>
-            `;
-
-        }
-
-        else if (tab === 'ads') {
-
-            try {
-
-                const res = await fetch('/api/get-ads', {
-                    method: 'POST'
-                });
-
-                const ads = await res.json();
-
-                if (!ads.length) {
-                    content.innerHTML =
-                        '<h3>الإعلانات</h3><p>لا توجد إعلانات حالياً.</p>';
-                    return;
-                }
-
-                content.innerHTML =
-                    '<h3>الإعلانات المتاحة</h3>' +
-                    ads.map(ad => `
-                        <div class="ad-box">
-                            <h4>${ad.title}</h4>
-                            <p>المكافأة: ${ad.costPerView}</p>
-
-                            <button
-                                class="btn-action"
-                                onclick="watchAd('${ad._id}','${ad.link}')">
-                                مشاهدة الإعلان
-                            </button>
-                        </div>
-                    `).join('');
-
-            } catch (err) {
-
-                console.error(err);
-
-                content.innerHTML =
-                    '<h3>الإعلانات</h3><p>تعذر تحميل الإعلانات.</p>';
-            }
-        }
-    }
-
-    function openModal(type) {
-
-        document.getElementById('modal').style.display = 'block';
-
-        if (type === 'deposit') {
-
-            document.getElementById('modalTitle').innerText =
-                'تعبئة الرصيد';
-
-            document.getElementById('modalBody').innerHTML = `
-                <p>
-                قم بالتحويل إلى محفظتك ثم أرسل إثبات الدفع للإدارة.
-                </p>
-            `;
-
-        } else {
-
-            document.getElementById('modalTitle').innerText =
-                'طلب سحب';
-
-            document.getElementById('modalBody').innerHTML = `
-                <p>
-                نظام السحب سيتم ربطه بالواجهة قريباً.
-                </p>
-            `;
-        }
-    }
-
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-    }
-
-    fetchUserData();
-    loadTab('home');
-</script>
+        fetchUserData();
+        loadTab('home');
+    </script>
+</body>
+</html>
