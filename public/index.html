@@ -4,13 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Nexora Elite • Premium WebApp</title>
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  
   <style>
-    /* =========================
-       التنسيق العام والنمط الداكن الفخم
-    ========================= */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; margin: 0; padding: 0; }
     body {
@@ -19,39 +14,27 @@
       color: #e9e9f3;
       overflow-x: hidden;
     }
-
     .app { min-height: 100svh; display: flex; flex-direction: column; padding-bottom: 90px; }
-
-    /*Topbar*/
     .topbar { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 215, 0, 0.05); }
     .brand { display: flex; align-items: center; gap: 10px; }
     .brand i { color: #ffd700; font-size: 20px; filter: drop-shadow(0 0 8px #ffd700); }
     .brand__title { font-weight: 800; font-size: 16px; color: #ffd700; }
-    
-    /* الـ Cards بنمط الـ Glassmorphic الفاخر */
     .content { padding: 14px; flex: 1; }
     .tab-section { display: none; }
-    .tab-section.active { display: block; animation: fadeIn 0.4s ease; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
+    .tab-section.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    
     .card {
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
       border: 1px solid rgba(255, 215, 0, 0.15);
-      border-radius: 24px;
-      padding: 20px;
-      margin-bottom: 16px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      border-radius: 24px; padding: 20px; margin-bottom: 16px;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
-
-    /* قسم الرصيد */
     .balance-box { text-align: center; padding: 10px 0; }
     .balance-label { font-size: 13px; color: rgba(233, 233, 243, 0.6); }
     .balance-amount { font-size: 36px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 8px 0; }
     
-    /* الأزرار الاحترافية */
     .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
     .btn {
       padding: 14px; border-radius: 16px; border: none; font-weight: 800; font-size: 14px;
@@ -60,60 +43,50 @@
     }
     .btn-deposit { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2); }
     .btn-withdraw { background: rgba(255, 255, 255, 0.06); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+    .btn-action { background: linear-gradient(90deg, #b8860b, #ffd700); color: #000; width: 100%; margin-top: 10px; }
     .btn:active { transform: scale(0.98); }
 
-    /* شاشة التعدين الدائرية المتطورة */
-    .mining-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 0; }
+    .mining-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; }
     .mining-circle {
-      width: 200px; height: 200px; border-radius: 50%;
+      width: 180px; height: 180px; border-radius: 50%;
       background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0.6) 70%);
       border: 4px dashed rgba(255, 215, 0, 0.4);
       display: grid; place-items: center; position: relative; cursor: pointer;
-      box-shadow: 0 0 40px rgba(255, 215, 0, 0.05);
-      transition: all 0.3s ease;
     }
-    .mining-circle:active { transform: scale(0.95); box-shadow: 0 0 50px rgba(255, 215, 0, 0.2); }
-    .mining-circle i { font-size: 50px; color: #ffd700; filter: drop-shadow(0 0 15px #ffd700); }
-    .mining-status { margin-top: 15px; background: rgba(255,215,0,0.1); padding: 6px 16px; border-radius: 999px; font-size: 12px; color: #ffd700; border: 1px solid rgba(255,215,0,0.2); }
-
-    /* شريط تقدم الطاقة */
+    .mining-circle i { font-size: 44px; color: #ffd700; filter: drop-shadow(0 0 12px #ffd700); }
     .energy-box { width: 100%; margin-top: 20px; }
     .energy-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: rgba(233,233,243,0.7); }
-    .energy-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-    .energy-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #b8860b, #ffd700); border-radius: 999px; transition: width 0.1s ease; }
+    .energy-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); }
+    .energy-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #b8860b, #ffd700); border-radius: 999px; }
 
-    /* قاعة المهام و VIP */
-    .vip-list, .task-list { display: flex; flex-direction: column; gap: 12px; }
-    .vip-item, .task-item {
+    .item-list { display: flex; flex-direction: column; gap: 12px; }
+    .list-item {
       background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
       border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;
     }
-    .vip-info, .task-info { display: flex; align-items: center; gap: 12px; }
-    .vip-icon, .task-icon { width: 40px; height: 40px; background: rgba(255,215,0,0.1); border-radius: 12px; display: grid; place-items: center; color: #ffd700; }
-    .vip-title, .task-title { font-weight: 700; font-size: 14px; }
-    .vip-profit, .task-reward { font-size: 12px; color: #ffd700; margin-top: 4px; }
+    .item-info { display: flex; align-items: center; gap: 12px; }
+    .item-icon { width: 40px; height: 40px; background: rgba(255,215,0,0.1); border-radius: 12px; display: grid; place-items: center; color: #ffd700; }
+    .item-title { font-weight: 700; font-size: 14px; }
+    .item-subtitle { font-size: 12px; color: #ffd700; margin-top: 4px; }
 
-    /* شريط التنقل السفلي الثابت الفاخر */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
-      background: rgba(6, 7, 10, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(6, 7, 10, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid rgba(255, 215, 0, 0.15);
-      display: grid; grid-template-columns: repeat(5, 1fr); padding: 5px 10px; z-index: 999;
+      display: grid; grid-template-columns: repeat(6, 1fr); padding: 5px 5px; z-index: 999;
     }
     .nav-item {
       background: none; border: none; color: rgba(233, 233, 243, 0.5);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 5px; cursor: pointer; transition: all 0.2s ease; font-size: 11px; font-weight: 600;
+      gap: 5px; cursor: pointer; font-size: 10px; font-weight: 600;
     }
-    .nav-item i { font-size: 18px; transition: all 0.2s ease; }
+    .nav-item i { font-size: 16px; }
     .nav-item.active { color: #ffd700; }
-    .nav-item.active i { transform: translateY(-4px); filter: drop-shadow(0 0 8px #ffd700); }
 
-    /* حقول الإدخال */
-    .input-group { margin-bottom: 15px; }
+    .input-group { margin-bottom: 12px; }
     .input-group label { display: block; font-size: 12px; color: rgba(233,233,243,0.6); margin-bottom: 6px; }
-    .input-field { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; color: #fff; outline: none; }
-    .input-field:focus { border-color: #ffd700; }
+    .input-field { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; color: #fff; outline: none; font-size: 14px; }
+    .wallet-address-box { background: rgba(255,215,0,0.06); border: 1px dashed #ffd700; padding: 12px; border-radius: 12px; font-size: 12px; font-family: monospace; word-break: break-all; margin-top: 5px; color: #fff; text-align: left; }
   </style>
 </head>
 <body>
@@ -124,7 +97,7 @@
         <i class="fa-solid fa-cubes-nordic"></i>
         <div class="brand__title">Nexora Elite</div>
       </div>
-      <div style="font-size: 12px; color: #ffd700; background: rgba(255,215,0,0.1); padding: 4px 10px; border-radius: 8px;">VIP 1</div>
+      <div id="userVipTag" style="font-size: 12px; color: #ffd700; background: rgba(255,215,0,0.1); padding: 4px 10px; border-radius: 8px;">VIP 1</div>
     </header>
 
     <main class="content">
@@ -133,93 +106,119 @@
         <article class="card">
           <div class="balance-box">
             <div class="balance-label">الرصيد الإجمالي (USDT)</div>
-            <div class="balance-amount" id="balanceAmount">177.85</div>
+            <div class="balance-amount" id="balanceAmount">0.00</div>
           </div>
           <div class="action-buttons">
-            <button class="btn btn-deposit" onclick="switchTab('sec-wallet')">إيداع</button>
-            <button class="btn btn-withdraw" onclick="switchTab('sec-wallet')">سحب</button>
+            <button class="btn btn-deposit" onclick="switchTab('sec-wallet')">إيداع / شحن</button>
+            <button class="btn btn-withdraw" onclick="switchTab('sec-wallet')">سحب الأرباح</button>
           </div>
         </article>
 
-        <article class="card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
-          <div>
-            <div style="font-size: 11px; color: rgba(233,233,243,0.5);">الربح لكل نقرة</div>
-            <div style="color: #ffd700; font-weight: bold; margin-top: 5px;">+1 TON</div>
-          </div>
-          <div style="border-right: 1px solid rgba(255,255,255,0.1);">
-            <div style="font-size: 11px; color: rgba(233,233,243,0.5);">الربح السلبي/ثانية</div>
-            <div style="color: #ffd700; font-weight: bold; margin-top: 5px;">+0 TON</div>
-          </div>
+        <article class="card">
+          <h4 style="margin: 0 0 10px 0; color: #ffd700;"><i class="fa-solid fa-rectangle-ad"></i> كسب المال من الإعلانات</h4>
+          <p style="font-size: 12px; margin: 0 0 12px 0; color: rgba(233,233,243,0.6);">شاهد الإعلانات الممولة واحصل على عوائد تضاف لحسابك فوراً.</p>
+          <button class="btn btn-action" id="btnWatchAd"><i class="fa-solid fa-play"></i> مشاهدة إعلان كسب (+0.10 USDT)</button>
         </article>
       </section>
 
       <section id="sec-mining" class="tab-section">
         <div class="mining-container">
-          <div class="mining-circle" id="miningBtn">
-            <i class="fa-solid fa-pickaxe"></i>
-          </div>
-          <div class="mining-status">...جارِ التعدين</div>
-          
+          <div class="mining-circle" id="miningBtn"><i class="fa-solid fa-pickaxe"></i></div>
           <div class="energy-box">
-            <div class="energy-header">
-              <span><i class="fa-solid fa-bolt" style="color: #ffd700;"></i> الطاقة المتبقية</span>
-              <span id="energyText">1000 / 1000</span>
+            <div class="energy-header"><span>الطاقة المتبقية</span><span id="energyText">1000 / 1000</span></div>
+            <div class="energy-bar-bg"><div class="energy-bar-fill" id="energyFill" style="width: 100%;"></div></div>
+          </div>
+        </div>
+
+        <h4 style="color: #ffd700; margin: 15px 0 10px 0;">خطط التعدين الاستثمارية</h4>
+        <div class="item-list">
+          <div class="list-item">
+            <div class="item-info">
+              <div class="item-icon"><i class="fa-solid fa-gem"></i></div>
+              <div><div class="item-title">خطة البداية الذكية</div><div class="item-subtitle">السعر: $3.00 • العائد: 5% يومياً</div></div>
             </div>
-            <div class="energy-bar-bg">
-              <div class="energy-bar-fill" id="energyFill"></div>
+            <button class="btn btn-deposit" style="padding: 8px 12px; width: auto; font-size: 12px;" onclick="buyPlan(3)">شراء</button>
+          </div>
+
+          <div class="card" style="margin-top: 10px; padding: 15px;">
+            <div style="font-size: 13px; font-weight: bold; color: #ffd700; margin-bottom: 8px;">خطة استثمار مخصصة (حسب رغبتك)</div>
+            <div class="input-group">
+              <input type="number" class="input-field" id="customPlanAmount" placeholder="أدخل السعر الذي يناسبك (مثال: 15$ أو أكثر)">
             </div>
+            <button class="btn btn-action" style="margin-top: 5px;" onclick="buyCustomPlan()">تفعيل القيمة المخصصة</button>
           </div>
         </div>
       </section>
 
       <section id="sec-tasks" class="tab-section">
-        <h3 style="color: #ffd700; margin-bottom: 15px;">قاعة المهام ومستويات VIP</h3>
-        <div class="vip-list">
-          <div class="vip-item">
-            <div class="vip-info">
-              <div class="vip-icon"><i class="fa-solid fa-lock-open"></i></div>
-              <div>
-                <div class="vip-title">مستوى VIP 1</div>
-                <div class="vip-profit">عمولة الطلب $5.00</div>
-              </div>
-            </div>
-            <span style="color: #00ffaa; font-size: 12px;">نشط</span>
+        <h4 style="color: #ffd700; margin-top: 0;">أضف إعلانك في المنصة (للمعلنين)</h4>
+        <article class="card" style="padding: 15px;">
+          <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: 0;">روج لقناتك أو بوتك الخاص، الدفع يدوي ويتم تفعيل الإعلان بعد مراجعة الإدارة.</p>
+          <div class="input-group"><label>رابط الإعلان (تليجرام / موقع)</label><input type="text" class="input-field" placeholder="https://t.me/..."></div>
+          <div class="input-group"><label>تكلفة الحملة المطلوبة ($)</label><input type="number" class="input-field" placeholder="تبدأ من 5 دولار"></div>
+          <button class="btn btn-action" onclick="alert('تم إرسال طلب حملتك الإعلانية للإدارة للتحقق يدويًا.')">تقديم الطلب والدفع</button>
+        </article>
+      </section>
+
+      <section id="sec-casino" class="tab-section">
+        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-dice"></i> قاعة ألعاب كازينو Nexora</h3>
+        <article class="card" style="text-align: center;">
+          <div style="font-size: 40px; margin-bottom: 15px;">🎲 🎰 🎡</div>
+          <p style="font-size: 13px; color: rgba(233,233,243,0.7);">راهن بمبالغ بسيطة وضاعف أرباحك فوراً عبر عجلة الحظ أو التخمين الرقمي الذكي.</p>
+          <div class="input-group"><label>مبلغ الرهان (USDT)</label><input type="number" class="input-field" placeholder="0.00" id="casinoBet"></div>
+          <div class="action-buttons">
+            <button class="btn btn-deposit" onclick="playCasino('win')">تخمين عالي (X2)</button>
+            <button class="btn btn-withdraw" onclick="playCasino('lose')">تخمين منخفض</button>
           </div>
-          <div class="vip-item" style="opacity: 0.6;">
-            <div class="vip-info">
-              <div class="vip-icon"><i class="fa-solid fa-lock"></i></div>
-              <div>
-                <div class="vip-title">مستوى VIP 2</div>
-                <div class="vip-profit">عمولة الطلب $26.00</div>
-              </div>
-            </div>
-            <i class="fa-solid fa-key" style="color: #ffd700;"></i>
-          </div>
-        </div>
+        </article>
       </section>
 
       <section id="sec-team" class="tab-section">
         <article class="card">
-          <div style="font-size: 12px; color: rgba(233,233,243,0.6);">رابط الإحالة الخاص بك</div>
-          <input type="text" class="input-field" value="https://nexora.elite/reg?ref=7018561132" readonly style="margin: 10px 0; text-align: left; direction: ltr;">
-          <button class="btn btn-deposit" style="padding: 8px;">نسخ الرابط</button>
+          <div style="font-size: 12px; color: rgba(233,233,243,0.6);">رابط الإحالة ومكافآت الفريق</div>
+          <input type="text" class="input-field" value="https://t.me/NexoraBot?start=7018561132" readonly style="margin: 10px 0; text-align: left; direction: ltr;">
+          <button class="btn btn-deposit" style="padding: 10px;" onclick="alert('تم نسخ رابط الإحالة!')">نسخ الرابط</button>
         </article>
       </section>
 
       <section id="sec-wallet" class="tab-section">
         <article class="card">
-          <h3 style="color: #ffd700; margin-top: 0;">عمليات السحب والإيداع</h3>
-          <div class="input-group">
-            <label>المبلغ المطلوب (USDT)</label>
-            <input type="number" class="input-field" placeholder="0.00" id="txAmount">
+          <h4 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-building-columns"></i> بوابة الشحن والسحب اليدوي</h4>
+          
+          <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="font-size: 12px; color: #ffd700; font-weight: bold;">محفظة الإيداع المعتمدة (USDT - TRC20):</span>
+            <div class="wallet-address-box" id="trcAddress">TYxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
+            
+            <span style="font-size: 12px; color: #ffd700; font-weight: bold; display:block; margin-top:10px;">محفظة الإيداع البديلة (TON Network):</span>
+            <div class="wallet-address-box" id="tonAddress">EQxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
           </div>
-          <div class="input-group">
-            <label>عنوان المحفظة (TRC20)</label>
-            <input type="text" class="input-field" placeholder="أدخل العنوان هنا">
-          </div>
+
+          <div class="input-group"><label>المبلغ المطلوب (USDT)</label><input type="number" class="input-field" placeholder="0.00" id="txAmount"></div>
+          <div class="input-group"><label>رقم المعاملة / هاش التحويل (Hash)</label><input type="text" class="input-field" placeholder="أدخل إثبات التحويل للتحقق اليدوي" id="txHash"></div>
+          
           <div class="action-buttons">
-            <button class="btn btn-deposit" id="btnDepositSubmit">تأكيد الإيداع</button>
-            <button class="btn btn-withdraw" id="btnWithdrawSubmit">طلب سحب</button>
+            <button class="btn btn-deposit" id="btnDepositSubmit">إرسال إثبات الإيداع</button>
+            <button class="btn btn-withdraw" id="btnWithdrawSubmit">طلب سحب الأرباح</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="sec-admin" class="tab-section">
+        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-user-gear"></i> لوحة التحكم الذاتية للآدمين</h3>
+        <article class="card">
+          <div class="input-group"><label>تعديل رصيد العميل الحالي (USDT)</label><input type="number" class="input-field" id="adminUpdateBalance" placeholder="ضع القيمة الجديدة للرصيد"></div>
+          <button class="btn btn-deposit" onclick="adminSetBalance()">حفظ الرصيد الجديد فورا</button>
+          
+          <div style="margin-top: 20px;">
+            <label style="font-size: 12px; color: #ffd700; display: block; margin-bottom: 8px;">طلبات التحقق اليدوية المعلقة:</label>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,255,255,0.05);">
+              <div>مستخدم ID: 7018561132</div>
+              <div style="color: #ffd700;">طلب إيداع بقيمة: 3$</div>
+              <div style="margin-top: 8px; display: flex; gap: 8px;">
+                <button class="btn btn-deposit" style="padding: 5px; font-size: 11px;" onclick="alert('تم تفعيل الطلب بنجاح!')">موافقة وتفعيل</button>
+                <button class="btn btn-withdraw" style="padding: 5px; font-size: 11px;" onclick="alert('تم رفض وإلغ الارسالية.')">رفض الطلب</button>
+              </div>
+            </div>
           </div>
         </article>
       </section>
@@ -229,64 +228,104 @@
     <nav class="bottom-nav">
       <button class="nav-item active" onclick="switchTab('sec-home', this)"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
       <button class="nav-item" onclick="switchTab('sec-mining', this)"><i class="fa-solid fa-fire"></i><span>التعدين</span></button>
-      <button class="nav-item" onclick="switchTab('sec-tasks', this)"><i class="fa-solid fa-list-check"></i><span>المهام</span></button>
+      <button class="nav-item" onclick="switchTab('sec-tasks', this)"><i class="fa-solid fa-rectangle-ad"></i><span>الإعلانات</span></button>
+      <button class="nav-item" onclick="switchTab('sec-casino', this)"><i class="fa-solid fa-dice"></i><span>كازينو</span></button>
       <button class="nav-item" onclick="switchTab('sec-team', this)"><i class="fa-solid fa-users"></i><span>الفريق</span></button>
-      <button class="nav-item" onclick="switchTab('sec-wallet', this)"><i class="fa-solid fa-user"></i><span>الملف</span></button>
+      <button class="nav-item" onclick="switchTab('sec-wallet', this)"><i class="fa-solid fa-wallet"></i><span>المحفظة</span></button>
     </nav>
   </div>
 
   <script>
-    // نظام التنقل الفوري بين التبويبات (Tabs) دون عمل Refresh للمتصفح
+    let globalBalance = 0.00;
+
     function switchTab(tabId, buttonElement) {
       document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
-      
       if(buttonElement) {
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
         buttonElement.classList.add('active');
       }
     }
 
-    // تفاعل زر التعدين ونظام عدّاد الطاقة المتناقصة
-    let currentEnergy = 1000;
-    const miningBtn = document.getElementById('miningBtn');
-    const energyText = document.getElementById('energyText');
-    const energyFill = document.getElementById('energyFill');
-
-    miningBtn.addEventListener('click', () => {
-      if(currentEnergy > 0) {
-        currentEnergy -= 10; // خصم طاقة عند الضغط
-        energyText.textContent = `${currentEnergy} / 1000`;
-        energyFill.style.width = `${(currentEnergy / 1000) * 100}%`;
-        
-        // تأثير اهتزاز خفيف للزر أثناء الضغط الفعلي
-        miningBtn.style.transform = 'scale(0.92)';
-        setTimeout(() => miningBtn.style.transform = 'scale(1)', 50);
-      } else {
-        alert("انتهت الطاقة! يرجى الانتظار حتى إعادة الشحن.");
+    // لتسهيل وصولك للوحة الإدارة يدوياً، اضغط على شعار Nexora في الأعلى 5 مرات متتالية
+    let logoClicks = 0;
+    document.querySelector('.brand').addEventListener('click', () => {
+      logoClicks++;
+      if(logoClicks >= 5) {
+        let pass = prompt("أدخل كلمة مرور الإدارة الذاتية السري:");
+        if(pass === "admin123") {
+          switchTab('sec-admin');
+          logoClicks = 0;
+        } else { alert("كلمة مرور خاطئة!"); logoClicks = 0; }
       }
     });
 
-    // ==========================================
-    // أماكن ربط السيرفر والـ API الخاص بك (لم يتم المساس بالمنطق)
-    // ==========================================
-    
-    // 1. تحديث الرصيد عند فتح التطبيق
-    async function fetchUserData() {
-      try {
-        // // API Connection Here
-        // const res = await fetch('/api/user-data', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ telegramId: "7018561132" }) });
-        // const data = await res.json();
-        // document.getElementById('balanceAmount').textContent = data.balance;
-      } catch (err) { console.log(err); }
+    // سكريبت كازينو التخمين التفاعلي
+    function playCasino(type) {
+      let bet = parseFloat(document.getElementById('casinoBet').value);
+      if(!bet || bet <= 0 || bet > globalBalance) { alert("رصيدك غير كافي أو القيمة غير صحيحة!"); return; }
+      if(type === 'win') {
+        globalBalance += bet;
+        alert("تهانينا! خمنّت بشكل صحيح وضاعفت قيمتك بربح X2.");
+      } else {
+        globalBalance -= bet;
+        alert("للأسف، لم ينجح التخمين هذه المرة. حظاً أوفر في المرة القادمة!");
+      }
+      document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
     }
-    fetchUserData();
 
-    // 2. ربط عملية الإيداع
+    // شراء خطط التعدين المدفوعة
+    function buyPlan(cost) {
+      alert(`لقد اخترت خطة الـ ${cost}$. يرجى الانتقال لبوابة المحفظة لإرسال المبلغ ووضع الهاش للتحقق اليدوي.`);
+      switchTab('sec-wallet');
+    }
+    function buyCustomPlan() {
+      let amt = document.getElementById('customPlanAmount').value;
+      if(!amt || amt <= 0) { alert("يرجى تحديد سعر صالح ومقبول للشركة."); return; }
+      alert(`تم تسجيل رغبتك بخطة بقيمة ${amt}$. توجه لقسم المحفظة لإتمام التحويل وتأكيده.`);
+      switchTab('sec-wallet');
+    }
+
+    // التعدين اليدوي بالنقر وعداد الطاقة
+    let currentEnergy = 1000;
+    document.getElementById('miningBtn').addEventListener('click', () => {
+      if(currentEnergy > 0) {
+        currentEnergy -= 20;
+        globalBalance += 0.05;
+        document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+        document.getElementById('energyText').textContent = `${currentEnergy} / 1000`;
+        document.getElementById('energyFill').style.width = `${(currentEnergy / 1000) * 100}%`;
+      } else { alert("نفدت الطاقة تماماً، انتظر الشحن التلقائي بالسيرفر."); }
+    });
+
+    // مشاهدة الإعلانات
+    document.getElementById('btnWatchAd').addEventListener('click', () => {
+      alert("يتم الآن تحميل الإعلان... انتظر 5 ثوانٍ للاحتساب.");
+      setTimeout(() => {
+        globalBalance += 0.10;
+        document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+        alert("تمت المشاهدة بنجاح! تم إضافة +0.10 USDT لرصيدك المتاح.");
+      }, 5000);
+    });
+
+    // تحكم الآدمين بالرصيد يدويًا
+    function adminSetBalance() {
+      let val = parseFloat(document.getElementById('adminUpdateBalance').value);
+      if(!isNaN(val)) {
+        globalBalance = val;
+        document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+        alert("تم تحديث وتثبيت رصيد الحساب بنجاح.");
+      }
+    }
+
+    // ==========================================
+    // // API Connection Here
+    // ==========================================
     document.getElementById('btnDepositSubmit').addEventListener('click', async () => {
       const amt = document.getElementById('txAmount').value;
-      // // API Connection Here (أضف fetch الخاص بك هنا)
-      alert(`تم تسجيل طلب إيداع بمبلغ ${amt} - بانتظار ربط السيرفر`);
+      const hash = document.getElementById('txHash').value;
+      // هنا تضع ربط fetch مع الـ Backend الخاص بك لإرسال طلب الإيداع والهاش
+      alert("تم إرسال البيانات للإدارة. ستتم مراجعة الهاش يدويًا وتحديث رصيدك فور التأكد.");
     });
   </script>
 </body>
