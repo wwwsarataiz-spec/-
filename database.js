@@ -7,7 +7,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // --- ١. مخطط المستخدمين المطور والمحمي الشامل ---
 const UserSchema = new mongoose.Schema({
-  // الحقول القديمة (تم الحفاظ عليها بالكامل لضمان عدم فقدان أي بيانات مسجلة)
+  // الحقول القديمة (مضمونة ومحفوظة بالكامل)
   telegramId: { type: String, required: true, unique: true, index: true },
   fullName: { type: String, default: 'مستخدم جديد' },
   phoneNumber: { type: String, default: 'غير محدد' },
@@ -18,41 +18,44 @@ const UserSchema = new mongoose.Schema({
   walletAddress: { type: String, default: '' },
   pendingWithdrawals: { type: Number, default: 0 },
 
-  // الإضافات الجديدة لتغطية التحديثات (الرصيد بالدولار، الطاقة، والخطط الاستثمارية)
-  usdBalance: { type: Number, default: 0.00 }, // الرصيد الفعلي بالدولار لتفادي التلاعب محلياً
-  miningEnergy: { type: Number, default: 1000 }, // عداد الطاقة المحمي بالسيرفر (1000/1000)
-  lastMiningClick: { type: Date, default: Date.now }, // لحساب وتدقيق سرعة النقر ومنع الـ Auto-Clicker
-  vipPlanLevel: { type: Number, default: 1 }, // مستوى الخطة الاستثمارية (تبدأ من VIP 1 المجاني)
-  customMiningInvestment: { type: Number, default: 0 }, // قيمة الخطة المخصصة التي يطلبها العميل بنفسه
-  role: { type: String, default: 'user' } // لتحديد الصلاحيات (user أو admin للوحة الإدارة الذاتية)
+  // الإضافات الجديدة للتوافق مع الواجهة
+  usdBalance: { type: Number, default: 0.000 }, // رصيد الدولار بدقة 3 خانات عشرية للاحتساب الدقيق
+  miningEnergy: { type: Number, default: 1000 },
+  lastMiningClick: { type: Date, default: Date.now },
+  vipPlanLevel: { type: Number, default: 1 },
+  customMiningInvestment: { type: Number, default: 0 },
+  role: { type: String, default: 'user' }
 });
 
-// --- ٢. مخطط نظام الإعلانات الشامل (مشاهدة وإعلان) ---
+// --- ٢. مخطط نظام الإعلانات الحقيقي والمدفوع (حسب رغبتك تماماً) ---
 const AdSchema = new mongoose.Schema({
-  title: { type: String, default: 'إعلان ممول' },
-  link: { type: String, required: true }, // رابط القناة أو البوت المعلن عنه
-  budget: { type: Number, default: 0 }, // الميزانية الإجمالية المدفوعة للحملة
-  costPerView: { type: Number, default: 0.10 }, // تكلفة المشاهدة الواحدة التي تذهب للمستخدم
-  isActive: { type: Boolean, default: false }, // لا يظهر الإعلان إلا بعد موافقة الإدارة (حماية وتدقيق يدوي)
-  advertiserId: { type: String }, // آيدي الشخص الذي قام بطلب الإعلان
+  title: { type: String, default: 'إعلان حقيقي ممول' },
+  link: { type: String, required: true },          // رابط القناة أو البوت الخاص بالمعلن
+  totalBudget: { type: Number, required: true },    // الميزانية الإجمالية المدفوعة للإدارة (مثلاً 10$)
+  remainingBudget: { type: Number, required: true },// الميزانية المتبقية (يُخصم منها مع كل مشاهدة)
+  costPerView: { type: Number, default: 0.001 },    // القيمة الدقيقة للمشاهدة الواحدة التي تذهب للمستخدم
+  totalViewsRequired: { type: Number, default: 0 }, // عدد المشاهدات الكلي المطلوبة (الميزانية ÷ 0.001)
+  viewsCount: { type: Number, default: 0 },          // عدد المشاهدات الحالية التي حصل عليها الإعلان فعلياً
+  isActive: { type: Boolean, default: false },      // لا يظهر للعملاء إلا بعد أن يوافق الآدمين ويثبت الدفع اليدوي
+  advertiserId: { type: String, required: true },   // آيدي العميل (المعلن) الذي أنشأ الحملة
   createdAt: { type: Date, default: Date.now }
 });
 
+// سجل المشاهدات لمنع المستخدم من مشاهدة نفس الإعلان مرتين والتلاعب
 const AdLogSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, index: true },
   adId: { type: mongoose.Schema.Types.ObjectId, required: true },
   viewedAt: { type: Date, default: Date.now }
 });
 
-// --- ٣. إضافة مخطط لعمليات التحقق اليدوية (الشحن والسحب والخطط) ---
-// هذا القسم يمنع اختراق الرصيد ويجعل لوحة الإدارة الذاتية تعرض لك طلبات التحويل لاعتمادها أو رفضها
+// --- ٣. مخطط المعاملات والطلبات اليدوية ---
 const TransactionRequestSchema = new mongoose.Schema({
   userId: { type: String, required: true, index: true },
   type: { type: String, enum: ['deposit', 'withdrawal', 'custom_plan', 'ad_campaign'], required: true },
   amount: { type: Number, required: true },
-  txHash: { type: String, default: '' }, // هاش التحويل لإثبات الدفع اليدوي
-  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }, // حالة الطلب
-  details: { type: String, default: '' }, // تفاصيل إضافية (مثل رابط الإعلان المطلوب رشه)
+  txHash: { type: String, default: '' }, 
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }, 
+  details: { type: String, default: '' }, // يحمل رابط الإعلان أو تفاصيل الخطة المخصصة
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -62,5 +65,4 @@ const Ad = mongoose.model('Ad', AdSchema);
 const AdLog = mongoose.model('AdLog', AdLogSchema);
 const TransactionRequest = mongoose.model('TransactionRequest', TransactionRequestSchema);
 
-// تصدير الموديلات بأمان جاهزة للربط مع الـ Endpoints
 module.exports = { User, Ad, AdLog, TransactionRequest };
