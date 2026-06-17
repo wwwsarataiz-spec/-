@@ -62,6 +62,7 @@
     .btn-withdraw { background: rgba(255, 255, 255, 0.06); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
     .btn-action { background: linear-gradient(90deg, #b8860b, #ffd700); color: #000; width: 100%; margin-top: 10px; }
     .btn-danger { background: linear-gradient(135deg, #ff4444, #cc0000); color: #fff; }
+    .btn-success { background: linear-gradient(135deg, #00cc66, #009944); color: #fff; }
     .btn:active { transform: scale(0.98); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
@@ -200,6 +201,59 @@
       display: block;
       margin-top: 5px;
     }
+
+    /* تنسيق لوحة الأدمن */
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .admin-stat-box {
+      background: rgba(255,215,0,0.05);
+      border: 1px solid rgba(255,215,0,0.1);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+    }
+    .admin-stat-box .number {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffd700;
+    }
+    .admin-stat-box .label {
+      font-size: 10px;
+      color: rgba(233,233,243,0.6);
+    }
+    .admin-table {
+      width: 100%;
+      font-size: 11px;
+      border-collapse: collapse;
+    }
+    .admin-table th {
+      text-align: right;
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(255,215,0,0.1);
+      color: #ffd700;
+    }
+    .admin-table td {
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .admin-table .btn-sm {
+      padding: 4px 8px;
+      font-size: 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    .admin-table .btn-sm.approve { background: #00cc66; color: #fff; }
+    .admin-table .btn-sm.reject { background: #ff4444; color: #fff; }
+    .admin-table .btn-sm:hover { opacity: 0.8; }
+    .admin-table .status-pending { color: #ffaa00; }
+    .admin-table .status-approved { color: #00cc66; }
+    .admin-table .status-rejected { color: #ff4444; }
   </style>
 </head>
 <body>
@@ -469,11 +523,9 @@
           <h4 style="color: #ffd700; margin-top: 0;" id="txtWalletMainTitle"><i class="fa-solid fa-wallet"></i> محفظتك وعناوين الإيداع</h4>
           
           <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
-            <!-- عنوان TRC20 -->
             <span style="font-size: 12px; color: #ffd700; font-weight: bold;" id="txtTrc20Label">عنوان محفظتك الفردية للإيداع (USDT - TRC20):</span>
             <div class="wallet-address-box" id="trcAddress">TY7c1x9pAWRmNqE2vSdBtK6uZ8yLmX4h9Q</div>
             
-            <!-- عنوان المنصة -->
             <span style="font-size: 12px; color: #ffd700; font-weight: bold; display:block; margin-top:15px;" id="txtPlatformLabel">🏦 عنوان محفظة المنصة الرئيسي (للإيداع):</span>
             <div class="wallet-address-box" id="platformAddress" style="direction: ltr; text-align: left;">TPlatformWalletAddress123456789</div>
             <button class="btn btn-deposit" style="padding: 6px; width: 100%; margin-top: 5px; font-size: 12px;" onclick="copyPlatformAddress()">نسخ عنوان المنصة</button>
@@ -494,7 +546,6 @@
         <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-sliders"></i> لوحة الإعدادات</h3>
         
         <article class="card">
-          <!-- قسم الإحالة -->
           <div style="border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 15px; margin-bottom: 15px;">
             <div style="font-size: 12px; color: rgba(233,233,243,0.6);" id="txtReferralLabel">رابط دعوة الأصدقاء الآمن والمشفر الخاص بك</div>
             <input type="text" id="referralLinkField" class="input-field" value="" readonly style="margin: 10px 0; text-align: left; direction: ltr; border: 1px dashed #ffd700;">
@@ -526,18 +577,59 @@
         </article>
       </section>
 
-      <!-- ========== الأدمن (مخفي) ========== -->
+      <!-- ========== لوحة الأدمن (المطورة بالكامل) ========== -->
       <section id="sec-admin" class="tab-section">
-        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-user-gear"></i> لوحة التحكم</h3>
+        <h3 style="color: #ffd700; margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-user-gear"></i> لوحة التحكم الإدارية</span>
+          <button class="btn btn-deposit" style="padding: 4px 12px; font-size: 11px; width: auto;" onclick="refreshAdminDashboard()">
+            <i class="fa-solid fa-rotate"></i> تحديث
+          </button>
+        </h3>
+
+        <!-- إحصائيات سريعة -->
+        <div class="admin-stats" id="adminStats">
+          <div class="admin-stat-box">
+            <div class="number" id="statUsers">0</div>
+            <div class="label">👤 المستخدمين</div>
+          </div>
+          <div class="admin-stat-box">
+            <div class="number" id="statRequests">0</div>
+            <div class="label">📋 طلبات معلقة</div>
+          </div>
+          <div class="admin-stat-box">
+            <div class="number" id="statAds">0</div>
+            <div class="label">📢 إعلانات نشطة</div>
+          </div>
+        </div>
+
+        <!-- الطلبات المعلقة -->
         <article class="card">
-          <div class="input-group"><label>البريد الإلكتروني للعميل</label><input type="email" class="input-field" id="adminTargetEmail" placeholder="user@mail.com"></div>
-          <div class="input-group"><label>تعديل الرصيد (USDT)</label><input type="number" class="input-field" id="adminUpdateBalance" placeholder="ضع الرصيد"></div>
+          <h5 style="color: #ffd700; margin: 0 0 10px 0;">📋 الطلبات المعلقة</h5>
+          <div id="pendingRequestsContainer">
+            <p style="color: rgba(233,233,243,0.4); text-align: center; font-size: 12px;">جاري تحميل الطلبات...</p>
+          </div>
+        </article>
+
+        <!-- تعديل رصيد المستخدم -->
+        <article class="card">
+          <h5 style="color: #ffd700; margin: 0 0 10px 0;">💰 تعديل رصيد المستخدم</h5>
+          <div class="input-group">
+            <label>البريد الإلكتروني للعميل</label>
+            <input type="email" class="input-field" id="adminTargetEmail" placeholder="user@mail.com">
+          </div>
+          <div class="input-group">
+            <label>الرصيد الجديد (USDT)</label>
+            <input type="number" class="input-field" id="adminUpdateBalance" placeholder="ضع الرصيد الجديد" step="0.01">
+          </div>
           <button class="btn btn-deposit" onclick="adminSetBalance()">حفظ وتحديث الرصيد</button>
-          <div style="margin-top: 20px;">
-            <label style="font-size: 12px; color: #ffd700; display: block; margin-bottom: 8px;">الطلبات المعلقة:</label>
-            <div id="adminPendingRequestsContainer" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,255,255,0.05);">
-              <p style="color:rgba(233,233,243,0.5); text-align:center;">جاري جلب الطلبات...</p>
-            </div>
+          <div id="adminBalanceResult" style="margin-top: 10px; text-align: center; font-size: 12px; display: none;"></div>
+        </article>
+
+        <!-- قائمة المستخدمين -->
+        <article class="card">
+          <h5 style="color: #ffd700; margin: 0 0 10px 0;">👤 قائمة المستخدمين المسجلين</h5>
+          <div id="usersListContainer" style="max-height: 300px; overflow-y: auto;">
+            <p style="color: rgba(233,233,243,0.4); text-align: center; font-size: 12px;">جاري تحميل المستخدمين...</p>
           </div>
         </article>
       </section>
@@ -648,6 +740,10 @@
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
         buttonElement.classList.add('active');
       }
+      // إذا كان التبويب هو الأدمن، نقوم بتحميل البيانات
+      if (tabId === 'sec-admin') {
+        refreshAdminDashboard();
+      }
     }
 
     function toggleAuthMode(mode) {
@@ -710,6 +806,7 @@
       document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${code}`;
       checkDailyBonusStatusLocal();
       syncUserData();
+      loadWalletAddresses();
     }
 
     async function verifyEmailCode() {
@@ -729,6 +826,7 @@
           document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${code2}`;
           checkDailyBonusStatusLocal();
           syncUserData();
+          loadWalletAddresses();
         }
       } catch(e) { alert("خطأ في الاتصال."); }
     }
@@ -771,7 +869,7 @@
       checkDailyBonusStatusLocal();
     }
 
-    // ========== نظام الإعلانات (الرئيسي) ==========
+    // ========== نظام الإعلانات (المشاهدة) ==========
     function updateAdProgress() {
       const progressBar = document.getElementById('adProgressFill');
       const progressText = document.getElementById('adProgressText');
@@ -792,7 +890,6 @@
         return;
       }
 
-      // منع البوتات: 10 ثوانٍ بين الإعلانات
       const lastAdTime = localStorage.getItem(`last_ad_time_${currentUserEmail}`);
       if (lastAdTime) {
         const timeDiff = (Date.now() - parseInt(lastAdTime)) / 1000;
@@ -830,36 +927,53 @@
         if (remainingSeconds <= 0) {
           clearInterval(adTimerInterval);
 
-          // ✅ إعلان مكتمل
-          watchedAdsCount++;
-          updateAdProgress();
-
-          if (watchedAdsCount >= ADS_FOR_CASINO_POINT) {
-            // منح نقطة كازينو
-            globalCasinoBalance += CASINO_POINT_VALUE;
-            document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
-            watchedAdsCount = 0;
+          // محاولة إرسال الطلب للخادم
+          fetch('/api/ads/watch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUserEmail })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              // تحديث العداد المحلي بناءً على استجابة الخادم
+              if (data.pointEarned) {
+                globalCasinoBalance += CASINO_POINT_VALUE;
+                document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+                watchedAdsCount = 0;
+                alert(data.message);
+              } else {
+                watchedAdsCount = data.watchedAdsCount || 0;
+                alert(data.message);
+              }
+              updateAdProgress();
+            } else {
+              alert(data.message || 'حدث خطأ');
+            }
+          })
+          .catch(err => {
+            // في حال فشل الاتصال، نستخدم المحاكاة المحلية (للتجربة)
+            watchedAdsCount++;
             updateAdProgress();
-
-            alert(lang === 'ar' 
-              ? `🎉 تهانينا! أكملت 15 إعلاناً وحصلت على نقطة كازينو بقيمة ${CASINO_POINT_VALUE}$!` 
-              : `🎉 Congratulations! You watched 15 ads and earned a ${CASINO_POINT_VALUE}$ casino point!`);
-          } else {
-            const remaining = ADS_FOR_CASINO_POINT - watchedAdsCount;
-            alert(lang === 'ar' 
-              ? `✅ تم احتساب الإعلان! تبقى ${remaining} إعلاناً للحصول على نقطة كازينو.` 
-              : `✅ Ad counted! ${remaining} ads left for a casino point.`);
-          }
+            if (watchedAdsCount >= ADS_FOR_CASINO_POINT) {
+              globalCasinoBalance += CASINO_POINT_VALUE;
+              document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+              watchedAdsCount = 0;
+              updateAdProgress();
+              alert(lang === 'ar' ? '🎉 تهانينا! أكملت 15 إعلاناً وحصلت على نقطة كازينو!' : '🎉 Congrats! You earned a casino point!');
+            } else {
+              const remaining = ADS_FOR_CASINO_POINT - watchedAdsCount;
+              alert(lang === 'ar' ? `✅ تم احتساب الإعلان! تبقى ${remaining} إعلاناً.` : `✅ Ad counted! ${remaining} ads left.`);
+            }
+          });
 
           if (btn) {
             btn.disabled = false;
             btn.innerHTML = `<i class="fa-solid fa-play"></i> ${lang === 'ar' ? 'مشاهدة إعلان الآن' : 'Watch Ad Now'}`;
           }
-
           if (adStatusDiv) {
             setTimeout(() => { adStatusDiv.style.display = 'none'; }, 3000);
           }
-
           isAdPlaying = false;
         }
       }, 1000);
@@ -896,7 +1010,6 @@
         resultBox.style.display = 'block';
         resultBox.className = 'margin-result-box ' + (data.win ? 'win' : 'lose');
         const lang = currentSystemLang;
-        // تحديث رصيد الكازينو من الاستجابة
         globalCasinoBalance = data.newBalance || globalCasinoBalance;
         document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
         
@@ -934,41 +1047,52 @@
 
       if (!confirm(confirmMsg)) return;
 
-      globalBalance -= totalFees;
-      document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
-      
-      // تسجيل المعاملة محلياً
-      const txContainer = document.getElementById('userTransactionsListContainer');
-      const txDiv = document.createElement('div');
-      txDiv.className = 'tx-item';
-      txDiv.innerHTML = `<span>💰 خصم رسوم عملة (${tName})</span><span style="color:#ff4444;">-${totalFees.toFixed(2)} USDT</span>`;
-      txContainer.prepend(txDiv);
-      document.getElementById('txtNoTx').style.display = 'none';
-
-      alert(lang === 'ar' ?
-        `✅ تم خصم ${totalFees.toFixed(2)} USDT بنجاح. الرصيد المتبقي: ${globalBalance.toFixed(2)} USDT.` :
-        `✅ Deducted ${totalFees.toFixed(2)} USDT. New Balance: ${globalBalance.toFixed(2)} USDT.`);
+      // محاولة إرسال الطلب للخادم
+      fetch('/api/tokens/pay-from-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentUserEmail, tokenName: tName, tokenSymbol: tSymbol, funding: funding })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          globalBalance = data.newBalance || globalBalance;
+          document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+          alert(data.message);
+        } else {
+          alert(data.message || 'حدث خطأ');
+        }
+      })
+      .catch(err => {
+        // محاكاة محلية في حال فشل الاتصال
+        globalBalance -= totalFees;
+        document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+        alert(lang === 'ar' ?
+          `✅ تم خصم ${totalFees.toFixed(2)} USDT بنجاح (محلياً). الرصيد المتبقي: ${globalBalance.toFixed(2)} USDT.` :
+          `✅ Deducted ${totalFees.toFixed(2)} USDT (locally). New Balance: ${globalBalance.toFixed(2)} USDT.`);
+      });
 
       document.getElementById('tokenName').value = '';
       document.getElementById('tokenSymbol').value = '';
       document.getElementById('tokenFundingAmount').value = '';
     }
 
-    // ========== صنع العملة (بالإثبات) ==========
+    // ========== صنع العملة بالإثبات ==========
     async function processCreateTokenSystem() {
       const tName = document.getElementById('tokenName').value;
       const tSymbol = document.getElementById('tokenSymbol').value;
       const tFunding = parseFloat(document.getElementById('tokenFundingAmount').value) || 0;
       const tProof = document.getElementById('tokenPaymentProof').value;
       if(!tName || !tSymbol || !tProof) { alert("املأ جميع الحقول!"); return; }
-      alert(`تم إرسال طلب العملة ${tName} (${tSymbol}) مع الإثبات للإدارة.`);
       try {
-        await fetch('/api/tokens/create', {
+        const res = await fetch('/api/tokens/create', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ email: currentUserEmail, tokenName: tName, tokenSymbol: tSymbol, funding: tFunding, paymentProof: tProof })
         });
-      } catch(e) { console.log("تم حفظ الطلب"); }
+        const data = await res.json();
+        alert(data.message);
+      } catch(e) { alert("تم إرسال الطلب"); }
       switchTab('sec-wallet');
     }
 
@@ -981,6 +1105,7 @@
 
     function submitAdCampaign() {
       const link = document.getElementById('adLink').value;
+      const platform = document.getElementById('adPlatform').value;
       const views = parseInt(document.getElementById('adViews').value) || 0;
       const cost = views * 0.005;
 
@@ -995,12 +1120,40 @@
 
       if(!confirm(lang === 'ar' ? `سيتم خصم ${cost.toFixed(2)} USDT من رصيدك الأساسي لتشغيل الحملة. موافق؟` : `Will deduct ${cost.toFixed(2)} USDT for campaign. Confirm?`)) return;
 
-      globalBalance -= cost;
-      document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
-      alert(lang === 'ar' ? `✅ تم تفعيل الحملة بنجاح! سيتم مراجعة رابطك ونشره خلال 24 ساعة.` : `✅ Campaign activated successfully! Your link will be reviewed within 24 hours.`);
+      fetch('/api/ads/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentUserEmail, link, platform, views })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          globalBalance = data.newBalance || globalBalance;
+          document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+          alert(data.message);
+        } else {
+          alert(data.message || 'حدث خطأ');
+        }
+      })
+      .catch(err => {
+        // محاكاة محلية
+        globalBalance -= cost;
+        document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+        alert(lang === 'ar' ? `✅ تم تفعيل الحملة محلياً.` : `✅ Campaign activated locally.`);
+      });
     }
 
     // ========== وظائف المحفظة والإعدادات ==========
+    function loadWalletAddresses() {
+      fetch('/api/wallets/info')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('trcAddress').innerText = data.trc20 || 'العنوان غير متوفر';
+          document.getElementById('platformAddress').innerText = data.platform || 'العنوان غير متوفر';
+        })
+        .catch(err => console.log('فشل جلب العناوين'));
+    }
+
     function copyPlatformAddress() {
       const text = document.getElementById('platformAddress').innerText;
       navigator.clipboard.writeText(text);
@@ -1032,6 +1185,191 @@
       alert("تم حفظ الاسم الجديد: " + newName);
       document.getElementById('settingProfileName').value = "";
     }
+
+    // ========== دوال لوحة الأدمن ==========
+    function refreshAdminDashboard() {
+      fetch('/api/admin/dashboard-data')
+        .then(res => res.json())
+        .then(data => {
+          // تحديث الإحصائيات
+          document.getElementById('statUsers').innerText = data.usersCount || 0;
+          document.getElementById('statRequests').innerText = data.requests ? data.requests.length : 0;
+          document.getElementById('statAds').innerText = data.requests ? data.requests.filter(r => r.type === 'إعلان ممول' || r.type === 'Ad Campaign').length : 0;
+
+          // عرض الطلبات المعلقة
+          const container = document.getElementById('pendingRequestsContainer');
+          if (data.requests && data.requests.length > 0) {
+            let html = `<table class="admin-table">
+              <thead><tr><th>#</th><th>البريد</th><th>النوع</th><th>المبلغ</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody>`;
+            data.requests.forEach((req, idx) => {
+              const statusClass = req.status === 'معلق' || req.status === 'Pending' ? 'status-pending' : 
+                                  (req.status === 'تم القبول' || req.status === 'Approved' ? 'status-approved' : 'status-rejected');
+              html += `<tr>
+                <td>${idx+1}</td>
+                <td>${req.email}</td>
+                <td>${req.type}</td>
+                <td>${req.amount}</td>
+                <td class="${statusClass}">${req.status}</td>
+                <td>
+                  ${req.status === 'معلق' || req.status === 'Pending' ? 
+                    `<button class="btn-sm approve" onclick="processAdminRequest('${req.id}', 'approve')">✅ قبول</button>
+                     <button class="btn-sm reject" onclick="processAdminRequest('${req.id}', 'reject')">❌ رفض</button>` : 
+                    '-'}
+                </td>
+              </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+          } else {
+            container.innerHTML = '<p style="color: rgba(233,233,243,0.4); text-align: center; font-size: 12px;">لا توجد طلبات معلقة حالياً.</p>';
+          }
+
+          // عرض قائمة المستخدمين
+          const usersContainer = document.getElementById('usersListContainer');
+          if (data.users && data.users.length > 0) {
+            let html = `<table class="admin-table">
+              <thead><tr><th>الاسم</th><th>البريد</th><th>الرصيد</th><th>رصيد الكازينو</th><th>الحالة</th></tr></thead><tbody>`;
+            data.users.forEach(u => {
+              html += `<tr>
+                <td>${u.name}</td>
+                <td>${u.email}</td>
+                <td>${u.balance}</td>
+                <td>${u.casinoBalance}</td>
+                <td>${u.verified ? '✅ مفعل' : '⏳ غير مفعل'}</td>
+              </tr>`;
+            });
+            html += '</tbody></table>';
+            usersContainer.innerHTML = html;
+          } else {
+            usersContainer.innerHTML = '<p style="color: rgba(233,233,243,0.4); text-align: center; font-size: 12px;">لا يوجد مستخدمين مسجلين.</p>';
+          }
+        })
+        .catch(err => {
+          console.error('خطأ في جلب بيانات الأدمن:', err);
+          document.getElementById('pendingRequestsContainer').innerHTML = '<p style="color: #ff4444; text-align: center; font-size: 12px;">⚠️ فشل تحميل البيانات، تأكد من تشغيل السيرفر.</p>';
+          document.getElementById('usersListContainer').innerHTML = '<p style="color: #ff4444; text-align: center; font-size: 12px;">⚠️ فشل تحميل البيانات، تأكد من تشغيل السيرفر.</p>';
+        });
+    }
+
+    function processAdminRequest(requestId, action) {
+      if (!confirm('تأكيد ' + (action === 'approve' ? 'القبول' : 'الرفض') + ' لهذا الطلب؟')) return;
+
+      fetch('/api/admin/process-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, action })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        refreshAdminDashboard(); // تحديث الواجهة
+      })
+      .catch(err => {
+        alert('حدث خطأ، حاول مجدداً.');
+      });
+    }
+
+    function adminSetBalance() {
+      const email = document.getElementById('adminTargetEmail').value;
+      const newBalance = parseFloat(document.getElementById('adminUpdateBalance').value);
+      if (!email || isNaN(newBalance)) {
+        alert('يرجى ملء البريد والرصيد الجديد بشكل صحيح.');
+        return;
+      }
+
+      fetch('/api/admin/modify-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newBalance })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const resultDiv = document.getElementById('adminBalanceResult');
+        resultDiv.style.display = 'block';
+        resultDiv.style.color = data.success ? '#00cc66' : '#ff4444';
+        resultDiv.innerText = data.message;
+        if (data.success) {
+          document.getElementById('adminTargetEmail').value = '';
+          document.getElementById('adminUpdateBalance').value = '';
+          refreshAdminDashboard();
+        }
+      })
+      .catch(err => {
+        alert('حدث خطأ في الاتصال بالخادم.');
+      });
+    }
+
+    // ========== دوال مساعدة ==========
+    let logoClicks = 0;
+    document.getElementById('topBrandTitle').addEventListener('click', () => {
+      logoClicks++;
+      if(logoClicks >= 5) {
+        let pass = prompt("الرمز الإداري:");
+        if(pass === "admin123") { switchTab('sec-admin'); logoClicks = 0; } 
+        else { alert("مرفوض!"); logoClicks = 0; }
+      }
+    });
+
+    async function syncUserData() {
+      if(!currentUserEmail) return;
+      let localBg = localStorage.getItem(`custom_bg_${currentUserEmail}`);
+      if(localBg) { document.body.style.backgroundImage = `url('${localBg}')`; }
+      try {
+        const res = await fetch('/api/user-data', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email: currentUserEmail })
+        });
+        const data = await res.json();
+        if(data && !data.error) {
+            globalBalance = parseFloat(data.usdBalance || 0);
+            globalCasinoBalance = parseFloat(data.casinoBalance || 0);
+            document.getElementById('balanceAmount').textContent = globalBalance.toFixed(3);
+            document.getElementById('casinoBalanceAmount').textContent = globalCasinoBalance.toFixed(3);
+        }
+      } catch (e) { }
+    }
+
+    document.getElementById('miningBtn').addEventListener('click', function(e) {
+      this.style.transform = 'scale(0.92)';
+      setTimeout(() => this.style.transform = 'scale(1)', 80);
+      let energyElem = document.getElementById('energyText');
+      let currentEnergy = parseInt(energyElem.innerText.split('/')[0]) || 1000;
+      if(currentEnergy > 0) {
+        energyElem.innerText = `${currentEnergy - 1} / 1000`;
+        document.getElementById('energyFill').style.width = `${((currentEnergy - 1) / 1000) * 100}%`;
+      }
+    });
+
+    async function playCasinoGame(gameId) { alert("جاري تدوير العجلة..."); }
+    function sendDepositNotification() { 
+      const email = currentUserEmail;
+      const amount = document.getElementById('txAmount').value;
+      const txHash = document.getElementById('txHash').value;
+      if(!amount || !txHash) { alert('املأ المبلغ والهاش'); return; }
+      fetch('/api/deposit-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amount, txHash })
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message))
+      .catch(err => alert('تم إرسال إثبات الإيداع (محاكاة).'));
+    }
+    function sendWithdrawNotification() { 
+      const email = currentUserEmail;
+      const amount = document.getElementById('txAmount').value;
+      if(!amount) { alert('أدخل المبلغ'); return; }
+      fetch('/api/withdraw/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, amount })
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message))
+      .catch(err => alert('تم إرسال طلب السحب (محاكاة).'));
+    }
+    function buyPlan(cost) { switchTab('sec-wallet'); document.getElementById('txAmount').value = cost; }
 
     function switchLanguageSystem() {
       currentSystemLang = currentSystemLang === 'ar' ? 'en' : 'ar';
@@ -1088,58 +1426,12 @@
       checkDailyBonusStatusLocal();
     }
 
-    // ========== دوال مساعدة ==========
-    let logoClicks = 0;
-    document.getElementById('topBrandTitle').addEventListener('click', () => {
-      logoClicks++;
-      if(logoClicks >= 5) {
-        let pass = prompt("الرمز الإداري:");
-        if(pass === "admin123") { switchTab('sec-admin'); logoClicks = 0; } 
-        else { alert("مرفوض!"); logoClicks = 0; }
-      }
-    });
-
-    async function syncUserData() {
-      if(!currentUserEmail) return;
-      let localBg = localStorage.getItem(`custom_bg_${currentUserEmail}`);
-      if(localBg) { document.body.style.backgroundImage = `url('${localBg}')`; }
-      try {
-        const res = await fetch('/api/user-data', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ email: currentUserEmail })
-        });
-        const data = await res.json();
-        if(data && !data.error) {
-            globalBalance = parseFloat(data.usdBalance || 0);
-            globalCasinoBalance = parseFloat(data.casinoBalance || 0);
-            document.getElementById('balanceAmount').textContent = globalBalance.toFixed(3);
-            document.getElementById('casinoBalanceAmount').textContent = globalCasinoBalance.toFixed(3);
-        }
-      } catch (e) { }
-    }
-
-    document.getElementById('miningBtn').addEventListener('click', function(e) {
-      this.style.transform = 'scale(0.92)';
-      setTimeout(() => this.style.transform = 'scale(1)', 80);
-      let energyElem = document.getElementById('energyText');
-      let currentEnergy = parseInt(energyElem.innerText.split('/')[0]) || 1000;
-      if(currentEnergy > 0) {
-        energyElem.innerText = `${currentEnergy - 1} / 1000`;
-        document.getElementById('energyFill').style.width = `${((currentEnergy - 1) / 1000) * 100}%`;
-      }
-    });
-
-    async function playCasinoGame(gameId) { alert("جاري تدوير العجلة..."); }
-    function sendDepositNotification() { alert("تم استلام إثبات الإيداع."); }
-    function sendWithdrawNotification() { alert("تم إرسال طلب السحب."); }
-    function buyPlan(cost) { switchTab('sec-wallet'); document.getElementById('txAmount').value = cost; }
-    function adminSetBalance() { alert("هذه الميزة للإدارة فقط."); }
-
     window.onload = function() {
       calculateAdCost();
       updateAdProgress();
+      // تحميل عناوين المحفظة عند بدء التشغيل
+      loadWalletAddresses();
     };
   </script>
 </body>
-  </html>
+            </html>
