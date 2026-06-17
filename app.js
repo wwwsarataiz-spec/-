@@ -1,65 +1,200 @@
-// --- ٤. مشاهدة الإعلان: النظام الجديد (تحويل الربح للإدارة + عداد الجولات المجانية) ---
-app.post('/api/watch-ad', async (req, res) => {
-    const { telegramId, adId } = req.body;
-    try {
-        const ad = await Ad.findById(adId);
-        if (!ad) return res.json({ success: false, message: 'الإعلان غير موجود أو انتهت صلاحيته' });
-        
-        // التحقق من ميزانية الإعلان
-        if (ad.remainingBudget < 0.001) {
-            ad.isActive = false;
-            await ad.save();
-            return res.json({ success: false, message: 'عذراً، نفذت ميزانية هذا الإعلان!' });
-        }
+const express = require('express');
+const path = require('path');
+const app = express();
 
-        // منع تكرار مشاهدة نفس الإعلان من نفس الشخص
-        const alreadyViewed = await AdLog.findOne({ telegramId, adId });
-        if (alreadyViewed) return res.json({ success: false, message: 'لقد شاهدت هذا الإعلان بالفعل!' });
+// تفعيل قراءة البيانات القادمة بصيغة JSON
+app.use(express.json());
 
-        // ١. خصم القيمة من ميزانية المعلن (تذهب لصالح الإدارة تلقائياً لأننا لا نضيفها لرصيد المستخدم)
-        ad.remainingBudget -= 0.001;
-        ad.viewsCount += 1;
-        if (ad.remainingBudget < 0.001) ad.isActive = false; 
-        await ad.save();
+// تشغيل الملفات الثابتة مثل index.html من مجلد public
+app.use(express.static(path.join(__dirname, '../public'))); 
+// ملاحظة: إذا كان مجلد public بجانب app.js مباشرة، اجعلها: app.use(express.static(path.join(__dirname, 'public')));
 
-        // ٢. تسجيل اللوج للمستخدم لضمان عدم التكرار
-        await AdLog.create({ telegramId, adId });
-
-        // ٣. تحديث عداد الإعلانات للمستخدم في قاعدة البيانات ومنحه الجولة إذا وصل لـ 15
-        const user = await User.findOne({ telegramId });
-        if (!user) return res.json({ success: false, message: 'المستخدم غير موجود' });
-
-        // نستخدم حقل الـ points مؤقتاً كعداد للإعلانات المشاهدة، أو نرفع القيمة مباشرة
-        // لكي نبقي الأمر بسيطاً ومحفوظاً، سنقوم بزيادة عدد المشاهدات وتحديث الجولات تلقائياً
-        
-        // هنا فكرة ذكية: كلما شاهد إعلان نضيف له 1 في عداد داخلي مخفي (سنعتمد على لوج الإعلانات اليومي)
-        // للحفاظ على بساطة الكود واستقراره، سنقوم بزيادة الجولات المجانية مباشرة بعد كل 15 مشاهدة حقيقية
-        const totalUserViews = await AdLog.countDocuments({ telegramId });
-        
-        let earnedSpins = false;
-        // إذا كان باقي قسمة مجموع مشاهداته على 15 يساوي 0، يعني أنه أتم حزمة جديدة من 15 إعلان
-        if (totalUserViews % 15 === 0) {
-            user.freeCasinoSpins += 1;
-            earnedSpins = true;
-        }
-        await user.save();
-
-        if (earnedSpins) {
-            return res.json({ 
-                success: true, 
-                message: `🎉 رائع جداً! لقد أتممت مشاهدة 15 إعلاناً بنجاح، وتم منحك جولة مجانية (1 Free Spin) في قاعة الكازينو الآن!`,
-                freeSpinsLeft: user.freeCasinoSpins
-            });
-        } else {
-            const nextMilestone = 15 - (totalUserViews % 15);
-            return res.json({ 
-                success: true, 
-                message: `👀 تم تسجيل مشاهدة الإعلان بنجاح. متبقي لك ${nextMilestone} إعلانات للحصول على جولة كازينو مجانية!`,
-                freeSpinsLeft: user.freeCasinoSpins
-            });
-        }
-
-    } catch (error) {
-        res.json({ success: false, message: 'خطأ في معالجة الإعلان برمجياً' });
+// قاعدة بيانات وهمية مؤقتة لحين ربط Supabase/MongoDB بالكامل
+let usersDatabase = {
+    "7018561132": {
+        usdBalance: 0.00,
+        vipPlanLevel: 1,
+        miningEnergy: 1000,
+        freeCasinoSpins: 0
     }
+};
+
+let pendingRequests = [];
+let availableAds = [
+    { _id: "ad_001", title: "إعلان ممول 1", link: "https://t.me/NexoraBot" }
+];
+
+// ==========================================
+// المسارات والـ APIs الخاصة بالمنصة
+// ==========================================
+
+// 1. مسار جلب وتحديث بيانات العميل
+app.post('/api/user-data', (req, res) => {
+    const { telegramId } = req.body;
+    if (!telegramId) return res.status(400).json({ error: "Missing telegramId" });
+    
+    if (!usersDatabase[telegramId]) {
+        usersDatabase[telegramId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
+    }
+    res.json(usersDatabase[telegramId]);
+});
+
+// 2. مسار النقر والتعدين اليدوي
+app.post('/api/mining/click', (req, res) => {
+    const { userId } = req.body;
+    if (usersDatabase[userId]) {
+        if (usersDatabase[userId].miningEnergy >= 20) {
+            usersDatabase[userId].miningEnergy -= 20;
+            usersDatabase[userId].usdBalance += 0.05;
+            return res.json({ success: true, newBalance: usersDatabase[userId].usdBalance });
+        }
+    }
+    res.json({ success: false, message: "فشلت المزامنة أو نفدت الطاقة" });
+});
+
+// 3. مسار جلب الإعلانات المتاحة
+app.post('/api/get-ads', (req, res) => {
+    res.json(availableAds);
+});
+
+// 4. مسار مشاهدة الإعلانات واحتساب الجولات المجانية
+app.post('/api/watch-ad', (req, res) => {
+    const { telegramId, adId } = req.body;
+    if (!telegramId) return res.json({ success: false, message: "المستخدم غير معروف" });
+
+    if (!usersDatabase[telegramId]) {
+        usersDatabase[telegramId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
+    }
+
+    // إضافة جولة مجانية وتحديث البيانات
+    usersDatabase[telegramId].freeCasinoSpins += 1; 
+    
+    res.json({ 
+        success: true, 
+        message: "تمت مشاهدة الإعلان بنجاح! تم منحك جولة كازينو مجانية.",
+        freeSpinsLeft: usersDatabase[telegramId].freeCasinoSpins
+    });
+});
+
+// 5. مسار تشغيل ألعاب الكازينو الثلاثة (عجلة، سلوت، نرد)
+app.post('/api/casino/play-game', (req, res) => {
+    const { userId, gameId, riskLevel, betAmount } = req.body;
+    const user = usersDatabase[userId];
+
+    if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
+
+    // التحقق من طريقة اللعب (بجولة مجانية أم برصيد حقيقي)
+    if (betAmount === 0) {
+        if (user.freeCasinoSpins <= 0) {
+            return res.json({ success: false, message: "لا تملك جولات مجانية! شاهد الإعلانات لشحنها." });
+        }
+        user.freeCasinoSpins -= 1;
+    } else {
+        if (user.usdBalance < betAmount) {
+            return res.json({ success: false, message: "رصيدك الحالي غير كافٍ للرهان الحقيقي!" });
+        }
+        user.usdBalance -= betAmount;
+    }
+
+    // خوارزمية الربح والخسارة بناءً على مستوى الخطورة
+    let winChance = 0.5; // متوسط
+    if (riskLevel === 'low') winChance = 0.7;
+    if (riskLevel === 'high') winChance = 0.25;
+
+    const isWin = Math.random() < winChance;
+    let prize = 0;
+
+    if (isWin) {
+        let multiplier = riskLevel === 'high' ? 3.0 : (riskLevel === 'medium' ? 1.5 : 1.1);
+        prize = betAmount === 0 ? (Math.random() * 0.5) : (betAmount * multiplier);
+        user.usdBalance += prize;
+    }
+
+    res.json({
+        success: true,
+        message: isWin ? `مبروك! لقد فزت بمبلغ ${prize.toFixed(3)} USDT` : "للأسف لم تحالفك الحظ في هذه الجولة، حاول مجدداً!",
+        newBalance: user.usdBalance,
+        freeSpinsLeft: user.freeCasinoSpins
+    });
+});
+
+// 6. تقديم طلب إعلاني من معلن
+app.post('/api/ads/submit', (req, res) => {
+    const { userId, link, cost } = req.body;
+    const newId = "ad_" + Date.now();
+    availableAds.push({ _id: newId, title: "إعلان مدفوع", link: link });
+    
+    pendingRequests.push({ id: newId, userId, type: 'إعلان ممول', amount: cost, txHash: 'دفع معلق للتحقق' });
+    res.json({ success: true, message: "تم تقديم طلب الإعلان، يرجى إرسال هاش التحويل في المحفظة لتفعيله." });
+});
+
+// 7. استقبال إشعارات الإيداع اليدوي
+app.post('/api/deposit-notify', (req, res) => {
+    const { telegramId, amount, txHash } = req.body;
+    pendingRequests.push({
+        id: "req_" + Date.now(),
+        userId: telegramId,
+        type: 'شحن رصيد',
+        amount: amount,
+        txHash: txHash
+    });
+    res.json({ success: true });
+});
+
+// 8. طلب سحب الأرباح (بحد أقصى مرتين في الأسبوع تلقائياً)
+app.post('/api/withdraw/submit', (req, res) => {
+    const { userId, amount } = req.body;
+    const user = usersDatabase[userId];
+    if(!user || user.usdBalance < amount) {
+        return res.json({ success: false, message: "الرصيد غير كافٍ لإتمام عملية السحب!" });
+    }
+    
+    user.usdBalance -= parseFloat(amount);
+    pendingRequests.push({
+        id: "req_" + Date.now(),
+        userId: userId,
+        type: 'سحب أرباح',
+        amount: amount,
+        txHash: 'قيد المراجعة الإدارية'
+    });
+    res.json({ success: true, message: "تم تسجيل طلب السحب بنجاح، وسيتم تحويله يدوياً بعد مراجعة الإدارة (حد أقصى مرتين أسبوعياً)." });
+});
+
+// ==========================================
+// لوحة تحكم الإدارة الذاتية (Admin APIs)
+// ==========================================
+
+app.post('/api/admin/update-balance', (req, res) => {
+    const { targetUserId, newBalance } = req.body;
+    if (!usersDatabase[targetUserId]) {
+        usersDatabase[targetUserId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
+    }
+    usersDatabase[targetUserId].usdBalance = parseFloat(newBalance);
+    res.json({ success: true, message: `تم تحديث رصيد المستخدم الحساب بنجاح إلى ${newBalance} USDT` });
+});
+
+app.post('/api/admin/pending-requests', (req, res) => {
+    res.json({ success: true, requests: pendingRequests });
+});
+
+app.post('/api/admin/process-request', (req, res) => {
+    const { requestId, action } = req.body;
+    const index = pendingRequests.findIndex(r => r.id === requestId);
+    if (index !== -1) {
+        const request = pendingRequests[index];
+        if (action === 'approve' && request.type === 'شحن رصيد') {
+            if (usersDatabase[request.userId]) {
+                usersDatabase[request.userId].usdBalance += parseFloat(request.amount);
+            }
+        }
+        pendingRequests.splice(index, 1);
+        return res.json({ success: true, message: "تمت معالجة الطلب وتحديث بيانات العميل فوراً." });
+    }
+    res.json({ success: false, message: "الطلب غير موجود." });
+});
+
+// تشغيل السيرفر على البورت المتاح في ريندر
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`السيرفر يعمل بنجاح الآن على بورت: ${PORT}`);
 });
