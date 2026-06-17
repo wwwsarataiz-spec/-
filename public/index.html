@@ -49,9 +49,10 @@
     .btn-deposit { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2); }
     .btn-withdraw { background: rgba(255, 255, 255, 0.06); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
     .btn-action { background: linear-gradient(90deg, #b8860b, #ffd700); color: #000; width: 100%; margin-top: 10px; }
+    .btn-danger { background: linear-gradient(135deg, #ff4444, #cc0000); color: #fff; }
     .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* حلقة التعدين المطورة ذات البريق الحركي المتوهج الشفاف */
     .mining-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; }
     .mining-circle {
       width: 180px; height: 180px; border-radius: 50%;
@@ -74,7 +75,6 @@
     .energy-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.05); border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); }
     .energy-bar-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #b8860b, #ffd700); border-radius: 999px; }
 
-    /* الهدية اليومية المصغرة في زاوية الشاشة بشكل معزول */
     .floating-bonus-zone {
       background: linear-gradient(135deg, #2b1f0c, #110e05);
       border: 1px solid #ffd700; border-radius: 12px;
@@ -119,6 +119,7 @@
     .input-group { margin-bottom: 14px; }
     .input-group label { display: block; font-size: 12px; color: rgba(233,233,243,0.6); margin-bottom: 6px; }
     .input-field { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; color: #fff; outline: none; font-size: 14px; }
+    .input-field option { background: #0c0e12; color: #fff; }
     .wallet-address-box { background: rgba(255,215,0,0.06); border: 1px dashed #ffd700; padding: 12px; border-radius: 12px; font-size: 11px; font-family: monospace; word-break: break-all; margin-top: 5px; color: #fff; text-align: left; }
 
     .auth-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.94); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -127,10 +128,32 @@
     
     .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .tx-item { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; display: flex; justify-content: space-between; }
+
+    .margin-slider-container { direction: ltr; width: 100%; }
+    .margin-slider-container input[type="range"] { width: 100%; accent-color: #ffd700; background: transparent; }
+    .margin-result-box {
+      margin-top: 15px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 12px; text-align: center; display: none;
+      border: 1px solid rgba(255,215,0,0.1);
+    }
+    .margin-result-box.win { border-color: #00ff00; }
+    .margin-result-box.lose { border-color: #ff4444; }
+
+    /* تنسيق إضافي للإعلانات */
+    .ad-price-preview {
+      background: rgba(255,215,0,0.05);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    .ad-price-preview span { color: #ffd700; font-weight: bold; }
   </style>
 </head>
 <body>
 
+  <!-- شاشة الدخول -->
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-modal">
       <div style="text-align: center; margin-bottom: 20px;">
@@ -154,6 +177,11 @@
       <div class="input-group" id="groupAuthPass">
         <label id="lblAuthPass">كلمة المرور</label>
         <input type="password" id="authPassword" class="input-field" placeholder="••••••••">
+      </div>
+      <div class="input-group" id="groupVerifyCode" style="display: none;">
+        <label id="lblVerifyCode">🔑 رمز التأكيد المرسل لبريدك</label>
+        <input type="text" id="verifyCodeInput" class="input-field" placeholder="أدخل الرقم 6 أرقام">
+        <button class="btn btn-action" id="btnVerifyEmail" onclick="verifyEmailCode()" style="margin-top:8px;">تفعيل الحساب</button>
       </div>
 
       <button class="btn btn-deposit" id="btnMainAuth" onclick="handleAuthAction()" style="width: 100%; margin-top: 10px;">تسجيل الدخول</button>
@@ -183,6 +211,7 @@
 
     <main class="content">
 
+      <!-- ========== الرئيسية ========== -->
       <section id="sec-home" class="tab-section active">
         <article class="card">
           <div class="balance-box">
@@ -215,20 +244,16 @@
             <button class="btn btn-deposit" style="padding: 8px 12px; width: auto; font-size: 12px;" id="btnBuyPlan1" onclick="buyPlan(3)">شراء</button>
           </div>
         </div>
-
-        <article class="card" style="margin-top: 10px;">
-          <h5 style="color: #ffd700; margin: 0 0 6px 0;"><i class="fa-solid fa-rectangle-ad"></i> حملات إعلانية ممولة</h5>
-          <p style="font-size: 11px; color: rgba(233,233,243,0.6); margin: 0 0 10px 0;">شاهد الإعلان لرفد طاقتك وحسابك بجولات مجانية إضافية فورا.</p>
-          <button class="btn btn-action" style="padding: 10px; font-size: 12px;" onclick="handleWatchAd()"><i class="fa-solid fa-play"></i> مشاهدة الآن</button>
-        </article>
       </section>
 
+      <!-- ========== الكازينو ========== -->
       <section id="sec-casino" class="tab-section">
         <h3 style="color: #ffd700; margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
           <span id="txtCasinoHeader"><i class="fa-solid fa-dice"></i> كازينو ومضاعفات Nexora</span>
           <span id="freeSpinsBadge" style="font-size: 11px; background: #ffaa00; color: #000; padding: 3px 8px; border-radius: 20px; font-weight: 800;">الجولات المجانية: 2</span>
         </h3>
         
+        <!-- العجلة -->
         <article class="card" style="border: 1px solid rgba(255, 215, 0, 0.25); margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 15px;">
             <div style="font-size: 35px;">🎡</div>
@@ -241,11 +266,43 @@
             <button class="btn btn-deposit style-play-btn" style="padding: 10px 15px; width: auto;" onclick="playCasinoGame('wheel')">لعب 🎡</button>
           </div>
         </article>
+
+        <!-- لعبة الهامش -->
+        <article class="card" style="border: 1px solid rgba(255, 215, 0, 0.15);">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+            <div style="font-size: 35px;">📊</div>
+            <div style="flex: 1;">
+              <h4 style="margin: 0; color: #ffd700;" id="txtMarginGameTitle">لعبة الهامش المتقلب (النسبة المئوية)</h4>
+              <p style="font-size: 11px; color: rgba(233,233,243,0.5); margin: 2px 0 0 0;">اختر نسبة الفوز التي تريدها، واربح نفس النسبة من رهانك إذا فزت.</p>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label id="lblMarginAmount">💰 المبلغ (الحد الأقصى 10$)</label>
+            <input type="number" id="marginBetAmount" class="input-field" placeholder="1.00" min="0.1" max="10" step="0.1" value="1.00">
+          </div>
+
+          <div class="input-group">
+            <label id="lblMarginPercentage">📊 نسبة الفوز المطلوبة: <span id="percentageDisplay">50%</span></label>
+            <div class="margin-slider-container">
+              <input type="range" id="marginPercentageSlider" min="1" max="100" value="50" oninput="document.getElementById('percentageDisplay').innerText = this.value + '%'">
+            </div>
+          </div>
+
+          <button class="btn btn-deposit" style="width: 100%;" id="btnPlayMargin" onclick="playMarginGame()">
+            <i class="fa-solid fa-dice"></i> <span id="txtPlayMarginBtn">اقلب الحظ الآن</span>
+          </button>
+
+          <div id="marginResultBox" class="margin-result-box">
+            <span id="marginResultText"></span>
+          </div>
+        </article>
       </section>
 
+      <!-- ========== صنع العملة ========== -->
       <section id="sec-tokencreator" class="tab-section">
-        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-coins"></i> صانع العملات الرقمية الذكي • Binance Deployment</h3>
-        <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: -5px;" id="txtTokenCreatorDesc">أنشئ عملتك الرسمية الخاصة الآن على شبكة الـ Blockchain وقم بنشرها بشكل آمن.</p>
+        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-coins"></i> صانع العملات الرقمية الذكي</h3>
+        <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: -5px;" id="txtTokenCreatorDesc">أنشئ عملتك الرقمية الخاصة الآن وادفع الرسوم من رصيدك مباشرة.</p>
         
         <article class="card">
           <div class="input-group">
@@ -255,7 +312,7 @@
           
           <div class="input-group">
             <label id="lblTokenSymbol">كود العملة المختصر (Symbol)</label>
-            <input type="text" id="tokenSymbol" class="input-field" placeholder="e.g. NXG , BTC">
+            <input type="text" id="tokenSymbol" class="input-field" placeholder="e.g. NXG">
           </div>
           
           <div class="input-group">
@@ -264,48 +321,87 @@
           </div>
 
           <div style="background: rgba(255,215,0,0.04); padding: 12px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,215,0,0.15); margin-bottom: 15px;">
-            <div style="font-weight: bold; color: #ffd700;" id="txtFeeSpecsTitle">تفاصيل وتكلفة الرسوم الإجبارية والاختيارية:</div>
-            <div style="margin-top: 5px;">• تكلفة برمجة وصناعة العقد الذكي: <span style="color:#00ff00; font-weight:bold;">5 USDT</span></div>
-            <div>• تكلفة طلب فحص الإدراج والنشر الأساسي بـ Binance: <span style="color:#00ff00; font-weight:bold;">5 USDT</span></div>
-            <div style="color: rgba(233,233,243,0.7); font-size: 11px; margin-top: 4px;" id="txtFundOptionDesc">* خيار التمويل الإضافي والتسويق اختياري، يمكنك تحديد قيمة تمويل عملتك بالأسفل وضخ السيولة ليرسل الإشعار فوراً للإدارة للموافقة والنشر.</div>
+            <div style="font-weight: bold; color: #ffd700;" id="txtFeeSpecsTitle">تفاصيل الرسوم الإجبارية:</div>
+            <div style="margin-top: 5px;">• تكلفة العقد الذكي + النشر في Binance: <span style="color:#00ff00; font-weight:bold;">10 USDT</span></div>
+            <div style="color: rgba(233,233,243,0.7); font-size: 11px; margin-top: 4px;">* سيتم خصم المبلغ تلقائياً من رصيدك عند التأكيد.</div>
           </div>
 
           <div class="input-group">
-            <label id="lblTokenFunding">قيمة تمويل ودعم سيولة عملتك المخصصة (اختياري)</label>
+            <label id="lblTokenFunding">قيمة تمويل ودعم سيولة عملتك (اختياري)</label>
             <input type="number" id="tokenFundingAmount" class="input-field" placeholder="0.00 USDT">
           </div>
 
-          <div class="input-group" style="border-top: 1px dashed rgba(255,215,0,0.3); padding-top: 12px;">
-            <label style="color: #ffd700; font-weight: bold;"><i class="fa-solid fa-receipt"></i> رقم الإثبات أو هاش عملية دفع الرسوم (Hash / Wallet)</label>
-            <input type="text" id="tokenPaymentProof" class="input-field" placeholder="أدخل هاش عملية الدفع لإرسال طلبك فوراً للآدمن">
+          <!-- زر الدفع الجديد من الرصيد -->
+          <button class="btn btn-deposit" style="width: 100%; margin-bottom: 10px;" id="btnPayFromBalance" onclick="payTokenFeesFromBalance()">
+            <i class="fa-solid fa-wallet"></i> خصم الرسوم من رصيدي الآن
+          </button>
+          
+          <!-- الزر القديم مع الإثبات -->
+          <div style="border-top: 1px dashed rgba(255,215,0,0.2); padding-top: 15px; margin-top: 5px;">
+            <div class="input-group">
+              <label style="color: #ffd700; font-weight: bold;"><i class="fa-solid fa-receipt"></i> أو أرسل إثبات الدفع (Hash)</label>
+              <input type="text" id="tokenPaymentProof" class="input-field" placeholder="أدخل هاش عملية الدفع">
+            </div>
+            <button class="btn btn-action" style="width: 100%;" onclick="processCreateTokenSystem()">إرسال طلب صنع العملة بالإثبات</button>
+          </div>
+        </article>
+      </section>
+
+      <!-- ========== الإعلانات الممولة (الجديد) ========== -->
+      <section id="sec-ads" class="tab-section">
+        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-rectangle-ad"></i> نشر حملة إعلانية ممولة</h3>
+        <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: -5px;">ادفع مقدمًا واحصل على مشاهدات أو إضافات لحملتك.</p>
+        
+        <article class="card">
+          <div class="input-group">
+            <label id="lblAdLink">رابط الإعلان (فيديو / موقع / قناة / بوت)</label>
+            <input type="url" id="adLink" class="input-field" placeholder="https://youtube.com/... أو https://t.me/...">
           </div>
 
-          <button class="btn btn-deposit" style="width: 100%;" onclick="processCreateTokenSystem()">تأكيد دفع الرسوم وإرسال طلب صنع العملة</button>
+          <div class="input-group">
+            <label id="lblAdPlatform">نوع المنصة المستهدفة</label>
+            <select id="adPlatform" class="input-field">
+              <option value="telegram">تيليغرام (قناة / بوت)</option>
+              <option value="youtube">يوتيوب (فيديو)</option>
+              <option value="website">موقع ويب</option>
+              <option value="other">أخرى</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label id="lblAdViews">عدد المشاهدات / الإضافات المطلوبة</label>
+            <input type="number" id="adViews" class="input-field" placeholder="1000" min="100" step="100" value="1000" oninput="calculateAdCost()">
+          </div>
+
+          <div class="ad-price-preview">
+            التكلفة الإجمالية: <span id="adTotalCost">5.00</span> USDT <br>
+            <small style="color: rgba(233,233,243,0.5);">(سعر المشاهدة: 0.005 USDT)</small>
+          </div>
+
+          <button class="btn btn-deposit" style="width: 100%;" onclick="submitAdCampaign()">
+            <i class="fa-solid fa-credit-card"></i> دفع مقدم وتفعيل الحملة
+          </button>
         </article>
       </section>
 
-      <section id="sec-team" class="tab-section">
-        <article class="card">
-          <div style="font-size: 12px; color: rgba(233,233,243,0.6);" id="txtReferralLabel">رابط دعوة الأصدقاء الآمن والمشفر الخاص بك</div>
-          <input type="text" id="referralLinkField" class="input-field" value="" readonly style="margin: 10px 0; text-align: left; direction: ltr; border: 1px dashed #ffd700;">
-          <button class="btn btn-deposit" style="padding: 10px; width: 100%;" id="btnCopyRef" onclick="copyReferralLink()">نسخ رابط الإحالة المحمي</button>
-        </article>
-      </section>
-
+      <!-- ========== المحفظة ========== -->
       <section id="sec-wallet" class="tab-section">
         <article class="card">
-          <h4 style="color: #ffd700; margin-top: 0;" id="txtWalletMainTitle"><i class="fa-solid fa-wallet"></i> محفظتك الشخصية وعناوين الإيداع الفردية</h4>
+          <h4 style="color: #ffd700; margin-top: 0;" id="txtWalletMainTitle"><i class="fa-solid fa-wallet"></i> محفظتك وعناوين الإيداع</h4>
           
           <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
+            <!-- عنوان TRC20 (تم إلغاء TON) -->
             <span style="font-size: 12px; color: #ffd700; font-weight: bold;" id="txtTrc20Label">عنوان محفظتك الفردية للإيداع (USDT - TRC20):</span>
             <div class="wallet-address-box" id="trcAddress">TY7c1x9pAWRmNqE2vSdBtK6uZ8yLmX4h9Q</div>
             
-            <span style="font-size: 12px; color: #ffd700; font-weight: bold; display:block; margin-top:10px;" id="txtTonLabel">عنوان محفظتك البديلة الفردية (TON Network):</span>
-            <div class="wallet-address-box" id="tonAddress">EQBvD8uUXp1W_mR1vN8LpM5xY703d8J7V9kR4eG6b2mN</div>
+            <!-- عنوان المنصة الجديد -->
+            <span style="font-size: 12px; color: #ffd700; font-weight: bold; display:block; margin-top:15px;" id="txtPlatformLabel">🏦 عنوان محفظة المنصة الرئيسي (للإيداع):</span>
+            <div class="wallet-address-box" id="platformAddress" style="direction: ltr; text-align: left;">TPlatformWalletAddress123456789</div>
+            <button class="btn btn-deposit" style="padding: 6px; width: 100%; margin-top: 5px; font-size: 12px;" onclick="copyPlatformAddress()">نسخ عنوان المنصة</button>
           </div>
 
           <div class="input-group"><label id="lblTxAmount">المبلغ المطلوب (USDT)</label><input type="number" class="input-field" placeholder="0.00" id="txAmount"></div>
-          <div class="input-group"><label id="lblTxHash">هاش عملية التحويل لتدقيق المعاملة (Hash)</label><input type="text" class="input-field" placeholder="أدخل رقم الإثبات بدقة هنا" id="txHash"></div>
+          <div class="input-group"><label id="lblTxHash">هاش عملية التحويل (Hash)</label><input type="text" class="input-field" placeholder="أدخل رقم الإثبات" id="txHash"></div>
           
           <div class="action-buttons">
             <button class="btn btn-deposit" id="btnDepositSubmit" onclick="sendDepositNotification()">إرسال إثبات الإيداع</button>
@@ -314,10 +410,18 @@
         </article>
       </section>
 
+      <!-- ========== الإعدادات (تم نقل الإحالة هنا) ========== -->
       <section id="sec-settings" class="tab-section">
-        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-sliders"></i> لوحة الإعدادات والتحكم بالملف الشخصي</h3>
+        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-sliders"></i> لوحة الإعدادات</h3>
         
         <article class="card">
+          <!-- قسم الإحالة الذي كان في "الفريق" -->
+          <div style="border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 15px; margin-bottom: 15px;">
+            <div style="font-size: 12px; color: rgba(233,233,243,0.6);" id="txtReferralLabel">رابط دعوة الأصدقاء الآمن والمشفر الخاص بك</div>
+            <input type="text" id="referralLinkField" class="input-field" value="" readonly style="margin: 10px 0; text-align: left; direction: ltr; border: 1px dashed #ffd700;">
+            <button class="btn btn-deposit" style="padding: 10px; width: 100%;" id="btnCopyRef" onclick="copyReferralLink()">نسخ رابط الإحالة المحمي</button>
+          </div>
+
           <div class="input-group">
             <label id="lblSettingName">تعديل الاسم الكامل للحساب</label>
             <input type="text" id="settingProfileName" class="input-field" placeholder="الاسم الجديد">
@@ -335,25 +439,25 @@
           </div>
         </article>
 
-        <h4 style="color: #ffd700; margin-top: 15px;" id="txtHistoryHeader"><i class="fa-solid fa-clock-rotate-left"></i> سجل وجدول جميع المعاملات المالية</h4>
+        <h4 style="color: #ffd700; margin-top: 15px;" id="txtHistoryHeader"><i class="fa-solid fa-clock-rotate-left"></i> سجل المعاملات المالية</h4>
         <article class="card" style="padding: 10px;">
           <div id="userTransactionsListContainer">
-            <div style="text-align: center; font-size: 11px; color: rgba(233,233,243,0.4); padding: 15px;" id="txtNoTx">لا يوجد معاملات مسجلة حالياً في هذه الجلسة.</div>
+            <div style="text-align: center; font-size: 11px; color: rgba(233,233,243,0.4); padding: 15px;" id="txtNoTx">لا يوجد معاملات مسجلة حالياً.</div>
           </div>
         </article>
       </section>
 
+      <!-- ========== الأدمن (مخفي) ========== -->
       <section id="sec-admin" class="tab-section">
-        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-user-gear"></i> لوحة التحكم والتحقق الذاتي للآدمن</h3>
+        <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-user-gear"></i> لوحة التحكم</h3>
         <article class="card">
-          <div class="input-group"><label>البريد الإلكتروني للعميل المستهدف</label><input type="email" class="input-field" id="adminTargetEmail" placeholder="user@mail.com"></div>
-          <div class="input-group"><label>تعديل الرصيد الإجمالي (USDT)</label><input type="number" class="input-field" id="adminUpdateBalance" placeholder="ضع الرصيد الجديد"></div>
-          <button class="btn btn-deposit" onclick="adminSetBalance()">حفظ وتحديث الرصيد فورا</button>
-          
+          <div class="input-group"><label>البريد الإلكتروني للعميل</label><input type="email" class="input-field" id="adminTargetEmail" placeholder="user@mail.com"></div>
+          <div class="input-group"><label>تعديل الرصيد (USDT)</label><input type="number" class="input-field" id="adminUpdateBalance" placeholder="ضع الرصيد"></div>
+          <button class="btn btn-deposit" onclick="adminSetBalance()">حفظ وتحديث الرصيد</button>
           <div style="margin-top: 20px;">
-            <label style="font-size: 12px; color: #ffd700; display: block; margin-bottom: 8px;">إدارة طلبات فحص العملات المفتوحة والتمويل والإيداعات المعلقة:</label>
+            <label style="font-size: 12px; color: #ffd700; display: block; margin-bottom: 8px;">الطلبات المعلقة:</label>
             <div id="adminPendingRequestsContainer" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,255,255,0.05);">
-              <p style="color:rgba(233,233,243,0.5); text-align:center;">جاري جلب الطلبات الهامة المعلقة من الخادم الرئيسي...</p>
+              <p style="color:rgba(233,233,243,0.5); text-align:center;">جاري جلب الطلبات...</p>
             </div>
           </div>
         </article>
@@ -361,11 +465,12 @@
 
     </main>
 
+    <!-- الشريط السفلي (6 تبويبات - تم استبدال الفريق بالإعلانات) -->
     <nav class="bottom-nav">
       <button class="nav-item active" onclick="switchTab('sec-home', this)"><i class="fa-solid fa-house"></i><span class="nav-text-home">الرئيسية</span></button>
       <button class="nav-item" onclick="switchTab('sec-casino', this)"><i class="fa-solid fa-dice"></i><span class="nav-text-casino">كازينو</span></button>
       <button class="nav-item" onclick="switchTab('sec-tokencreator', this)"><i class="fa-solid fa-coins"></i><span class="nav-text-token">صنع عملة</span></button>
-      <button class="nav-item" onclick="switchTab('sec-team', this)"><i class="fa-solid fa-users"></i><span class="nav-text-team">الفريق</span></button>
+      <button class="nav-item" onclick="switchTab('sec-ads', this)"><i class="fa-solid fa-rectangle-ad"></i><span class="nav-text-ads">إعلانات</span></button>
       <button class="nav-item" onclick="switchTab('sec-wallet', this)"><i class="fa-solid fa-wallet"></i><span class="nav-text-wallet">المحفظة</span></button>
       <button class="nav-item" onclick="switchTab('sec-settings', this)"><i class="fa-solid fa-sliders"></i><span class="nav-text-settings">الإعدادات</span></button>
     </nav>
@@ -381,39 +486,65 @@
     let currentAuthMode = "login"; 
     let currentSystemLang = "ar";
 
+    // ========== ملف الترجمة ==========
     const localizations = {
       ar: {
         totalBalance: "الرصيد الإجمالي (USDT)", deposit: "إيداع / شحن", withdraw: "سحب الأرباح",
         energyLeft: "الطاقة المتبقية", miniBonus: "مكافأة اليوم", miniBonusClaimed: "تمت المطالبة",
-        miningPlans: "خطط التعدين الاستثمارية", planTitle1: "خطة البداية الذكية", planSub1: "السعر: $3.00 • العائد: 5% يومياً",
-        casinoHeader: "كازينو ومضاعفات Nexora", game1Title: "عجلة الحظ الملكية (Lucky Wheel)",
-        referralLabel: "رابط دعوة الأصدقاء الآمن والمشفر الخاص بك", btnCopyRef: "نسخ رابط الإحالة المحمي",
-        walletMainTitle: "محفظتك الشخصية وعناوين الإيداع الفردية", trc20Label: "عنوان محفظتك الفردية للإيداع (USDT - TRC20):",
-        tonLabel: "عنوان محفظتك البديلة الفردية (TON Network):", lblTxAmount: "المبلغ المطلوب (USDT)",
-        lblTxHash: "هاش عملية التحويل لتدقيق المعاملة (Hash)", lblSettingName: "تعديل الاسم الكامل للحساب",
-        lblSettingBg: "تخصيص ورفع صورة خلفية واجهة التطبيق الشخصية", lblSettingLang: "لغة الواجهة والتنبيهات المعتمدة",
-        txtHistoryHeader: "سجل وجدول جميع المعاملات المالية", lblTokenName: "اسم العملة الكامل (باللغة الإنجليزية حصراً)",
-        lblTokenSymbol: "كود العملة المختصر (Symbol)", lblTokenLogo: "شعار وصورة العملة (رفع ملف الصورة)",
-        lblTokenFunding: "قيمة تمويل ودعم سيولة عملتك المخصصة (اختياري)", navHome: "الرئيسية",
-        navCasino: "كازينو", navToken: "صنع عملة", navTeam: "الفريق", navWallet: "المحفظة", navSettings: "الإعدادات"
+        miningPlans: "خطط التعدين", planTitle1: "خطة البداية الذكية", planSub1: "السعر: $3.00 • العائد: 5% يومياً",
+        casinoHeader: "كازينو ومضاعفات Nexora", game1Title: "عجلة الحظ الملكية",
+        marginGameTitle: "لعبة الهامش المتقلب", lblMarginAmount: "💰 المبلغ (الحد الأقصى 10$)",
+        lblMarginPercentage: "📊 نسبة الفوز المطلوبة:", playMarginBtn: "اقلب الحظ الآن",
+        lblAdLink: "رابط الإعلان", lblAdPlatform: "نوع المنصة", lblAdViews: "عدد المشاهدات",
+        adCostPreview: "التكلفة الإجمالية: {cost} USDT",
+        btnAdPay: "دفع مقدم وتفعيل الحملة",
+        referralLabel: "رابط دعوة الأصدقاء", btnCopyRef: "نسخ رابط الإحالة",
+        walletMainTitle: "محفظتك الشخصية", trc20Label: "عنوانك الفردي (USDT - TRC20):",
+        platformLabel: "🏦 عنوان محفظة المنصة الرئيسي (للإيداع):",
+        lblTxAmount: "المبلغ المطلوب (USDT)", lblTxHash: "هاش عملية التحويل",
+        lblSettingName: "تعديل الاسم", lblSettingBg: "رفع خلفية شخصية", lblSettingLang: "اللغة",
+        txtHistoryHeader: "سجل المعاملات", lblTokenName: "اسم العملة (إنجليزي)",
+        lblTokenSymbol: "كود العملة", lblTokenLogo: "شعار العملة",
+        lblTokenFunding: "قيمة التمويل (اختياري)",
+        lblVerifyCode: "🔑 رمز التأكيد", btnVerify: "تفعيل الحساب",
+        navHome: "الرئيسية", navCasino: "كازينو", navToken: "صنع عملة", navAds: "إعلانات", navWallet: "المحفظة", navSettings: "الإعدادات",
+        marginWin: "🎉 فوز! الرقم: {roll} | ربحت: {profit}$ | الرصيد: {balance}$",
+        marginLose: "💔 خسارة! الرقم: {roll} | خسرت: {amount}$ | الرصيد: {balance}$",
+        payFromBalance: "خصم الرسوم من رصيدي الآن",
+        confirmDeduction: "سيتم خصم {amount} USDT من رصيدك الحالي ({balance} USDT). هل أنت متأكد؟",
+        insufficientBalance: "❌ رصيدك غير كافي! رصيدك الحالي: {balance} USDT، والرسوم المطلوبة: {amount} USDT.",
+        successDeduction: "✅ تم خصم {amount} USDT من رصيدك بنجاح. الرصيد المتبقي: {balance} USDT."
       },
       en: {
-        totalBalance: "Total Balance (USDT)", deposit: "Deposit / Top-up", withdraw: "Withdraw Profits",
+        totalBalance: "Total Balance (USDT)", deposit: "Deposit", withdraw: "Withdraw",
         energyLeft: "Energy Remaining", miniBonus: "Daily Bonus", miniBonusClaimed: "Claimed",
-        miningPlans: "Investment Mining Plans", planTitle1: "Smart Starter Plan", planSub1: "Price: $3.00 • Return: 5% Daily",
-        casinoHeader: "Nexora Casino & Multipliers", game1Title: "Royal Lucky Wheel",
-        referralLabel: "Your Secure & Encrypted Referral Invite Link", btnCopyRef: "Copy Protected Referral Link",
-        walletMainTitle: "Your Personal Wallet & Individual Deposit Addresses", trc20Label: "Your Individual Deposit Address (USDT - TRC20):",
-        tonLabel: "Your Alternative Individual Address (TON Network):", lblTxAmount: "Required Amount (USDT)",
-        lblTxHash: "Transaction Transfer Hash for Audit", lblSettingName: "Modify Account Full Name",
-        lblSettingBg: "Customize & Upload Personal WebApp Background Image", lblSettingLang: "Approved Interface Language",
-        txtHistoryHeader: "Financial Transaction Logs History", lblTokenName: "Full Token Name (English Only)",
-        lblTokenSymbol: "Token Short Symbol", lblTokenLogo: "Token Logo & Icon (Upload Image File)",
-        lblTokenFunding: "Custom Token Liquidity Funding Value (Optional)", navHome: "Home",
-        navCasino: "Casino", navToken: "Create Coin", navTeam: "Team", navWallet: "Wallet", navSettings: "Settings"
+        miningPlans: "Mining Plans", planTitle1: "Smart Starter", planSub1: "Price: $3.00 • Return: 5% Daily",
+        casinoHeader: "Nexora Casino", game1Title: "Lucky Wheel",
+        marginGameTitle: "Margin Game", lblMarginAmount: "💰 Amount (Max 10$)",
+        lblMarginPercentage: "📊 Win Percentage:", playMarginBtn: "Flip Luck",
+        lblAdLink: "Ad Link", lblAdPlatform: "Platform Type", lblAdViews: "Views/Subs",
+        adCostPreview: "Total Cost: {cost} USDT",
+        btnAdPay: "Pay & Activate Campaign",
+        referralLabel: "Referral Link", btnCopyRef: "Copy Link",
+        walletMainTitle: "Your Wallet", trc20Label: "Your Address (USDT - TRC20):",
+        platformLabel: "🏦 Main Platform Wallet (Deposit):",
+        lblTxAmount: "Amount (USDT)", lblTxHash: "Transaction Hash",
+        lblSettingName: "Edit Name", lblSettingBg: "Upload Background", lblSettingLang: "Language",
+        txtHistoryHeader: "Transactions", lblTokenName: "Token Name (English)",
+        lblTokenSymbol: "Token Symbol", lblTokenLogo: "Token Logo",
+        lblTokenFunding: "Funding (Optional)",
+        lblVerifyCode: "🔑 Verification Code", btnVerify: "Verify",
+        navHome: "Home", navCasino: "Casino", navToken: "Create Coin", navAds: "Ads", navWallet: "Wallet", navSettings: "Settings",
+        marginWin: "🎉 Win! Roll: {roll} | Profit: {profit}$ | Balance: {balance}$",
+        marginLose: "💔 Lose! Roll: {roll} | Lost: {amount}$ | Balance: {balance}$",
+        payFromBalance: "Deduct Fees from Balance",
+        confirmDeduction: "Will deduct {amount} USDT from your balance ({balance} USDT). Confirm?",
+        insufficientBalance: "❌ Insufficient balance! Current: {balance} USDT, Required: {amount} USDT.",
+        successDeduction: "✅ Deducted {amount} USDT. New Balance: {balance} USDT."
       }
     };
 
+    // ========== الدوال الأساسية ==========
     function switchTab(tabId, buttonElement) {
       document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
@@ -428,6 +559,9 @@
       const gName = document.getElementById('groupRegName');
       const btnAuth = document.getElementById('btnMainAuth');
       const header = document.getElementById('txtAuthHeader');
+      const verifyGroup = document.getElementById('groupVerifyCode');
+
+      verifyGroup.style.display = 'none';
 
       if (mode === 'login') {
         gName.style.display = 'none';
@@ -435,38 +569,82 @@
         header.innerText = "Nexora Elite Gateway";
       } else if (mode === 'register') {
         gName.style.display = 'block';
-        btnAuth.innerText = currentSystemLang === 'ar' ? "إنشاء حساب وحصد الهدية" : "Sign Up & Get Bonus";
-        header.innerText = currentSystemLang === 'ar' ? "عضوية استثمارية جديدة" : "New Investment Account";
-      } else if (mode === 'recover') {
+        btnAuth.innerText = currentSystemLang === 'ar' ? "إنشاء حساب" : "Sign Up";
+        header.innerText = currentSystemLang === 'ar' ? "عضوية جديدة" : "New Account";
+      } else {
         gName.style.display = 'none';
-        btnAuth.innerText = currentSystemLang === 'ar' ? "استعادة الآن" : "Recover Now";
-        header.innerText = currentSystemLang === 'ar' ? "استعادة الحساب المفقود" : "Recover Account";
+        btnAuth.innerText = currentSystemLang === 'ar' ? "استعادة" : "Recover";
+        header.innerText = currentSystemLang === 'ar' ? "استعادة الحساب" : "Recover Account";
       }
     }
 
+    // ========== الدخول والتسجيل ==========
     async function handleAuthAction() {
       const name = document.getElementById('authName').value;
       const email = document.getElementById('authEmail').value;
       const phone = document.getElementById('authPhone').value;
       const password = document.getElementById('authPassword').value;
 
-      if(!email || !phone) { alert("يرجى ملء الحقول الأساسية بدقة!"); return; }
+      if(!email || !phone) { alert("يرجى ملء الحقول!"); return; }
+
+      if (currentAuthMode === 'register') {
+        try {
+          const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, email, phone, password, telegramId })
+          });
+          const data = await res.json();
+          alert(data.message);
+          if (data.success) {
+            document.getElementById('groupRegName').style.display = 'none';
+            document.getElementById('groupAuthPhone').style.display = 'none';
+            document.getElementById('groupAuthPass').style.display = 'none';
+            document.getElementById('btnMainAuth').style.display = 'none';
+            document.getElementById('btnToggleReg').style.display = 'none';
+            document.getElementById('btnToggleRecover').style.display = 'none';
+            document.getElementById('groupVerifyCode').style.display = 'block';
+            document.getElementById('txtAuthSub').innerText = "أدخل رمز التأكيد";
+            currentUserEmail = email;
+          }
+        } catch(e) { alert("خطأ في الاتصال بالسيرفر."); }
+        return;
+      }
 
       currentUserEmail = email;
       document.getElementById('authOverlay').style.display = 'none';
-      let secureSaltCode = btoa(email || "user").substring(0, 8);
-      document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${secureSaltCode}`;
-      
-      checkDailyBonusStatusLocal(); // فحص حالة قفل المكافأة اليومية للمستخدم فور دخوله
+      let code = btoa(email || "user").substring(0, 8);
+      document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${code}`;
+      checkDailyBonusStatusLocal();
       syncUserData();
     }
 
-    // فحص محلي فوري لمنع استغلال المكافأة وتكرار النقر وتجميد الواجهة
+    async function verifyEmailCode() {
+      const code = document.getElementById('verifyCodeInput').value;
+      if(!code || code.length < 6) { alert("أدخل الرمز 6 أرقام"); return; }
+      try {
+        const res = await fetch('/api/auth/verify-email', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email: currentUserEmail, code: code })
+        });
+        const data = await res.json();
+        alert(data.message);
+        if (data.success) {
+          document.getElementById('authOverlay').style.display = 'none';
+          let code2 = btoa(currentUserEmail).substring(0, 8);
+          document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${code2}`;
+          checkDailyBonusStatusLocal();
+          syncUserData();
+        }
+      } catch(e) { alert("خطأ في الاتصال."); }
+    }
+
+    // ========== المكافأة اليومية ==========
     function checkDailyBonusStatusLocal() {
       const btn = document.getElementById('miniBonusBtn');
       const text = document.getElementById('miniBonusText');
       const lastClaim = localStorage.getItem(`nexora_bonus_claim_${currentUserEmail}`);
-      
       if (lastClaim) {
         const timePassed = Date.now() - parseInt(lastClaim);
         if (timePassed < 24 * 60 * 60 * 1000) {
@@ -481,13 +659,11 @@
       return true;
     }
 
-    // منظومة حصد المكافأة اليومية الفردية الآمنة لمرة واحدة كل 24 ساعة
     async function claimDailyBonusSystem() {
       if (!checkDailyBonusStatusLocal()) {
-        alert(currentSystemLang === 'ar' ? "لقد قمت بحصد مكافأتك اليومية بالفعل! يرجى الانتظار حتى انتهاء العداد." : "You already claimed your bonus! Please wait for the cooldown.");
+        alert("تم الحصد مسبقاً!");
         return;
       }
-
       try {
         const res = await fetch('/api/bonus/daily-claim', {
           method: 'POST',
@@ -497,59 +673,162 @@
         const data = await res.json();
         alert(data.message);
       } catch(e) {
-        alert("المكافأة اليومية الآمنة: تم منحك 1 جولة مجانية إضافية ونقاط في المحفظة بنجاح! تم تشغيل قفل الحماية لـ 24 ساعة.");
+        alert("تم منحك جولة مجانية!");
         let currentSpins = parseInt(document.getElementById('freeSpinsBadge').innerText.replace(/\D/g, '')) || 0;
         document.getElementById('freeSpinsBadge').innerText = (currentSystemLang === 'ar' ? "الجولات المجانية: " : "Free Spins: ") + (currentSpins + 1);
       }
-
-      // تفعيل القفل المحلي الفوري كخط دفاع أول ضد هجمات النقر المتكرر
       localStorage.setItem(`nexora_bonus_claim_${currentUserEmail}`, Date.now().toString());
       checkDailyBonusStatusLocal();
     }
 
-    // منظومة صنع وتطوير العملات الرقمية المحمية مع تحويل البيانات مباشرة للإدارة
+    // ========== لعبة الهامش ==========
+    async function playMarginGame() {
+      const amount = parseFloat(document.getElementById('marginBetAmount').value);
+      const percentage = parseInt(document.getElementById('marginPercentageSlider').value);
+      const btn = document.getElementById('btnPlayMargin');
+      const resultBox = document.getElementById('marginResultBox');
+      const resultText = document.getElementById('marginResultText');
+
+      if (!amount || amount <= 0 || amount > 10) { alert("أدخل مبلغ صحيح (1-10$)"); return; }
+      if (!currentUserEmail) { alert("سجل دخول أولاً"); return; }
+
+      btn.disabled = true;
+      btn.innerText = 'جاري...';
+      resultBox.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/casino/margin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentUserEmail, amount: amount, chosenPercentage: percentage })
+        });
+        if (!response.ok) { throw new Error('Server error'); }
+        const data = await response.json();
+
+        resultBox.style.display = 'block';
+        resultBox.className = 'margin-result-box ' + (data.win ? 'win' : 'lose');
+        const lang = currentSystemLang;
+        let msg = data.win ? 
+          (lang === 'ar' ? `🎉 فوز! الرقم: ${data.rollResult} | ربحت: ${data.profit.toFixed(2)}$ | الرصيد: ${data.newBalance.toFixed(2)}$` : `🎉 Win! Roll: ${data.rollResult} | Profit: ${data.profit.toFixed(2)}$ | Balance: ${data.newBalance.toFixed(2)}$`)
+          : (lang === 'ar' ? `💔 خسارة! الرقم: ${data.rollResult} | خسرت: ${amount.toFixed(2)}$ | الرصيد: ${data.newBalance.toFixed(2)}$` : `💔 Lose! Roll: ${data.rollResult} | Lost: ${amount.toFixed(2)}$ | Balance: ${data.newBalance.toFixed(2)}$`);
+        resultText.innerText = msg;
+        document.getElementById('balanceAmount').innerText = data.newBalance.toFixed(3);
+        globalBalance = data.newBalance;
+      } catch (error) {
+        alert("خطأ في الاتصال");
+      }
+      btn.disabled = false;
+      btn.innerText = currentSystemLang === 'ar' ? 'اقلب الحظ الآن' : 'Flip Luck';
+    }
+
+    // ========== الدفع من الرصيد (صنع العملة) ==========
+    function payTokenFeesFromBalance() {
+      const tName = document.getElementById('tokenName').value;
+      const tSymbol = document.getElementById('tokenSymbol').value;
+      if(!tName || !tSymbol) { alert("املأ اسم العملة والرمز أولاً!"); return; }
+
+      const funding = parseFloat(document.getElementById('tokenFundingAmount').value) || 0;
+      const totalFees = 10 + funding; // 10 رسوم أساسية + تمويل اختياري
+
+      const lang = currentSystemLang;
+      if (globalBalance < totalFees) {
+        const msg = lang === 'ar' ? 
+          `❌ رصيدك غير كافي! رصيدك: ${globalBalance.toFixed(2)} USDT، والرسوم: ${totalFees.toFixed(2)} USDT.` :
+          `❌ Insufficient balance! Current: ${globalBalance.toFixed(2)} USDT, Required: ${totalFees.toFixed(2)} USDT.`;
+        alert(msg);
+        return;
+      }
+
+      const confirmMsg = lang === 'ar' ?
+        `سيتم خصم ${totalFees.toFixed(2)} USDT من رصيدك (${globalBalance.toFixed(2)} USDT). هل أنت متأكد؟` :
+        `Will deduct ${totalFees.toFixed(2)} USDT from your balance (${globalBalance.toFixed(2)} USDT). Confirm?`;
+
+      if (!confirm(confirmMsg)) return;
+
+      // الخصم
+      globalBalance -= totalFees;
+      document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+      
+      // تسجيل المعاملة محلياً
+      const txContainer = document.getElementById('userTransactionsListContainer');
+      const txDiv = document.createElement('div');
+      txDiv.className = 'tx-item';
+      txDiv.innerHTML = `<span>💰 خصم رسوم عملة (${tName})</span><span style="color:#ff4444;">-${totalFees.toFixed(2)} USDT</span>`;
+      txContainer.prepend(txDiv);
+      document.getElementById('txtNoTx').style.display = 'none';
+
+      const successMsg = lang === 'ar' ?
+        `✅ تم خصم ${totalFees.toFixed(2)} USDT بنجاح. الرصيد المتبقي: ${globalBalance.toFixed(2)} USDT.` :
+        `✅ Deducted ${totalFees.toFixed(2)} USDT. New Balance: ${globalBalance.toFixed(2)} USDT.`;
+      alert(successMsg);
+
+      // تنظيف الحقول
+      document.getElementById('tokenName').value = '';
+      document.getElementById('tokenSymbol').value = '';
+      document.getElementById('tokenFundingAmount').value = '';
+    }
+
+    // ========== صنع العملة (بالإثبات) ==========
     async function processCreateTokenSystem() {
       const tName = document.getElementById('tokenName').value;
       const tSymbol = document.getElementById('tokenSymbol').value;
       const tFunding = parseFloat(document.getElementById('tokenFundingAmount').value) || 0;
       const tProof = document.getElementById('tokenPaymentProof').value;
-
-      if(!tName || !tSymbol) {
-        alert("يرجى ملء الاسم الإنجليزي وكود العملة المختصر أولاً لإنشاء العقد الموثق!");
-        return;
-      }
-      if(!tProof) {
-        alert("خطأ حماية: يرجى إدخال هاش عملية التحويل أو رقم محفظة الدفع لكي يتم تحويل الطلب للإدارة!");
-        return;
-      }
-
-      let totalRequiredFees = 10 + tFunding; 
-      
-      alert(`طلب إنشاء عملتك الرقمية تم ترحيله وتحويله بنجاح للآدمن:\n- الاسم: ${tName}\n- الرمز: ${tSymbol}\n- الإثبات المرفق: ${tProof}\n- الرسوم الإجمالية: ${totalRequiredFees} USDT\n\nحالة الطلب الآن: [معلق / قيد المراجعة اليدوية للمطابقة برأس المال والسيولة].`);
-      
+      if(!tName || !tSymbol || !tProof) { alert("املأ جميع الحقول!"); return; }
+      alert(`تم إرسال طلب العملة ${tName} (${tSymbol}) مع الإثبات للإدارة.`);
+      // محاكاة إرسال للخادم
       try {
         await fetch('/api/tokens/create', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ 
-            email: currentUserEmail, 
-            tokenName: tName, 
-            tokenSymbol: tSymbol, 
-            funding: tFunding, 
-            paymentProof: tProof,
-            totalFee: totalRequiredFees,
-            status: "Pending" 
-          })
+          body: JSON.stringify({ email: currentUserEmail, tokenName: tName, tokenSymbol: tSymbol, funding: tFunding, paymentProof: tProof })
         });
-      } catch(e) { console.log("تم نقل وحفظ بيانات العقد المفتوح بقاعدة البيانات الموازية كأمان إضافي."); }
-
-      // تنظيف الخانات والتوجه للمحفظة للتوثيق الإضافي
-      document.getElementById('tokenName').value = "";
-      document.getElementById('tokenSymbol').value = "";
-      document.getElementById('tokenPaymentProof').value = "";
+      } catch(e) { console.log("تم حفظ الطلب"); }
       switchTab('sec-wallet');
-      document.getElementById('txAmount').value = totalRequiredFees;
-      document.getElementById('txHash').value = tProof;
+    }
+
+    // ========== الإعلانات ==========
+    function calculateAdCost() {
+      const views = parseInt(document.getElementById('adViews').value) || 0;
+      const cost = views * 0.005;
+      document.getElementById('adTotalCost').innerText = cost.toFixed(2);
+    }
+
+    function submitAdCampaign() {
+      const link = document.getElementById('adLink').value;
+      const platform = document.getElementById('adPlatform').value;
+      const views = parseInt(document.getElementById('adViews').value) || 0;
+      const cost = views * 0.005;
+
+      if(!link) { alert("أدخل رابط الإعلان!"); return; }
+      if(views < 100) { alert("الحد الأدنى 100 مشاهدة"); return; }
+
+      const lang = currentSystemLang;
+      if (globalBalance < cost) {
+        alert(lang === 'ar' ? `رصيدك غير كافي! التكلفة: ${cost.toFixed(2)} USDT، رصيدك: ${globalBalance.toFixed(2)} USDT` : `Insufficient balance! Cost: ${cost.toFixed(2)} USDT, Balance: ${globalBalance.toFixed(2)} USDT`);
+        return;
+      }
+
+      if(!confirm(lang === 'ar' ? `سيتم خصم ${cost.toFixed(2)} USDT من رصيدك لتشغيل الحملة. موافق؟` : `Will deduct ${cost.toFixed(2)} USDT for campaign. Confirm?`)) return;
+
+      // الخصم
+      globalBalance -= cost;
+      document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+      alert(lang === 'ar' ? `✅ تم تفعيل الحملة بنجاح! سيتم مراجعة رابطك ونشره خلال 24 ساعة.` : `✅ Campaign activated successfully! Your link will be reviewed within 24 hours.`);
+    }
+
+    // ========== وظائف المحفظة والإعدادات ==========
+    function copyPlatformAddress() {
+      const text = document.getElementById('platformAddress').innerText;
+      navigator.clipboard.writeText(text);
+      alert("تم نسخ عنوان المنصة!");
+    }
+
+    function copyReferralLink() {
+      const copyText = document.getElementById("referralLinkField");
+      copyText.select();
+      navigator.clipboard.writeText(copyText.value);
+      alert("تم نسخ الرابط!");
     }
 
     function applyUserCustomBackground(input) {
@@ -558,7 +837,7 @@
         reader.onload = function(e) {
           document.body.style.backgroundImage = `url('${e.target.result}')`;
           localStorage.setItem(`custom_bg_${currentUserEmail}`, e.target.result);
-          alert("تم حفظ وتحديث الخلفية المخصصة لواجهتك الفردية بنجاح!");
+          alert("تم تحديث الخلفية!");
         };
         reader.readAsDataURL(input.files[0]);
       }
@@ -566,8 +845,8 @@
 
     function updateProfileNameSystem() {
       const newName = document.getElementById('settingProfileName').value;
-      if(!newName) { alert("يرجى إدخال اسم صحيح."); return; }
-      alert("تمت مراجعة وحفظ الاسم الجديد لملفك الاستثماري بنجاح.");
+      if(!newName) { alert("أدخل اسماً"); return; }
+      alert("تم حفظ الاسم الجديد: " + newName);
       document.getElementById('settingProfileName').value = "";
     }
 
@@ -576,66 +855,70 @@
       document.documentElement.lang = currentSystemLang;
       document.documentElement.dir = currentSystemLang === 'ar' ? 'rtl' : 'ltr';
 
-      const langData = localizations[currentSystemLang];
-      
-      document.getElementById('txtTotalBalanceLabel').innerText = langData.totalBalance;
-      document.getElementById('btnDepositShort').innerText = langData.deposit;
-      document.getElementById('btnWithdrawShort').innerText = langData.withdraw;
-      document.getElementById('txtEnergyLeftLabel').innerText = langData.energyLeft;
-      document.getElementById('txtMiningPlansHeader').innerText = langData.miningPlans;
-      document.getElementById('txtPlanTitle1').innerText = langData.planTitle1;
-      document.getElementById('txtPlanSub1').innerText = langData.planSub1;
+      const lang = localizations[currentSystemLang];
+      // ترجمة العناصر الأساسية (تم اختصارها للاختصار لكنها موجودة في الكود الكامل)
+      document.getElementById('txtTotalBalanceLabel').innerText = lang.totalBalance;
+      document.getElementById('btnDepositShort').innerText = lang.deposit;
+      document.getElementById('btnWithdrawShort').innerText = lang.withdraw;
+      document.getElementById('txtEnergyLeftLabel').innerText = lang.energyLeft;
+      document.getElementById('txtMiningPlansHeader').innerText = lang.miningPlans;
+      document.getElementById('txtPlanTitle1').innerText = lang.planTitle1;
+      document.getElementById('txtPlanSub1').innerText = lang.planSub1;
       document.getElementById('btnBuyPlan1').innerText = currentSystemLang === 'ar' ? "شراء" : "Buy";
-      document.getElementById('txtCasinoHeader').innerHTML = `<i class="fa-solid fa-dice"></i> ${langData.casinoHeader}`;
-      document.getElementById('txtGame1Title').innerText = langData.game1Title;
-      document.getElementById('txtReferralLabel').innerText = langData.referralLabel;
-      document.getElementById('btnCopyRef').innerText = langData.btnCopyRef;
-      document.getElementById('txtWalletMainTitle').innerHTML = `<i class="fa-solid fa-wallet"></i> ${langData.walletMainTitle}`;
-      document.getElementById('txtTrc20Label').innerText = langData.trc20Label;
-      document.getElementById('txtTonLabel').innerText = langData.tonLabel;
-      document.getElementById('lblTxAmount').innerText = langData.lblTxAmount;
-      document.getElementById('lblTxHash').innerText = langData.lblTxHash;
-      document.getElementById('lblSettingName').innerText = langData.lblSettingName;
-      document.getElementById('lblSettingBg').innerText = langData.lblSettingBg;
-      document.getElementById('lblSettingLang').innerText = langData.lblSettingLang;
-      document.getElementById('txtHistoryHeader').innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${langData.txtHistoryHeader}`;
-      document.getElementById('lblTokenName').innerText = langData.lblTokenName;
-      document.getElementById('lblTokenSymbol').innerText = langData.lblTokenSymbol;
-      document.getElementById('lblTokenLogo').innerText = langData.lblTokenLogo;
-      document.getElementById('lblTokenFunding').innerText = langData.lblTokenFunding;
+      document.getElementById('txtCasinoHeader').innerHTML = `<i class="fa-solid fa-dice"></i> ${lang.casinoHeader}`;
+      document.getElementById('txtGame1Title').innerText = lang.game1Title;
+      document.getElementById('txtMarginGameTitle').innerText = lang.marginGameTitle;
+      document.getElementById('lblMarginAmount').innerText = lang.lblMarginAmount;
+      document.getElementById('lblMarginPercentage').innerText = lang.lblMarginPercentage;
+      document.getElementById('txtPlayMarginBtn').innerText = lang.playMarginBtn;
+      document.getElementById('lblAdLink').innerText = lang.lblAdLink;
+      document.getElementById('lblAdPlatform').innerText = lang.lblAdPlatform;
+      document.getElementById('lblAdViews').innerText = lang.lblAdViews;
+      document.querySelector('#sec-ads .btn-deposit').innerHTML = `<i class="fa-solid fa-credit-card"></i> ${lang.btnAdPay}`;
+      document.getElementById('txtReferralLabel').innerText = lang.referralLabel;
+      document.getElementById('btnCopyRef').innerText = lang.btnCopyRef;
+      document.getElementById('txtWalletMainTitle').innerHTML = `<i class="fa-solid fa-wallet"></i> ${lang.walletMainTitle}`;
+      document.getElementById('txtTrc20Label').innerText = lang.trc20Label;
+      document.getElementById('txtPlatformLabel').innerText = lang.platformLabel;
+      document.getElementById('lblTxAmount').innerText = lang.lblTxAmount;
+      document.getElementById('lblTxHash').innerText = lang.lblTxHash;
+      document.getElementById('lblSettingName').innerText = lang.lblSettingName;
+      document.getElementById('lblSettingBg').innerText = lang.lblSettingBg;
+      document.getElementById('lblSettingLang').innerText = lang.lblSettingLang;
+      document.getElementById('txtHistoryHeader').innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${lang.txtHistoryHeader}`;
+      document.getElementById('lblTokenName').innerText = lang.lblTokenName;
+      document.getElementById('lblTokenSymbol').innerText = lang.lblTokenSymbol;
+      document.getElementById('lblTokenLogo').innerText = lang.lblTokenLogo;
+      document.getElementById('lblTokenFunding').innerText = lang.lblTokenFunding;
+      document.getElementById('lblVerifyCode').innerText = lang.lblVerifyCode;
+      document.getElementById('btnVerifyEmail').innerText = lang.btnVerify;
+      document.getElementById('btnPayFromBalance').innerHTML = `<i class="fa-solid fa-wallet"></i> ${lang.payFromBalance}`;
 
-      document.querySelector('.nav-text-home').innerText = langData.navHome;
-      document.querySelector('.nav-text-casino').innerText = langData.navCasino;
-      document.querySelector('.nav-text-token').innerText = langData.navToken;
-      document.querySelector('.nav-text-team').innerText = langData.navTeam;
-      document.querySelector('.nav-text-wallet').innerText = langData.navWallet;
-      document.querySelector('.nav-text-settings').innerText = langData.navSettings;
+      document.querySelector('.nav-text-home').innerText = lang.navHome;
+      document.querySelector('.nav-text-casino').innerText = lang.navCasino;
+      document.querySelector('.nav-text-token').innerText = lang.navToken;
+      document.querySelector('.nav-text-ads').innerText = lang.navAds;
+      document.querySelector('.nav-text-wallet').innerText = lang.navWallet;
+      document.querySelector('.nav-text-settings').innerText = lang.navSettings;
       
       checkDailyBonusStatusLocal();
     }
 
+    // ========== دوال مساعدة (مؤقتة) ==========
     let logoClicks = 0;
     document.getElementById('topBrandTitle').addEventListener('click', () => {
       logoClicks++;
       if(logoClicks >= 5) {
-        let pass = prompt("الرمز الإداري السري للتحقق:");
+        let pass = prompt("الرمز الإداري:");
         if(pass === "admin123") { switchTab('sec-admin'); logoClicks = 0; } 
         else { alert("مرفوض!"); logoClicks = 0; }
       }
     });
 
-    function copyReferralLink() {
-      const copyText = document.getElementById("referralLinkField");
-      copyText.select();
-      navigator.clipboard.writeText(copyText.value);
-      alert(currentSystemLang === 'ar' ? "تم نسخ الرابط المشفر بنجاح لحماية الخصوصية!" : "Encrypted secure referral link copied!");
-    }
-
     async function syncUserData() {
       if(!currentUserEmail) return;
       let localBg = localStorage.getItem(`custom_bg_${currentUserEmail}`);
       if(localBg) { document.body.style.backgroundImage = `url('${localBg}')`; }
-
       try {
         const res = await fetch('/api/user-data', {
             method: 'POST',
@@ -653,7 +936,6 @@
     document.getElementById('miningBtn').addEventListener('click', function(e) {
       this.style.transform = 'scale(0.92)';
       setTimeout(() => this.style.transform = 'scale(1)', 80);
-      
       let energyElem = document.getElementById('energyText');
       let currentEnergy = parseInt(energyElem.innerText.split('/')[0]) || 1000;
       if(currentEnergy > 0) {
@@ -662,26 +944,16 @@
       }
     });
 
-    function handleWatchAd() {
-      alert("جاري تحميل الإعلان الممول وتزويد نقاط الطاقة للمستخدم بشكل آمن...");
-    }
+    async function playCasinoGame(gameId) { alert("جاري تدوير العجلة..."); }
+    function sendDepositNotification() { alert("تم استلام إثبات الإيداع."); }
+    function sendWithdrawNotification() { alert("تم إرسال طلب السحب."); }
+    function buyPlan(cost) { switchTab('sec-wallet'); document.getElementById('txAmount').value = cost; }
+    function adminSetBalance() { alert("هذه الميزة للإدارة فقط."); }
 
-    async function playCasinoGame(gameId) {
-      alert(currentSystemLang === 'ar' ? "جاري تدوير العجلة ومطابقة خوارزميات الأمان..." : "Spinning the royal safe wheel...");
-    }
-
-    function sendDepositNotification() {
-      alert("تم استلام إشعار الإيداع والهاش بنجاح، جاري التحقق من المعاملة عبر الإدارة يدوياً لتزويد رصيدك وتفعيل عقود العملات المفتوحة.");
-    }
-
-    function sendWithdrawNotification() {
-      alert("تم إرسال طلب السحب بنجاح للتحقق اليدوي والمحافظة على السيولة.");
-    }
-
-    function buyPlan(cost) {
-      switchTab('sec-wallet');
-      document.getElementById('txAmount').value = cost;
-    }
+    // تفعيل حساب التكلفة عند تحميل الصفحة
+    window.onload = function() {
+      calculateAdCost();
+    };
   </script>
 </body>
-</html>
+        </html>
