@@ -36,9 +36,21 @@
       backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
-    .balance-box { text-align: center; padding: 10px 0; }
-    .balance-label { font-size: 13px; color: rgba(233, 233, 243, 0.6); }
-    .balance-amount { font-size: 36px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 8px 0; }
+    
+    .balance-box { 
+      display: flex; 
+      justify-content: space-around; 
+      align-items: center; 
+      padding: 5px 0; 
+      text-align: center;
+    }
+    .balance-box .balance-item {
+      flex: 1;
+    }
+    .balance-label { font-size: 11px; color: rgba(233, 233, 243, 0.6); }
+    .balance-amount { font-size: 24px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 4px 0; }
+    .balance-amount.casino { background: linear-gradient(90deg, #00ff88, #00cc66); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .balance-divider { width: 1px; height: 40px; background: rgba(255,215,0,0.2); }
     
     .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
     .btn {
@@ -119,7 +131,6 @@
     .input-group { margin-bottom: 14px; }
     .input-group label { display: block; font-size: 12px; color: rgba(233,233,243,0.6); margin-bottom: 6px; }
     .input-field { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; color: #fff; outline: none; font-size: 14px; }
-    .input-field option { background: #0c0e12; color: #fff; }
     .wallet-address-box { background: rgba(255,215,0,0.06); border: 1px dashed #ffd700; padding: 12px; border-radius: 12px; font-size: 11px; font-family: monospace; word-break: break-all; margin-top: 5px; color: #fff; text-align: left; }
 
     .auth-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.94); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -138,7 +149,6 @@
     .margin-result-box.win { border-color: #00ff00; }
     .margin-result-box.lose { border-color: #ff4444; }
 
-    /* تنسيق إضافي للإعلانات */
     .ad-price-preview {
       background: rgba(255,215,0,0.05);
       border: 1px solid rgba(255,215,0,0.2);
@@ -149,6 +159,47 @@
       margin: 10px 0;
     }
     .ad-price-preview span { color: #ffd700; font-weight: bold; }
+
+    .progress-container {
+      margin-top: 15px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid rgba(255,215,0,0.1);
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: rgba(233,233,243,0.7);
+      margin-bottom: 5px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00ff88, #00cc66);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+    .ad-status {
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+    }
+    .ad-note {
+      color: rgba(233,233,243,0.4);
+      font-size: 10px;
+      display: block;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -215,8 +266,15 @@
       <section id="sec-home" class="tab-section active">
         <article class="card">
           <div class="balance-box">
-            <div class="balance-label" id="txtTotalBalanceLabel">الرصيد الإجمالي (USDT)</div>
-            <div class="balance-amount" id="balanceAmount">0.000</div>
+            <div class="balance-item">
+              <div class="balance-label" id="txtTotalBalanceLabel">💰 الرصيد الأساسي</div>
+              <div class="balance-amount" id="balanceAmount">0.000</div>
+            </div>
+            <div class="balance-divider"></div>
+            <div class="balance-item">
+              <div class="balance-label" id="txtCasinoBalanceLabel">🎰 رصيد الكازينو</div>
+              <div class="balance-amount casino" id="casinoBalanceAmount">0.000</div>
+            </div>
           </div>
           <div class="action-buttons">
             <button class="btn btn-deposit" id="btnDepositShort" onclick="switchTab('sec-wallet')">إيداع / شحن</button>
@@ -244,6 +302,27 @@
             <button class="btn btn-deposit" style="padding: 8px 12px; width: auto; font-size: 12px;" id="btnBuyPlan1" onclick="buyPlan(3)">شراء</button>
           </div>
         </div>
+
+        <!-- الإعلانات + شريط التقدم -->
+        <article class="card" style="margin-top: 10px;">
+          <h5 style="color: #ffd700; margin: 0 0 6px 0;"><i class="fa-solid fa-rectangle-ad"></i> حملات إعلانية ممولة</h5>
+          <p style="font-size: 11px; color: rgba(233,233,243,0.6); margin: 0 0 10px 0;">شاهد الإعلان كاملاً للحصول على نقاط كازينو (كل 15 إعلان = 0.01$ في رصيد الكازينو).</p>
+          <button class="btn btn-action" style="padding: 10px; font-size: 12px;" id="btnWatchAd" onclick="handleWatchAd()">
+            <i class="fa-solid fa-play"></i> مشاهدة إعلان الآن
+          </button>
+
+          <div class="progress-container">
+            <div class="progress-header">
+              <span id="txtAdProgressLabel">📺 التقدم نحو نقطة الكازينو:</span>
+              <span id="adProgressText">0 / 15</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="adProgressFill" style="width: 0%;"></div>
+            </div>
+            <div id="adStatusMessage" class="ad-status"></div>
+            <small class="ad-note">🎯 كل 15 إعلان = 0.01$ في رصيد الكازينو (الحد الأقصى للربح من النقطة هو 0.02$)</small>
+          </div>
+        </article>
       </section>
 
       <!-- ========== الكازينو ========== -->
@@ -267,19 +346,19 @@
           </div>
         </article>
 
-        <!-- لعبة الهامش -->
+        <!-- لعبة الهامش (تستخدم رصيد الكازينو فقط) -->
         <article class="card" style="border: 1px solid rgba(255, 215, 0, 0.15);">
           <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
             <div style="font-size: 35px;">📊</div>
             <div style="flex: 1;">
               <h4 style="margin: 0; color: #ffd700;" id="txtMarginGameTitle">لعبة الهامش المتقلب (النسبة المئوية)</h4>
-              <p style="font-size: 11px; color: rgba(233,233,243,0.5); margin: 2px 0 0 0;">اختر نسبة الفوز التي تريدها، واربح نفس النسبة من رهانك إذا فزت.</p>
+              <p style="font-size: 11px; color: rgba(233,233,243,0.5); margin: 2px 0 0 0;">استخدم رصيد الكازينو الخاص بك. اختر نسبة الفوز واربح نسبتها من رهانك.</p>
             </div>
           </div>
 
           <div class="input-group">
-            <label id="lblMarginAmount">💰 المبلغ (الحد الأقصى 10$)</label>
-            <input type="number" id="marginBetAmount" class="input-field" placeholder="1.00" min="0.1" max="10" step="0.1" value="1.00">
+            <label id="lblMarginAmount">💰 المبلغ (من رصيد الكازينو، الحد الأقصى 10$)</label>
+            <input type="number" id="marginBetAmount" class="input-field" placeholder="1.00" min="0.01" max="10" step="0.01" value="0.01">
           </div>
 
           <div class="input-group">
@@ -302,7 +381,7 @@
       <!-- ========== صنع العملة ========== -->
       <section id="sec-tokencreator" class="tab-section">
         <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-coins"></i> صانع العملات الرقمية الذكي</h3>
-        <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: -5px;" id="txtTokenCreatorDesc">أنشئ عملتك الرقمية الخاصة الآن وادفع الرسوم من رصيدك مباشرة.</p>
+        <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: -5px;" id="txtTokenCreatorDesc">أنشئ عملتك الرقمية الخاصة الآن وادفع الرسوم من رصيدك الأساسي مباشرة.</p>
         
         <article class="card">
           <div class="input-group">
@@ -323,7 +402,7 @@
           <div style="background: rgba(255,215,0,0.04); padding: 12px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,215,0,0.15); margin-bottom: 15px;">
             <div style="font-weight: bold; color: #ffd700;" id="txtFeeSpecsTitle">تفاصيل الرسوم الإجبارية:</div>
             <div style="margin-top: 5px;">• تكلفة العقد الذكي + النشر في Binance: <span style="color:#00ff00; font-weight:bold;">10 USDT</span></div>
-            <div style="color: rgba(233,233,243,0.7); font-size: 11px; margin-top: 4px;">* سيتم خصم المبلغ تلقائياً من رصيدك عند التأكيد.</div>
+            <div style="color: rgba(233,233,243,0.7); font-size: 11px; margin-top: 4px;">* سيتم خصم المبلغ تلقائياً من رصيدك الأساسي عند التأكيد.</div>
           </div>
 
           <div class="input-group">
@@ -331,9 +410,9 @@
             <input type="number" id="tokenFundingAmount" class="input-field" placeholder="0.00 USDT">
           </div>
 
-          <!-- زر الدفع الجديد من الرصيد -->
+          <!-- زر الدفع من الرصيد الأساسي -->
           <button class="btn btn-deposit" style="width: 100%; margin-bottom: 10px;" id="btnPayFromBalance" onclick="payTokenFeesFromBalance()">
-            <i class="fa-solid fa-wallet"></i> خصم الرسوم من رصيدي الآن
+            <i class="fa-solid fa-wallet"></i> خصم الرسوم من رصيدي الأساسي الآن
           </button>
           
           <!-- الزر القديم مع الإثبات -->
@@ -347,10 +426,10 @@
         </article>
       </section>
 
-      <!-- ========== الإعلانات الممولة (الجديد) ========== -->
+      <!-- ========== الإعلانات الممولة ========== -->
       <section id="sec-ads" class="tab-section">
         <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-rectangle-ad"></i> نشر حملة إعلانية ممولة</h3>
-        <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: -5px;">ادفع مقدمًا واحصل على مشاهدات أو إضافات لحملتك.</p>
+        <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: -5px;">ادفع مقدمًا واحصل على مشاهدات حقيقية لحملتك.</p>
         
         <article class="card">
           <div class="input-group">
@@ -390,11 +469,11 @@
           <h4 style="color: #ffd700; margin-top: 0;" id="txtWalletMainTitle"><i class="fa-solid fa-wallet"></i> محفظتك وعناوين الإيداع</h4>
           
           <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
-            <!-- عنوان TRC20 (تم إلغاء TON) -->
+            <!-- عنوان TRC20 -->
             <span style="font-size: 12px; color: #ffd700; font-weight: bold;" id="txtTrc20Label">عنوان محفظتك الفردية للإيداع (USDT - TRC20):</span>
             <div class="wallet-address-box" id="trcAddress">TY7c1x9pAWRmNqE2vSdBtK6uZ8yLmX4h9Q</div>
             
-            <!-- عنوان المنصة الجديد -->
+            <!-- عنوان المنصة -->
             <span style="font-size: 12px; color: #ffd700; font-weight: bold; display:block; margin-top:15px;" id="txtPlatformLabel">🏦 عنوان محفظة المنصة الرئيسي (للإيداع):</span>
             <div class="wallet-address-box" id="platformAddress" style="direction: ltr; text-align: left;">TPlatformWalletAddress123456789</div>
             <button class="btn btn-deposit" style="padding: 6px; width: 100%; margin-top: 5px; font-size: 12px;" onclick="copyPlatformAddress()">نسخ عنوان المنصة</button>
@@ -410,12 +489,12 @@
         </article>
       </section>
 
-      <!-- ========== الإعدادات (تم نقل الإحالة هنا) ========== -->
+      <!-- ========== الإعدادات ========== -->
       <section id="sec-settings" class="tab-section">
         <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-sliders"></i> لوحة الإعدادات</h3>
         
         <article class="card">
-          <!-- قسم الإحالة الذي كان في "الفريق" -->
+          <!-- قسم الإحالة -->
           <div style="border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 15px; margin-bottom: 15px;">
             <div style="font-size: 12px; color: rgba(233,233,243,0.6);" id="txtReferralLabel">رابط دعوة الأصدقاء الآمن والمشفر الخاص بك</div>
             <input type="text" id="referralLinkField" class="input-field" value="" readonly style="margin: 10px 0; text-align: left; direction: ltr; border: 1px dashed #ffd700;">
@@ -465,7 +544,7 @@
 
     </main>
 
-    <!-- الشريط السفلي (6 تبويبات - تم استبدال الفريق بالإعلانات) -->
+    <!-- الشريط السفلي (6 تبويبات) -->
     <nav class="bottom-nav">
       <button class="nav-item active" onclick="switchTab('sec-home', this)"><i class="fa-solid fa-house"></i><span class="nav-text-home">الرئيسية</span></button>
       <button class="nav-item" onclick="switchTab('sec-casino', this)"><i class="fa-solid fa-dice"></i><span class="nav-text-casino">كازينو</span></button>
@@ -482,49 +561,61 @@
     const telegramUserId = tg?.initDataUnsafe?.user?.id || "7018561132";
 
     let globalBalance = 0.00;
+    let globalCasinoBalance = 0.00;
     let currentUserEmail = ""; 
     let currentAuthMode = "login"; 
     let currentSystemLang = "ar";
+    let watchedAdsCount = 0;
+    let isAdPlaying = false;
+    const ADS_FOR_CASINO_POINT = 15;
+    const CASINO_POINT_VALUE = 0.01;
 
     // ========== ملف الترجمة ==========
     const localizations = {
       ar: {
-        totalBalance: "الرصيد الإجمالي (USDT)", deposit: "إيداع / شحن", withdraw: "سحب الأرباح",
+        totalBalance: "💰 الرصيد الأساسي",
+        casinoBalance: "🎰 رصيد الكازينو",
+        deposit: "إيداع / شحن", withdraw: "سحب الأرباح",
         energyLeft: "الطاقة المتبقية", miniBonus: "مكافأة اليوم", miniBonusClaimed: "تمت المطالبة",
         miningPlans: "خطط التعدين", planTitle1: "خطة البداية الذكية", planSub1: "السعر: $3.00 • العائد: 5% يومياً",
         casinoHeader: "كازينو ومضاعفات Nexora", game1Title: "عجلة الحظ الملكية",
-        marginGameTitle: "لعبة الهامش المتقلب", lblMarginAmount: "💰 المبلغ (الحد الأقصى 10$)",
-        lblMarginPercentage: "📊 نسبة الفوز المطلوبة:", playMarginBtn: "اقلب الحظ الآن",
+        marginGameTitle: "لعبة الهامش المتقلب", lblMarginAmount: "💰 المبلغ (من رصيد الكازينو)",
+        lblMarginPercentage: "📊 نسبة الفوز:", playMarginBtn: "اقلب الحظ",
         lblAdLink: "رابط الإعلان", lblAdPlatform: "نوع المنصة", lblAdViews: "عدد المشاهدات",
-        adCostPreview: "التكلفة الإجمالية: {cost} USDT",
         btnAdPay: "دفع مقدم وتفعيل الحملة",
         referralLabel: "رابط دعوة الأصدقاء", btnCopyRef: "نسخ رابط الإحالة",
         walletMainTitle: "محفظتك الشخصية", trc20Label: "عنوانك الفردي (USDT - TRC20):",
         platformLabel: "🏦 عنوان محفظة المنصة الرئيسي (للإيداع):",
-        lblTxAmount: "المبلغ المطلوب (USDT)", lblTxHash: "هاش عملية التحويل",
-        lblSettingName: "تعديل الاسم", lblSettingBg: "رفع خلفية شخصية", lblSettingLang: "اللغة",
+        lblTxAmount: "المبلغ المطلوب (USDT)", lblTxHash: "هاش التحويل",
+        lblSettingName: "تعديل الاسم", lblSettingBg: "رفع خلفية", lblSettingLang: "اللغة",
         txtHistoryHeader: "سجل المعاملات", lblTokenName: "اسم العملة (إنجليزي)",
         lblTokenSymbol: "كود العملة", lblTokenLogo: "شعار العملة",
         lblTokenFunding: "قيمة التمويل (اختياري)",
         lblVerifyCode: "🔑 رمز التأكيد", btnVerify: "تفعيل الحساب",
         navHome: "الرئيسية", navCasino: "كازينو", navToken: "صنع عملة", navAds: "إعلانات", navWallet: "المحفظة", navSettings: "الإعدادات",
-        marginWin: "🎉 فوز! الرقم: {roll} | ربحت: {profit}$ | الرصيد: {balance}$",
-        marginLose: "💔 خسارة! الرقم: {roll} | خسرت: {amount}$ | الرصيد: {balance}$",
-        payFromBalance: "خصم الرسوم من رصيدي الآن",
-        confirmDeduction: "سيتم خصم {amount} USDT من رصيدك الحالي ({balance} USDT). هل أنت متأكد؟",
-        insufficientBalance: "❌ رصيدك غير كافي! رصيدك الحالي: {balance} USDT، والرسوم المطلوبة: {amount} USDT.",
-        successDeduction: "✅ تم خصم {amount} USDT من رصيدك بنجاح. الرصيد المتبقي: {balance} USDT."
+        adProgress: "📺 التقدم نحو نقطة الكازينو:",
+        adStatusPlaying: "⏳ مشاهدة الإعلان... ({s}s)",
+        adStatusDone: "✅ تم احتساب الإعلان! تبقى {remaining} إعلاناً.",
+        adStatusComplete: "🎉 تهانينا! أكملت 15 إعلاناً وحصلت على نقطة كازينو (0.01$)!",
+        marginWin: "🎉 فوز! الرقم: {roll} | ربحت: {profit}$ | رصيد الكازينو: {balance}$",
+        marginLose: "💔 خسارة! الرقم: {roll} | خسرت: {amount}$ | رصيد الكازينو: {balance}$",
+        payFromBalance: "خصم الرسوم من رصيدي الأساسي الآن",
+        confirmDeduction: "سيتم خصم {amount} USDT من رصيدك الأساسي ({balance} USDT). موافق؟",
+        insufficientBalance: "❌ رصيدك الأساسي غير كافٍ! رصيدك: {balance} USDT، والرسوم: {amount} USDT.",
+        successDeduction: "✅ تم خصم {amount} USDT. الرصيد المتبقي: {balance} USDT.",
+        noCasinoBalance: "❌ رصيد الكازينو غير كافٍ! شاهد إعلانات للحصول على نقاط."
       },
       en: {
-        totalBalance: "Total Balance (USDT)", deposit: "Deposit", withdraw: "Withdraw",
-        energyLeft: "Energy Remaining", miniBonus: "Daily Bonus", miniBonusClaimed: "Claimed",
+        totalBalance: "💰 Main Balance",
+        casinoBalance: "🎰 Casino Balance",
+        deposit: "Deposit", withdraw: "Withdraw",
+        energyLeft: "Energy", miniBonus: "Daily Bonus", miniBonusClaimed: "Claimed",
         miningPlans: "Mining Plans", planTitle1: "Smart Starter", planSub1: "Price: $3.00 • Return: 5% Daily",
         casinoHeader: "Nexora Casino", game1Title: "Lucky Wheel",
-        marginGameTitle: "Margin Game", lblMarginAmount: "💰 Amount (Max 10$)",
-        lblMarginPercentage: "📊 Win Percentage:", playMarginBtn: "Flip Luck",
-        lblAdLink: "Ad Link", lblAdPlatform: "Platform Type", lblAdViews: "Views/Subs",
-        adCostPreview: "Total Cost: {cost} USDT",
-        btnAdPay: "Pay & Activate Campaign",
+        marginGameTitle: "Margin Game", lblMarginAmount: "💰 Amount (from Casino Balance)",
+        lblMarginPercentage: "📊 Win %:", playMarginBtn: "Flip Luck",
+        lblAdLink: "Ad Link", lblAdPlatform: "Platform", lblAdViews: "Views/Subs",
+        btnAdPay: "Pay & Activate",
         referralLabel: "Referral Link", btnCopyRef: "Copy Link",
         walletMainTitle: "Your Wallet", trc20Label: "Your Address (USDT - TRC20):",
         platformLabel: "🏦 Main Platform Wallet (Deposit):",
@@ -535,16 +626,21 @@
         lblTokenFunding: "Funding (Optional)",
         lblVerifyCode: "🔑 Verification Code", btnVerify: "Verify",
         navHome: "Home", navCasino: "Casino", navToken: "Create Coin", navAds: "Ads", navWallet: "Wallet", navSettings: "Settings",
-        marginWin: "🎉 Win! Roll: {roll} | Profit: {profit}$ | Balance: {balance}$",
-        marginLose: "💔 Lose! Roll: {roll} | Lost: {amount}$ | Balance: {balance}$",
-        payFromBalance: "Deduct Fees from Balance",
-        confirmDeduction: "Will deduct {amount} USDT from your balance ({balance} USDT). Confirm?",
-        insufficientBalance: "❌ Insufficient balance! Current: {balance} USDT, Required: {amount} USDT.",
-        successDeduction: "✅ Deducted {amount} USDT. New Balance: {balance} USDT."
+        adProgress: "📺 Progress to Casino Point:",
+        adStatusPlaying: "⏳ Watching ad... ({s}s)",
+        adStatusDone: "✅ Ad counted! {remaining} ads left.",
+        adStatusComplete: "🎉 Congrats! You watched 15 ads and earned a 0.01$ casino point!",
+        marginWin: "🎉 Win! Roll: {roll} | Profit: {profit}$ | Casino Balance: {balance}$",
+        marginLose: "💔 Lose! Roll: {roll} | Lost: {amount}$ | Casino Balance: {balance}$",
+        payFromBalance: "Deduct Fees from Main Balance",
+        confirmDeduction: "Will deduct {amount} USDT from your main balance ({balance} USDT). Confirm?",
+        insufficientBalance: "❌ Insufficient main balance! Current: {balance} USDT, Required: {amount} USDT.",
+        successDeduction: "✅ Deducted {amount} USDT. New Balance: {balance} USDT.",
+        noCasinoBalance: "❌ Insufficient casino balance! Watch ads to earn points."
       }
     };
 
-    // ========== الدوال الأساسية ==========
+    // ========== دوال أساسية ==========
     function switchTab(tabId, buttonElement) {
       document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
@@ -560,9 +656,7 @@
       const btnAuth = document.getElementById('btnMainAuth');
       const header = document.getElementById('txtAuthHeader');
       const verifyGroup = document.getElementById('groupVerifyCode');
-
       verifyGroup.style.display = 'none';
-
       if (mode === 'login') {
         gName.style.display = 'none';
         btnAuth.innerText = currentSystemLang === 'ar' ? "تسجيل الدخول" : "Sign In";
@@ -584,7 +678,6 @@
       const email = document.getElementById('authEmail').value;
       const phone = document.getElementById('authPhone').value;
       const password = document.getElementById('authPassword').value;
-
       if(!email || !phone) { alert("يرجى ملء الحقول!"); return; }
 
       if (currentAuthMode === 'register') {
@@ -660,10 +753,7 @@
     }
 
     async function claimDailyBonusSystem() {
-      if (!checkDailyBonusStatusLocal()) {
-        alert("تم الحصد مسبقاً!");
-        return;
-      }
+      if (!checkDailyBonusStatusLocal()) { alert("تم الحصد مسبقاً!"); return; }
       try {
         const res = await fetch('/api/bonus/daily-claim', {
           method: 'POST',
@@ -681,7 +771,101 @@
       checkDailyBonusStatusLocal();
     }
 
-    // ========== لعبة الهامش ==========
+    // ========== نظام الإعلانات (الرئيسي) ==========
+    function updateAdProgress() {
+      const progressBar = document.getElementById('adProgressFill');
+      const progressText = document.getElementById('adProgressText');
+      if (progressBar) {
+        const percent = Math.min((watchedAdsCount / ADS_FOR_CASINO_POINT) * 100, 100);
+        progressBar.style.width = percent + '%';
+        progressText.innerText = `${watchedAdsCount} / ${ADS_FOR_CASINO_POINT}`;
+      }
+    }
+
+    function handleWatchAd() {
+      if (isAdPlaying) {
+        alert(currentSystemLang === 'ar' ? 'يوجد إعلان قيد المشاهدة، انتظر.' : 'An ad is playing, wait.');
+        return;
+      }
+      if (!currentUserEmail) {
+        alert(currentSystemLang === 'ar' ? 'سجل دخول أولاً.' : 'Login first.');
+        return;
+      }
+
+      // منع البوتات: 10 ثوانٍ بين الإعلانات
+      const lastAdTime = localStorage.getItem(`last_ad_time_${currentUserEmail}`);
+      if (lastAdTime) {
+        const timeDiff = (Date.now() - parseInt(lastAdTime)) / 1000;
+        if (timeDiff < 10) {
+          alert(currentSystemLang === 'ar' ? 'يرجى الانتظار 10 ثوانٍ بين كل إعلان وآخر.' : 'Please wait 10 seconds between ads.');
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btnWatchAd');
+      const lang = currentSystemLang;
+      const adDuration = 8;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${lang === 'ar' ? 'مشاهدة...' : 'Watching...'}`;
+      }
+
+      isAdPlaying = true;
+      localStorage.setItem(`last_ad_time_${currentUserEmail}`, Date.now().toString());
+      let remainingSeconds = adDuration;
+
+      const adStatusDiv = document.getElementById('adStatusMessage');
+      if (adStatusDiv) {
+        adStatusDiv.style.display = 'block';
+        adStatusDiv.innerHTML = lang === 'ar' ? `⏳ مشاهدة الإعلان... (${remainingSeconds}s)` : `⏳ Watching ad... (${remainingSeconds}s)`;
+      }
+
+      const adTimerInterval = setInterval(() => {
+        remainingSeconds--;
+        if (adStatusDiv) {
+          adStatusDiv.innerHTML = lang === 'ar' ? `⏳ مشاهدة الإعلان... (${remainingSeconds}s)` : `⏳ Watching ad... (${remainingSeconds}s)`;
+        }
+
+        if (remainingSeconds <= 0) {
+          clearInterval(adTimerInterval);
+
+          // ✅ إعلان مكتمل
+          watchedAdsCount++;
+          updateAdProgress();
+
+          if (watchedAdsCount >= ADS_FOR_CASINO_POINT) {
+            // منح نقطة كازينو
+            globalCasinoBalance += CASINO_POINT_VALUE;
+            document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+            watchedAdsCount = 0;
+            updateAdProgress();
+
+            alert(lang === 'ar' 
+              ? `🎉 تهانينا! أكملت 15 إعلاناً وحصلت على نقطة كازينو بقيمة ${CASINO_POINT_VALUE}$!` 
+              : `🎉 Congratulations! You watched 15 ads and earned a ${CASINO_POINT_VALUE}$ casino point!`);
+          } else {
+            const remaining = ADS_FOR_CASINO_POINT - watchedAdsCount;
+            alert(lang === 'ar' 
+              ? `✅ تم احتساب الإعلان! تبقى ${remaining} إعلاناً للحصول على نقطة كازينو.` 
+              : `✅ Ad counted! ${remaining} ads left for a casino point.`);
+          }
+
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-play"></i> ${lang === 'ar' ? 'مشاهدة إعلان الآن' : 'Watch Ad Now'}`;
+          }
+
+          if (adStatusDiv) {
+            setTimeout(() => { adStatusDiv.style.display = 'none'; }, 3000);
+          }
+
+          isAdPlaying = false;
+        }
+      }, 1000);
+    }
+
+    // ========== لعبة الكازينو (باستخدام رصيد الكازينو) ==========
     async function playMarginGame() {
       const amount = parseFloat(document.getElementById('marginBetAmount').value);
       const percentage = parseInt(document.getElementById('marginPercentageSlider').value);
@@ -689,8 +873,12 @@
       const resultBox = document.getElementById('marginResultBox');
       const resultText = document.getElementById('marginResultText');
 
-      if (!amount || amount <= 0 || amount > 10) { alert("أدخل مبلغ صحيح (1-10$)"); return; }
+      if (!amount || amount <= 0 || amount > 10) { alert("أدخل مبلغ صحيح (0.01 - 10$)"); return; }
       if (!currentUserEmail) { alert("سجل دخول أولاً"); return; }
+      if (globalCasinoBalance < amount) {
+        alert(currentSystemLang === 'ar' ? '❌ رصيد الكازينو غير كافٍ! شاهد إعلانات للحصول على نقاط.' : '❌ Insufficient casino balance! Watch ads to earn points.');
+        return;
+      }
 
       btn.disabled = true;
       btn.innerText = 'جاري...';
@@ -708,12 +896,14 @@
         resultBox.style.display = 'block';
         resultBox.className = 'margin-result-box ' + (data.win ? 'win' : 'lose');
         const lang = currentSystemLang;
+        // تحديث رصيد الكازينو من الاستجابة
+        globalCasinoBalance = data.newBalance || globalCasinoBalance;
+        document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+        
         let msg = data.win ? 
-          (lang === 'ar' ? `🎉 فوز! الرقم: ${data.rollResult} | ربحت: ${data.profit.toFixed(2)}$ | الرصيد: ${data.newBalance.toFixed(2)}$` : `🎉 Win! Roll: ${data.rollResult} | Profit: ${data.profit.toFixed(2)}$ | Balance: ${data.newBalance.toFixed(2)}$`)
-          : (lang === 'ar' ? `💔 خسارة! الرقم: ${data.rollResult} | خسرت: ${amount.toFixed(2)}$ | الرصيد: ${data.newBalance.toFixed(2)}$` : `💔 Lose! Roll: ${data.rollResult} | Lost: ${amount.toFixed(2)}$ | Balance: ${data.newBalance.toFixed(2)}$`);
+          (lang === 'ar' ? `🎉 فوز! الرقم: ${data.rollResult} | ربحت: ${data.profit.toFixed(2)}$ | رصيد الكازينو: ${data.newBalance.toFixed(2)}$` : `🎉 Win! Roll: ${data.rollResult} | Profit: ${data.profit.toFixed(2)}$ | Casino Balance: ${data.newBalance.toFixed(2)}$`)
+          : (lang === 'ar' ? `💔 خسارة! الرقم: ${data.rollResult} | خسرت: ${amount.toFixed(2)}$ | رصيد الكازينو: ${data.newBalance.toFixed(2)}$` : `💔 Lose! Roll: ${data.rollResult} | Lost: ${amount.toFixed(2)}$ | Casino Balance: ${data.newBalance.toFixed(2)}$`);
         resultText.innerText = msg;
-        document.getElementById('balanceAmount').innerText = data.newBalance.toFixed(3);
-        globalBalance = data.newBalance;
       } catch (error) {
         alert("خطأ في الاتصال");
       }
@@ -721,31 +911,29 @@
       btn.innerText = currentSystemLang === 'ar' ? 'اقلب الحظ الآن' : 'Flip Luck';
     }
 
-    // ========== الدفع من الرصيد (صنع العملة) ==========
+    // ========== دفع رسوم العملة من الرصيد الأساسي ==========
     function payTokenFeesFromBalance() {
       const tName = document.getElementById('tokenName').value;
       const tSymbol = document.getElementById('tokenSymbol').value;
       if(!tName || !tSymbol) { alert("املأ اسم العملة والرمز أولاً!"); return; }
 
       const funding = parseFloat(document.getElementById('tokenFundingAmount').value) || 0;
-      const totalFees = 10 + funding; // 10 رسوم أساسية + تمويل اختياري
-
+      const totalFees = 10 + funding;
       const lang = currentSystemLang;
+
       if (globalBalance < totalFees) {
-        const msg = lang === 'ar' ? 
-          `❌ رصيدك غير كافي! رصيدك: ${globalBalance.toFixed(2)} USDT، والرسوم: ${totalFees.toFixed(2)} USDT.` :
-          `❌ Insufficient balance! Current: ${globalBalance.toFixed(2)} USDT, Required: ${totalFees.toFixed(2)} USDT.`;
-        alert(msg);
+        alert(lang === 'ar' ? 
+          `❌ رصيدك الأساسي غير كافٍ! رصيدك: ${globalBalance.toFixed(2)} USDT، والرسوم: ${totalFees.toFixed(2)} USDT.` :
+          `❌ Insufficient main balance! Current: ${globalBalance.toFixed(2)} USDT, Required: ${totalFees.toFixed(2)} USDT.`);
         return;
       }
 
       const confirmMsg = lang === 'ar' ?
-        `سيتم خصم ${totalFees.toFixed(2)} USDT من رصيدك (${globalBalance.toFixed(2)} USDT). هل أنت متأكد؟` :
-        `Will deduct ${totalFees.toFixed(2)} USDT from your balance (${globalBalance.toFixed(2)} USDT). Confirm?`;
+        `سيتم خصم ${totalFees.toFixed(2)} USDT من رصيدك الأساسي (${globalBalance.toFixed(2)} USDT). موافق؟` :
+        `Will deduct ${totalFees.toFixed(2)} USDT from your main balance (${globalBalance.toFixed(2)} USDT). Confirm?`;
 
       if (!confirm(confirmMsg)) return;
 
-      // الخصم
       globalBalance -= totalFees;
       document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
       
@@ -757,12 +945,10 @@
       txContainer.prepend(txDiv);
       document.getElementById('txtNoTx').style.display = 'none';
 
-      const successMsg = lang === 'ar' ?
+      alert(lang === 'ar' ?
         `✅ تم خصم ${totalFees.toFixed(2)} USDT بنجاح. الرصيد المتبقي: ${globalBalance.toFixed(2)} USDT.` :
-        `✅ Deducted ${totalFees.toFixed(2)} USDT. New Balance: ${globalBalance.toFixed(2)} USDT.`;
-      alert(successMsg);
+        `✅ Deducted ${totalFees.toFixed(2)} USDT. New Balance: ${globalBalance.toFixed(2)} USDT.`);
 
-      // تنظيف الحقول
       document.getElementById('tokenName').value = '';
       document.getElementById('tokenSymbol').value = '';
       document.getElementById('tokenFundingAmount').value = '';
@@ -776,7 +962,6 @@
       const tProof = document.getElementById('tokenPaymentProof').value;
       if(!tName || !tSymbol || !tProof) { alert("املأ جميع الحقول!"); return; }
       alert(`تم إرسال طلب العملة ${tName} (${tSymbol}) مع الإثبات للإدارة.`);
-      // محاكاة إرسال للخادم
       try {
         await fetch('/api/tokens/create', {
           method: 'POST',
@@ -787,7 +972,7 @@
       switchTab('sec-wallet');
     }
 
-    // ========== الإعلانات ==========
+    // ========== الإعلانات الممولة ==========
     function calculateAdCost() {
       const views = parseInt(document.getElementById('adViews').value) || 0;
       const cost = views * 0.005;
@@ -796,7 +981,6 @@
 
     function submitAdCampaign() {
       const link = document.getElementById('adLink').value;
-      const platform = document.getElementById('adPlatform').value;
       const views = parseInt(document.getElementById('adViews').value) || 0;
       const cost = views * 0.005;
 
@@ -805,13 +989,12 @@
 
       const lang = currentSystemLang;
       if (globalBalance < cost) {
-        alert(lang === 'ar' ? `رصيدك غير كافي! التكلفة: ${cost.toFixed(2)} USDT، رصيدك: ${globalBalance.toFixed(2)} USDT` : `Insufficient balance! Cost: ${cost.toFixed(2)} USDT, Balance: ${globalBalance.toFixed(2)} USDT`);
+        alert(lang === 'ar' ? `رصيدك الأساسي غير كافٍ! التكلفة: ${cost.toFixed(2)} USDT، رصيدك: ${globalBalance.toFixed(2)} USDT` : `Insufficient main balance! Cost: ${cost.toFixed(2)} USDT, Balance: ${globalBalance.toFixed(2)} USDT`);
         return;
       }
 
-      if(!confirm(lang === 'ar' ? `سيتم خصم ${cost.toFixed(2)} USDT من رصيدك لتشغيل الحملة. موافق؟` : `Will deduct ${cost.toFixed(2)} USDT for campaign. Confirm?`)) return;
+      if(!confirm(lang === 'ar' ? `سيتم خصم ${cost.toFixed(2)} USDT من رصيدك الأساسي لتشغيل الحملة. موافق؟` : `Will deduct ${cost.toFixed(2)} USDT for campaign. Confirm?`)) return;
 
-      // الخصم
       globalBalance -= cost;
       document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
       alert(lang === 'ar' ? `✅ تم تفعيل الحملة بنجاح! سيتم مراجعة رابطك ونشره خلال 24 ساعة.` : `✅ Campaign activated successfully! Your link will be reviewed within 24 hours.`);
@@ -856,8 +1039,8 @@
       document.documentElement.dir = currentSystemLang === 'ar' ? 'rtl' : 'ltr';
 
       const lang = localizations[currentSystemLang];
-      // ترجمة العناصر الأساسية (تم اختصارها للاختصار لكنها موجودة في الكود الكامل)
       document.getElementById('txtTotalBalanceLabel').innerText = lang.totalBalance;
+      document.getElementById('txtCasinoBalanceLabel').innerText = lang.casinoBalance;
       document.getElementById('btnDepositShort').innerText = lang.deposit;
       document.getElementById('btnWithdrawShort').innerText = lang.withdraw;
       document.getElementById('txtEnergyLeftLabel').innerText = lang.energyLeft;
@@ -893,6 +1076,7 @@
       document.getElementById('lblVerifyCode').innerText = lang.lblVerifyCode;
       document.getElementById('btnVerifyEmail').innerText = lang.btnVerify;
       document.getElementById('btnPayFromBalance').innerHTML = `<i class="fa-solid fa-wallet"></i> ${lang.payFromBalance}`;
+      document.getElementById('txtAdProgressLabel').innerText = lang.adProgress;
 
       document.querySelector('.nav-text-home').innerText = lang.navHome;
       document.querySelector('.nav-text-casino').innerText = lang.navCasino;
@@ -904,7 +1088,7 @@
       checkDailyBonusStatusLocal();
     }
 
-    // ========== دوال مساعدة (مؤقتة) ==========
+    // ========== دوال مساعدة ==========
     let logoClicks = 0;
     document.getElementById('topBrandTitle').addEventListener('click', () => {
       logoClicks++;
@@ -923,12 +1107,14 @@
         const res = await fetch('/api/user-data', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ telegramId: currentUserEmail })
+            body: JSON.stringify({ email: currentUserEmail })
         });
         const data = await res.json();
         if(data && !data.error) {
             globalBalance = parseFloat(data.usdBalance || 0);
+            globalCasinoBalance = parseFloat(data.casinoBalance || 0);
             document.getElementById('balanceAmount').textContent = globalBalance.toFixed(3);
+            document.getElementById('casinoBalanceAmount').textContent = globalCasinoBalance.toFixed(3);
         }
       } catch (e) { }
     }
@@ -950,10 +1136,10 @@
     function buyPlan(cost) { switchTab('sec-wallet'); document.getElementById('txAmount').value = cost; }
     function adminSetBalance() { alert("هذه الميزة للإدارة فقط."); }
 
-    // تفعيل حساب التكلفة عند تحميل الصفحة
     window.onload = function() {
       calculateAdCost();
+      updateAdProgress();
     };
   </script>
 </body>
-        </html>
+  </html>
