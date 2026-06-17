@@ -2,209 +2,239 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-// تفعيل قراءة البيانات القادمة بصيغة JSON
 app.use(express.json());
 
-// تشغيل وقراءة الملفات الثابتة من مجلد public بشكل صحيح ومباشر
+// تشغيل وقراءة الملفات الثابتة من مجلد public
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// مسار أساسي لضمان عرض صفحة index.html فوراً عند فتح الرابط الرئيسي ومقاومة خطأ Cannot GET /
+// مسار الدخول الرئيسي للمنصة
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'index.html'), (err) => {
-        if (err) {
-            res.sendFile(path.resolve(__dirname, '../public', 'index.html'), (err2) => {
-                if (err2) {
-                    res.status(500).send("ملف index.html غير موجود في مجلد public، يرجى التأكد من مساره في السيرفر!");
-                }
-            });
-        }
-    });
+    res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
 
-// قاعدة بيانات وهمية مؤقتة لحين ربط السيرفر بالكامل
-let usersDatabase = {
-    "7018561132": {
+// قاعدة البيانات المؤقتة للمستخدمين (تبدأ خالية تماماً لتسجيل حقيقي وأرصدة صفرية)
+let usersDatabase = {};
+
+// طلبات الإيداع والسحب والإعلانات المعلقة
+let pendingRequests = [];
+let availableAds = []; 
+
+// محفظة المنصة الرسمية الخاصة بك تلقائياً
+const OFFICIAL_WALLETS = {
+    trc20: "TY7c1x9pAWRmNqE2vSdBtK6uZ8yLmX4h9Q", 
+    ton: "EQBvD8uUXp1W_mR1vN8LpM5xY7O3d8J7V9kR4eG6b2mN" 
+};
+
+// ==========================================
+// 1. منظومة الحسابات (تسجيل، دخول، استعادة)
+// ==========================================
+
+// تسجيل حساب جديد
+app.post('/api/auth/register', (req, res) => {
+    const { name, phone, email, password, telegramId } = req.body;
+    
+    if (!name || !phone || !email || !password) {
+        return res.json({ success: false, message: "يرجى ملء جميع الحقول المطلوبة!" });
+    }
+
+    // التحقق من عدم تكرار الحساب
+    if (usersDatabase[email]) {
+        return res.json({ success: false, message: "هذا البريد الإلكتروني مسجل بالفعل!" });
+    }
+
+    // إنشاء الحساب برصيد صفر تماماً وطاقة كاملة
+    usersDatabase[email] = {
+        name,
+        phone,
+        email,
+        password,
+        telegramId: telegramId || "Not Connected",
         usdBalance: 0.00,
         vipPlanLevel: 1,
         miningEnergy: 1000,
-        freeCasinoSpins: 0
-    }
-};
+        freeCasinoSpins: 0,
+        language: "ar"
+    };
 
-let pendingRequests = [];
-let availableAds = [
-    { _id: "ad_001", title: "إعلان ممول 1", link: "https://t.me/NexoraBot" }
-];
+    res.json({ success: true, message: "تم إنشاء حسابك بنجاح! يمكنك الآن تسجيل الدخول.", user: usersDatabase[email] });
+});
+
+// تسجيل الدخول
+app.post('/api/auth/login', (req, res) => {
+    const { email, password } = req.body;
+    const user = usersDatabase[email];
+
+    if (!user || user.password !== password) {
+        return res.json({ success: false, message: "البريد الإلكتروني أو كلمة المرور غير صحيحة!" });
+    }
+
+    res.json({ success: true, message: "مرحباً بعودتك!", user });
+});
+
+// استعادة الحساب
+app.post('/api/auth/recover', (req, res) => {
+    const { email, phone } = req.body;
+    const user = usersDatabase[email];
+
+    if (!user || user.phone !== phone) {
+        return res.json({ success: false, message: "البيانات المدخلة لا تطابق أي حساب مسجل لدينا!" });
+    }
+
+    // عرض كلمة المرور للمستخدم (سيتم تشفيرها وحمايتها في مرحلة الأمان التالية)
+    res.json({ success: true, message: `تم التحقق بنجاح! كلمة المرور الخاصة بك هي: ${user.password}` });
+});
+
 
 // ==========================================
-// المسارات والـ APIs الخاصة بالمنصة
+// 2. وظائف المنصة الأساسية (تعدين، كازينو، إعلانات)
 // ==========================================
 
-// 1. مسار جلب وتحديث بيانات العميل
-app.post('/api/user-data', (req, res) => {
-    const { telegramId } = req.body;
-    if (!telegramId) return res.status(400).json({ error: "Missing telegramId" });
-    
-    if (!usersDatabase[telegramId]) {
-        usersDatabase[telegramId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
-    }
-    res.json(usersDatabase[telegramId]);
+// جلب عناوين المحافظ الرسمية
+app.get('/api/wallets/info', (req, res) => {
+    res.json(OFFICIAL_WALLETS);
 });
 
-// 2. مسار النقر والتعدين اليدوي
-app.post('/api/mining/click', (req, res) => {
-    const { userId } = req.body;
-    if (usersDatabase[userId]) {
-        if (usersDatabase[userId].miningEnergy >= 20) {
-            usersDatabase[userId].miningEnergy -= 20;
-            usersDatabase[userId].usdBalance += 0.05;
-            return res.json({ success: true, newBalance: usersDatabase[userId].usdBalance });
-        }
-    }
-    res.json({ success: false, message: "فشلت المزامنة أو نفدت الطاقة" });
-});
-
-// 3. مسار جلب الإعلانات المتاحة
-app.post('/api/get-ads', (req, res) => {
-    res.json(availableAds);
-});
-
-// 4. مسار مشاهدة الإعلانات واحتساب الجولات المجانية
+// مشاهدة الإعلانات والتحقق الذكي من توفرها
 app.post('/api/watch-ad', (req, res) => {
-    const { telegramId, adId } = req.body;
-    if (!telegramId) return res.json({ success: false, message: "المستخدم غير معروف" });
+    const { email } = req.body;
+    const user = usersDatabase[email];
 
-    if (!usersDatabase[telegramId]) {
-        usersDatabase[telegramId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
+    if (!user) return res.json({ success: false, message: "يرجى تسجيل الدخول أولاً!" });
+
+    // التحقق الصارم من وجود إعلان حقيقي
+    if (availableAds.length === 0) {
+        return res.json({ 
+            success: false, 
+            message: "الجمهور العزيز، الإعلانات غير متوفرة حالياً! المدراء يعملون على جلب حملات جديدة." 
+        });
     }
 
-    usersDatabase[telegramId].freeCasinoSpins += 1; 
-    
+    // منح جولة مجانية في الكازينو
+    user.freeCasinoSpins += 1; 
     res.json({ 
         success: true, 
-        message: "تمت مشاهدة الإعلان بنجاح! تم منحك جولة كازينو مجانية.",
-        freeSpinsLeft: usersDatabase[telegramId].freeCasinoSpins
+        message: "تمت مشاهدة الإعلان بنجاح! تم منحك جولة كازينو مجانية واحدة.",
+        freeSpinsLeft: user.freeCasinoSpins
     });
 });
 
-// 5. مسار تشغيل ألعاب الكازينو الثلاثة (عجلة، سلوت، نرد)
-app.post('/api/casino/play-game', (req, res) => {
-    const { userId, gameId, riskLevel, betAmount } = req.body;
-    const user = usersDatabase[userId];
+// النقر والتعدين اليدوي
+app.post('/api/mining/click', (req, res) => {
+    const { email } = req.body;
+    const user = usersDatabase[email];
+    
+    if (user && user.miningEnergy >= 20) {
+        user.miningEnergy -= 20;
+        user.usdBalance += 0.01; // يبدأ الاحتساب من الصفر والربح تصاعدي حقيقي
+        return res.json({ success: true, newBalance: user.usdBalance, energy: user.miningEnergy });
+    }
+    res.json({ success: false, message: "طاقة التعدين نفدت أو الحساب غير موجود!" });
+});
 
-    if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
+// تشغيل ألعاب الكازينو الثلاثة
+app.post('/api/casino/play-game', (req, res) => {
+    const { email, betAmount, riskLevel } = req.body;
+    const user = usersDatabase[email];
+    if (!user) return res.json({ success: false, message: "خطأ في الحساب" });
 
     if (betAmount === 0) {
-        if (user.freeCasinoSpins <= 0) {
-            return res.json({ success: false, message: "لا تملك جولات مجانية! شاهد الإعلانات لشحنها." });
-        }
+        if (user.freeCasinoSpins <= 0) return res.json({ success: false, message: "لا تملك جولات مجانية" });
         user.freeCasinoSpins -= 1;
     } else {
-        if (user.usdBalance < betAmount) {
-            return res.json({ success: false, message: "رصيدك الحالي غير كافٍ للرهان الحقيقي!" });
-        }
+        if (user.usdBalance < betAmount) return res.json({ success: false, message: "الرصيد الحالي غير كافٍ" });
         user.usdBalance -= betAmount;
     }
 
-    let winChance = 0.5;
-    if (riskLevel === 'low') winChance = 0.7;
-    if (riskLevel === 'high') winChance = 0.25;
-
+    let winChance = riskLevel === 'low' ? 0.65 : 0.30;
     const isWin = Math.random() < winChance;
     let prize = 0;
 
     if (isWin) {
-        let multiplier = riskLevel === 'high' ? 3.0 : (riskLevel === 'medium' ? 1.5 : 1.1);
-        prize = betAmount === 0 ? (Math.random() * 0.5) : (betAmount * multiplier);
+        prize = betAmount === 0 ? 0.20 : betAmount * 2;
         user.usdBalance += prize;
     }
 
     res.json({
         success: true,
-        message: isWin ? `مبروك! لقد فزت بمبلغ ${prize.toFixed(3)} USDT` : "للأسف لم تحالفك الحظ في هذه الجولة، حاول مجدداً!",
+        isWin,
+        prize,
         newBalance: user.usdBalance,
         freeSpinsLeft: user.freeCasinoSpins
     });
 });
 
-// 6. تقديم طلب إعلاني من معلن
-app.post('/api/ads/submit', (req, res) => {
-    const { userId, link, cost } = req.body;
-    const newId = "ad_" + Date.now();
-    availableAds.push({ _id: newId, title: "إعلان مدفوع", link: link });
-    
-    pendingRequests.push({ id: newId, userId, type: 'إعلان ممول', amount: cost, txHash: 'دفع معلق للتحقق' });
-    res.json({ success: true, message: "تم تقديم طلب الإعلان، يرجى إرسال هاش التحويل في المحفظة لتفعيله." });
-});
-
-// 7. استقبال إشعارات الإيداع اليدوي
+// استقبال إشعارات الإيداع اليدوي
 app.post('/api/deposit-notify', (req, res) => {
-    const { telegramId, amount, txHash } = req.body;
-    pendingRequests.push({
-        id: "req_" + Date.now(),
-        userId: telegramId,
-        type: 'شحن رصيد',
-        amount: amount,
-        txHash: txHash
-    });
-    res.json({ success: true });
+    const { email, amount, txHash } = req.body;
+    pendingRequests.push({ id: "req_" + Date.now(), email, type: 'شحن رصيد', amount, txHash, status: 'معلق' });
+    res.json({ success: true, message: "تم إرسال إثبات الإيداع، وسيتم مراجعته من الإدارة فوراً." });
 });
 
-// 8. طلب سحب الأرباح
+// طلب سحب الأرباح (حد أقصى مرتين في الأسبوع)
 app.post('/api/withdraw/submit', (req, res) => {
-    const { userId, amount } = req.body;
-    const user = usersDatabase[userId];
-    if(!user || user.usdBalance < amount) {
-        return res.json({ success: false, message: "الرصيد غير كافٍ لإتمام عملية السحب!" });
-    }
+    const { email, amount } = req.body;
+    const user = usersDatabase[email];
+    if(!user || user.usdBalance < amount) return res.json({ success: false, message: "الرصيد غير كافٍ!" });
     
     user.usdBalance -= parseFloat(amount);
-    pendingRequests.push({
-        id: "req_" + Date.now(),
-        userId: userId,
-        type: 'سحب أرباح',
-        amount: amount,
-        txHash: 'قيد المراجعة الإدارية'
+    pendingRequests.push({ id: "req_" + Date.now(), email, type: 'سحب أرباح', amount, txHash: 'تحويل يدوي معلق', status: 'معلق' });
+    res.json({ success: true, message: "تم تسجيل طلب السحب. المعالجة تتم مرتين أسبوعياً للمحافظة على سيولة المنصة." });
+});
+
+// إضافة إعلان مدفوع من معلن
+app.post('/api/ads/submit', (req, res) => {
+    const { email, link, cost } = req.body;
+    const newId = "ad_" + Date.now();
+    
+    availableAds.push({ _id: newId, link: link });
+    pendingRequests.push({ id: newId, email, type: 'إعلان ممول', amount: cost, txHash: link, status: 'نشط' });
+    res.json({ success: true, message: "تم تفعيل حملتك الإعلانية وتوفيرها للمستخدمين بنجاح!" });
+});
+
+
+// ==========================================
+// 3. لوحة التحكم الإدارية المتكاملة (Admin Dashboard)
+// ==========================================
+
+// جلب كل الطلبات المعلقة وحسابات المستخدمين للإدارة
+app.get('/api/admin/dashboard-data', (req, res) => {
+    res.json({
+        requests: pendingRequests,
+        usersCount: Object.keys(usersDatabase).length,
+        users: Object.values(usersDatabase).map(u => ({ name: u.name, email: u.email, balance: u.usdBalance, phone: u.phone }))
     });
-    res.json({ success: true, message: "تم تسجيل طلب السحب بنجاح، وسيتم تحويله يدوياً بعد مراجعة الإدارة (حد أقصى مرتين أسبوعياً)." });
 });
 
-// ==========================================
-// لوحة تحكم الإدارة الذاتية (Admin APIs)
-// ==========================================
-
-app.post('/api/admin/update-balance', (req, res) => {
-    const { targetUserId, newBalance } = req.body;
-    if (!usersDatabase[targetUserId]) {
-        usersDatabase[targetUserId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
-    }
-    usersDatabase[targetUserId].usdBalance = parseFloat(newBalance);
-    res.json({ success: true, message: `تم تحديث رصيد المستخدم بنجاح إلى ${newBalance} USDT` });
-});
-
-app.post('/api/admin/pending-requests', (req, res) => {
-    res.json({ success: true, requests: pendingRequests });
-});
-
+// التحكم بالطلبات (موافقة / رفض)
 app.post('/api/admin/process-request', (req, res) => {
     const { requestId, action } = req.body;
     const index = pendingRequests.findIndex(r => r.id === requestId);
+    
     if (index !== -1) {
         const request = pendingRequests[index];
         if (action === 'approve' && request.type === 'شحن رصيد') {
-            if (usersDatabase[request.userId]) {
-                usersDatabase[request.userId].usdBalance += parseFloat(request.amount);
+            if (usersDatabase[request.email]) {
+                usersDatabase[request.email].usdBalance += parseFloat(request.amount);
             }
         }
+        request.status = action === 'approve' ? 'تم القبول' : 'مرفوض';
+        // إزالة الطلب من المعلقين بعد المعالجة
         pendingRequests.splice(index, 1);
-        return res.json({ success: true, message: "تمت معالجة الطلب وتحديث بيانات العميل فوراً." });
+        return res.json({ success: true, message: "تم تحديث الطلب وتعديل بيانات الحساب فوراً." });
     }
     res.json({ success: false, message: "الطلب غير موجود." });
 });
 
-// تشغيل السيرفر
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`السيرفر يعمل بنجاح الآن على بورت: ${PORT}`);
+// تعديل رصيد مستخدم مباشرة من الإدارة
+app.post('/api/admin/modify-balance', (req, res) => {
+    const { email, newBalance } = req.body;
+    if (usersDatabase[email]) {
+        usersDatabase[email].usdBalance = parseFloat(newBalance);
+        return res.json({ success: true, message: "تم تحديث رصيد الحساب بنجاح." });
+    }
+    res.json({ success: false, message: "المستخدم غير موجود." });
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`السيرفر مستقر ويعمل على بورت ${PORT}`));
