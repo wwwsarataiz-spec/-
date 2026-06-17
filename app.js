@@ -5,11 +5,24 @@ const app = express();
 // تفعيل قراءة البيانات القادمة بصيغة JSON
 app.use(express.json());
 
-// تشغيل الملفات الثابتة مثل index.html من مجلد public
-app.use(express.static(path.join(__dirname, '../public'))); 
-// ملاحظة: إذا كان مجلد public بجانب app.js مباشرة، اجعلها: app.use(express.static(path.join(__dirname, 'public')));
+// تشغيل وقراءة الملفات الثابتة من مجلد public بشكل صحيح ومباشر
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
-// قاعدة بيانات وهمية مؤقتة لحين ربط Supabase/MongoDB بالكامل
+// مسار أساسي لضمان عرض صفحة index.html فوراً عند فتح الرابط الرئيسي ومقاومة خطأ Cannot GET /
+app.get('/', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'public', 'index.html'), (err) => {
+        if (err) {
+            res.sendFile(path.resolve(__dirname, '../public', 'index.html'), (err2) => {
+                if (err2) {
+                    res.status(500).send("ملف index.html غير موجود في مجلد public، يرجى التأكد من مساره في السيرفر!");
+                }
+            });
+        }
+    });
+});
+
+// قاعدة بيانات وهمية مؤقتة لحين ربط السيرفر بالكامل
 let usersDatabase = {
     "7018561132": {
         usdBalance: 0.00,
@@ -66,7 +79,6 @@ app.post('/api/watch-ad', (req, res) => {
         usersDatabase[telegramId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
     }
 
-    // إضافة جولة مجانية وتحديث البيانات
     usersDatabase[telegramId].freeCasinoSpins += 1; 
     
     res.json({ 
@@ -83,7 +95,6 @@ app.post('/api/casino/play-game', (req, res) => {
 
     if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
 
-    // التحقق من طريقة اللعب (بجولة مجانية أم برصيد حقيقي)
     if (betAmount === 0) {
         if (user.freeCasinoSpins <= 0) {
             return res.json({ success: false, message: "لا تملك جولات مجانية! شاهد الإعلانات لشحنها." });
@@ -96,8 +107,7 @@ app.post('/api/casino/play-game', (req, res) => {
         user.usdBalance -= betAmount;
     }
 
-    // خوارزمية الربح والخسارة بناءً على مستوى الخطورة
-    let winChance = 0.5; // متوسط
+    let winChance = 0.5;
     if (riskLevel === 'low') winChance = 0.7;
     if (riskLevel === 'high') winChance = 0.25;
 
@@ -141,7 +151,7 @@ app.post('/api/deposit-notify', (req, res) => {
     res.json({ success: true });
 });
 
-// 8. طلب سحب الأرباح (بحد أقصى مرتين في الأسبوع تلقائياً)
+// 8. طلب سحب الأرباح
 app.post('/api/withdraw/submit', (req, res) => {
     const { userId, amount } = req.body;
     const user = usersDatabase[userId];
@@ -170,7 +180,7 @@ app.post('/api/admin/update-balance', (req, res) => {
         usersDatabase[targetUserId] = { usdBalance: 0.00, vipPlanLevel: 1, miningEnergy: 1000, freeCasinoSpins: 0 };
     }
     usersDatabase[targetUserId].usdBalance = parseFloat(newBalance);
-    res.json({ success: true, message: `تم تحديث رصيد المستخدم الحساب بنجاح إلى ${newBalance} USDT` });
+    res.json({ success: true, message: `تم تحديث رصيد المستخدم بنجاح إلى ${newBalance} USDT` });
 });
 
 app.post('/api/admin/pending-requests', (req, res) => {
@@ -193,7 +203,7 @@ app.post('/api/admin/process-request', (req, res) => {
     res.json({ success: false, message: "الطلب غير موجود." });
 });
 
-// تشغيل السيرفر على البورت المتاح في ريندر
+// تشغيل السيرفر
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`السيرفر يعمل بنجاح الآن على بورت: ${PORT}`);
