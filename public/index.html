@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Nexora Elite • Premium WebApp</title>
+  
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -16,7 +19,7 @@
     }
     .app { min-height: 100svh; display: flex; flex-direction: column; padding-bottom: 90px; }
     .topbar { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 215, 0, 0.05); }
-    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .brand i { color: #ffd700; font-size: 20px; filter: drop-shadow(0 0 8px #ffd700); }
     .brand__title { font-weight: 800; font-size: 16px; color: #ffd700; }
     .content { padding: 14px; flex: 1; }
@@ -154,9 +157,9 @@
         <h4 style="color: #ffd700; margin-top: 0;">أضف إعلانك في المنصة (للمعلنين)</h4>
         <article class="card" style="padding: 15px;">
           <p style="font-size: 12px; color: rgba(233,233,243,0.6); margin-top: 0;">روج لقناتك أو بوتك الخاص، الدفع يدوي ويتم تفعيل الإعلان بعد مراجعة الإدارة.</p>
-          <div class="input-group"><label>رابط الإعلان (تليجرام / موقع)</label><input type="text" class="input-field" placeholder="https://t.me/..."></div>
-          <div class="input-group"><label>تكلفة الحملة المطلوبة ($)</label><input type="number" class="input-field" placeholder="تبدأ من 5 دولار"></div>
-          <button class="btn btn-action" onclick="alert('تم إرسال طلب حملتك الإعلانية للإدارة للتحقق يدويًا.')">تقديم الطلب والدفع</button>
+          <div class="input-group"><label>رابط الإعلان (تليجرام / موقع)</label><input type="text" id="adLink" class="input-field" placeholder="https://t.me/..."></div>
+          <div class="input-group"><label>تكلفة الحملة المطلوبة ($)</label><input type="number" id="adCost" class="input-field" placeholder="تبدأ من 5 دولار"></div>
+          <button class="btn btn-action" onclick="submitAdvertiserAd()">تقديم الطلب والدفع</button>
         </article>
       </section>
 
@@ -176,8 +179,8 @@
       <section id="sec-team" class="tab-section">
         <article class="card">
           <div style="font-size: 12px; color: rgba(233,233,243,0.6);">رابط الإحالة ومكافآت الفريق</div>
-          <input type="text" class="input-field" value="https://t.me/NexoraBot?start=7018561132" readonly style="margin: 10px 0; text-align: left; direction: ltr;">
-          <button class="btn btn-deposit" style="padding: 10px;" onclick="alert('تم نسخ رابط الإحالة!')">نسخ الرابط</button>
+          <input type="text" id="referralLinkField" class="input-field" value="https://t.me/NexoraBot?start=7018561132" readonly style="margin: 10px 0; text-align: left; direction: ltr;">
+          <button class="btn btn-deposit" style="padding: 10px;" onclick="copyReferralLink()">نسخ الرابط</button>
         </article>
       </section>
 
@@ -206,18 +209,14 @@
       <section id="sec-admin" class="tab-section">
         <h3 style="color: #ffd700; margin-top: 0;"><i class="fa-solid fa-user-gear"></i> لوحة التحكم الذاتية للآدمين</h3>
         <article class="card">
+          <div class="input-group"><label>رقم آيدي حساب المستخدم المُراد تعديله</label><input type="text" class="input-field" id="adminTargetUserId" placeholder="7018561132"></div>
           <div class="input-group"><label>تعديل رصيد العميل الحالي (USDT)</label><input type="number" class="input-field" id="adminUpdateBalance" placeholder="ضع القيمة الجديدة للرصيد"></div>
           <button class="btn btn-deposit" onclick="adminSetBalance()">حفظ الرصيد الجديد فورا</button>
           
           <div style="margin-top: 20px;">
-            <label style="font-size: 12px; color: #ffd700; display: block; margin-bottom: 8px;">طلبات التحقق اليدوية المعلقة:</label>
-            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,255,255,0.05);">
-              <div>مستخدم ID: 7018561132</div>
-              <div style="color: #ffd700;">طلب إيداع بقيمة: 3$</div>
-              <div style="margin-top: 8px; display: flex; gap: 8px;">
-                <button class="btn btn-deposit" style="padding: 5px; font-size: 11px;" onclick="alert('تم تفعيل الطلب بنجاح!')">موافقة وتفعيل</button>
-                <button class="btn btn-withdraw" style="padding: 5px; font-size: 11px;" onclick="alert('تم رفض وإلغ الارسالية.')">رفض الطلب</button>
-              </div>
+            <label style="font-size: 12px; color: #ffd700; display: block; margin-bottom: 8px;">إدارة طلبات التحقق اليدوية المعلقة:</label>
+            <div id="adminPendingRequestsContainer" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(255,255,255,0.05);">
+              <p style="color:rgba(233,233,243,0.5); text-align:center;">يتم جلب الطلبات المعلقة من السيرفر تلقائياً...</p>
             </div>
           </div>
         </article>
@@ -236,7 +235,19 @@
   </div>
 
   <script>
+    // تهيئة واستخراج تليجرام وايب آب داتا للتأمين والتحقق من الهوية بالسيرفر
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.expand(); // ملء شاشة الهاتف بالكامل
+        tg.ready();
+    }
+    const initData = tg ? tg.initData : "";
+    const userId = tg?.initDataUnsafe?.user?.id || "7018561132"; // استخدام آيدي حقيقي تلقائياً
+
     let globalBalance = 0.00;
+
+    // تحديث واجهة رابط الإحالة ليتطابق مع العميل الحالي تلقائياً
+    document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=${userId}`;
 
     function switchTab(tabId, buttonElement) {
       document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
@@ -245,9 +256,10 @@
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
         buttonElement.classList.add('active');
       }
+      if(tabId === 'sec-admin') { loadAdminPendingRequests(); }
     }
 
-    // لتسهيل وصولك للوحة الإدارة يدوياً، اضغط على شعار Nexora في الأعلى 5 مرات متتالية
+    // سر لوحة التحكم الذاتية: الضغط على الشعار 5 مرات متتالية
     let logoClicks = 0;
     document.querySelector('.brand').addEventListener('click', () => {
       logoClicks++;
@@ -260,73 +272,221 @@
       }
     });
 
-    // سكريبت كازينو التخمين التفاعلي
-    function playCasino(type) {
+    // ==========================================
+    // // API Connection Here: مزامنة بيانات العميل عند الفتح
+    // ==========================================
+    async function syncUserData() {
+      try {
+        const res = await fetch('/api/user-data', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initData, userId })
+        });
+        const data = await res.json();
+        if(data.success) {
+            globalBalance = parseFloat(data.balance || 0);
+            document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+            document.getElementById('userVipTag').textContent = `VIP ${data.vipLevel || 1}`;
+            document.getElementById('energyText').textContent = `${data.energy || 1000} / 1000`;
+            document.getElementById('energyFill').style.width = `${((data.energy || 1000) / 1000) * 100}%`;
+        }
+      } catch (e) { console.error("تعذر جلب البيانات الحية من السيرفر", e); }
+    }
+    syncUserData();
+
+    // سكريبت ألعاب الكازينو التفاعلية المربوطة بالسيرفر للتأمين
+    async function playCasino(type) {
       let bet = parseFloat(document.getElementById('casinoBet').value);
       if(!bet || bet <= 0 || bet > globalBalance) { alert("رصيدك غير كافي أو القيمة غير صحيحة!"); return; }
-      if(type === 'win') {
-        globalBalance += bet;
-        alert("تهانينا! خمنّت بشكل صحيح وضاعفت قيمتك بربح X2.");
-      } else {
-        globalBalance -= bet;
-        alert("للأسف، لم ينجح التخمين هذه المرة. حظاً أوفر في المرة القادمة!");
-      }
-      document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+      
+      try {
+        const res = await fetch('/api/casino/play', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initData, userId, bet, type })
+        });
+        const data = await res.json();
+        if(data.success) {
+            globalBalance = data.newBalance;
+            document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+            alert(data.message);
+        } else { alert(data.message); }
+      } catch(e) { alert("خطأ في معالجة رهان الكازينو"); }
     }
 
-    // شراء خطط التعدين المدفوعة
-    function buyPlan(cost) {
+    // شراء خطة تعدين مدفوعة جاهزة أو مخصصة
+    async function buyPlan(cost) {
       alert(`لقد اخترت خطة الـ ${cost}$. يرجى الانتقال لبوابة المحفظة لإرسال المبلغ ووضع الهاش للتحقق اليدوي.`);
       switchTab('sec-wallet');
+      document.getElementById('txAmount').value = cost;
     }
+    
     function buyCustomPlan() {
       let amt = document.getElementById('customPlanAmount').value;
       if(!amt || amt <= 0) { alert("يرجى تحديد سعر صالح ومقبول للشركة."); return; }
       alert(`تم تسجيل رغبتك بخطة بقيمة ${amt}$. توجه لقسم المحفظة لإتمام التحويل وتأكيده.`);
       switchTab('sec-wallet');
+      document.getElementById('txAmount').value = amt;
     }
 
-    // التعدين اليدوي بالنقر وعداد الطاقة
+    // التعدين اليدوي بالنقر وعداد الطاقة المتزامن مع الـ Backend
     let currentEnergy = 1000;
-    document.getElementById('miningBtn').addEventListener('click', () => {
-      if(currentEnergy > 0) {
-        currentEnergy -= 20;
-        globalBalance += 0.05;
-        document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
-        document.getElementById('energyText').textContent = `${currentEnergy} / 1000`;
-        document.getElementById('energyFill').style.width = `${(currentEnergy / 1000) * 100}%`;
-      } else { alert("نفدت الطاقة تماماً، انتظر الشحن التلقائي بالسيرفر."); }
+    document.getElementById('miningBtn').addEventListener('click', async () => {
+      if(currentEnergy <= 0) { alert("نفدت الطاقة تماماً، انتظر الشحن التلقائي بالسيرفر."); return; }
+      
+      currentEnergy -= 20;
+      globalBalance += 0.05;
+      document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+      document.getElementById('energyText').textContent = `${currentEnergy} / 1000`;
+      document.getElementById('energyFill').style.width = `${(currentEnergy / 1000) * 100}%`;
+
+      // إرسال كتل التعدين المحققة للسيرفر لمنع الغش والأوتوكليكر
+      try {
+        await fetch('/api/mining/click', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initData, userId, clicksCount: 1 })
+        });
+      } catch(e) { console.log("خطأ في مزامنة النقرة"); }
     });
 
-    // مشاهدة الإعلانات
+    // مشاهدة الإعلانات لكسب المال المباشر للبوت والمستخدم
     document.getElementById('btnWatchAd').addEventListener('click', () => {
-      alert("يتم الآن تحميل الإعلان... انتظر 5 ثوانٍ للاحتساب.");
-      setTimeout(() => {
-        globalBalance += 0.10;
-        document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
-        alert("تمت المشاهدة بنجاح! تم إضافة +0.10 USDT لرصيدك المتاح.");
+      alert("يتم الآن تحميل الإعلان الممولو من الوسيط... انتظر 5 ثوانٍ لاحتساب الأرباح.");
+      setTimeout(async () => {
+         try {
+            const res = await fetch('/api/ads/reward', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ initData, userId })
+            });
+            const data = await res.json();
+            if(data.success) {
+                globalBalance = data.newBalance;
+                document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+                alert("تمت المشاهدة بنجاح! تم إضافة المكافأة لرصيدك المتاح بنجاح.");
+            }
+         } catch(e) { alert("فشل احتساب ربح الإعلان"); }
       }, 5000);
     });
 
-    // تحكم الآدمين بالرصيد يدويًا
-    function adminSetBalance() {
-      let val = parseFloat(document.getElementById('adminUpdateBalance').value);
-      if(!isNaN(val)) {
-        globalBalance = val;
-        document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
-        alert("تم تحديث وتثبيت رصيد الحساب بنجاح.");
-      }
+    // المعلن: تقديم طلب حملة إعلانية يدوية مدفوعة
+    async function submitAdvertiserAd() {
+        const link = document.getElementById('adLink').value;
+        const cost = document.getElementById('adCost').value;
+        if(!link || !cost) { alert("يرجى ملء جميع الحقول المطلوبة."); return; }
+        
+        try {
+            const res = await fetch('/api/ads/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ initData, userId, link, cost })
+            });
+            const data = await res.json();
+            alert(data.message || "تم تقديم الطلب بنجاح.");
+            switchTab('sec-wallet');
+            document.getElementById('txAmount').value = cost;
+        } catch(e) { alert("خطأ في معالجة طلب الإعلان"); }
     }
 
     // ==========================================
-    // // API Connection Here
+    // // API Connection Here: إرسال إثباتات التحويل اليدوية
     // ==========================================
     document.getElementById('btnDepositSubmit').addEventListener('click', async () => {
       const amt = document.getElementById('txAmount').value;
       const hash = document.getElementById('txHash').value;
-      // هنا تضع ربط fetch مع الـ Backend الخاص بك لإرسال طلب الإيداع والهاش
-      alert("تم إرسال البيانات للإدارة. ستتم مراجعة الهاش يدويًا وتحديث رصيدك فور التأكد.");
+      if(!amt || !hash) { alert("يرجى إدخال القيمة وهاش التحويل بدقة."); return; }
+
+      try {
+        const res = await fetch('/api/deposit/submit', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initData, userId, amount: amt, txHash: hash })
+        });
+        const data = await res.json();
+        alert(data.message);
+      } catch(e) { alert("تعذر إرسال طلب الإيداع للسيرفر."); }
     });
+
+    // طلب سحب الأرباح مرتين في الأسبوع كحد أقصى
+    document.getElementById('btnWithdrawSubmit').addEventListener('click', async () => {
+      const amt = document.getElementById('txAmount').value;
+      if(!amt || amt <= 0) { alert("يرجى تحديد كمية السحب الصالحة."); return; }
+
+      try {
+        const res = await fetch('/api/withdraw/submit', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initData, userId, amount: amt })
+        });
+        const data = await res.json();
+        alert(data.message);
+      } catch(e) { alert("خطأ أثناء معالجة طلب السحب."); }
+    });
+
+    // ==========================================
+    // لوحة التحكم والتحكم الإداري الذاتي بالرابط الفعلي
+    // ==========================================
+    async function adminSetBalance() {
+      let targetId = document.getElementById('adminTargetUserId').value;
+      let val = parseFloat(document.getElementById('adminUpdateBalance').value);
+      if(!targetId || isNaN(val)) { alert("يرجى إدخال آيدي حساب المستخدم والقيمة الجديدة الحقيقية."); return; }
+      
+      try {
+        const res = await fetch('/api/admin/update-balance', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initData, userId, targetUserId: targetId, newBalance: val })
+        });
+        const data = await res.json();
+        alert(data.message);
+        if(targetId === userId) {
+            globalBalance = val;
+            document.getElementById('balanceAmount').textContent = globalBalance.toFixed(2);
+        }
+      } catch(e) { alert("فشل تحديث الرصيد عبر السيرفر"); }
+    }
+
+    async function loadAdminPendingRequests() {
+        const container = document.getElementById('adminPendingRequestsContainer');
+        try {
+            const res = await fetch('/api/admin/pending-requests', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ initData, userId })
+            });
+            const data = await res.json();
+            if(data.success && data.requests && data.requests.length > 0) {
+                container.innerHTML = data.requests.map(req => `
+                    <div style="border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px;">
+                      <div>مستخدم ID: ${req.userId}</div>
+                      <div style="color: #ffd700;">نوع الطلب: ${req.type} بقيمة: ${req.amount}$</div>
+                      <div style="font-size:10px; color:#aaa; word-break:break-all;">الهاش: ${req.txHash || 'لا يوجد'}</div>
+                      <div style="margin-top: 8px; display: flex; gap: 8px;">
+                        <button class="btn btn-deposit" style="padding: 5px; font-size: 11px;" onclick="processRequest('${req.id}', 'approve')">موافقة وتفعيل</button>
+                        <button class="btn btn-withdraw" style="padding: 5px; font-size: 11px;" onclick="processRequest('${req.id}', 'reject')">رفض الطلب</button>
+                      </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `<p style="color:rgba(233,233,243,0.5); text-align:center;">لا توجد أي طلبات إيداع أو سحب معلقة حالياً.</p>`;
+            }
+        } catch(e) { container.innerHTML = `<p style="color:#ff4444; text-align:center;">خطأ في جلب البيانات من السيرفر</p>`; }
+    }
+
+    async function processRequest(requestId, action) {
+        try {
+            const res = await fetch('/api/admin/process-request', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ initData, userId, requestId, action })
+            });
+            const data = await res.json();
+            alert(data.message);
+            loadAdminPendingRequests();
+            syncUserData();
+        } catch(e) { alert("خطأ في تنفيذ الإجراء الإداري."); }
+    }
   </script>
 </body>
 </html>
