@@ -22,10 +22,12 @@ let usersDatabase = {};
 let pendingRequests = [];
 let availableAds = [];
 
-// محفظة المنصة الرسمية (تم إزالة TON وإضافة TRC20 فقط كما طلبت)
+// ✅✅✅ محفظة المنصة الرسمية (تم تحديثها بعنوانك الفعلي) ✅✅✅
 const OFFICIAL_WALLETS = {
-    trc20: "TY7c1x9pAWRmNqE2vSdBtK6uZ8yLmX4h9Q",
-    platform: "TPlatformWalletAddress123456789" // عنوان المنصة الرئيسي للإيداع
+    trc20: "0x2975dc1f8188c30b2a4be0ec27e33494da66cb46",
+    platform: "0x2975dc1f8188c30b2a4be0ec27e33494da66cb46",
+    bnb: "0x2975dc1f8188c30b2a4be0ec27e33494da66cb46",
+    sol: "0x2975dc1f8188c30b2a4be0ec27e33494da66cb46"
 };
 
 // ==========================================
@@ -376,7 +378,7 @@ app.post('/api/ads/create', (req, res) => {
 // 8. نقاط النهاية القديمة (محفوظة كما هي مع تعديلات طفيفة)
 // ==========================================
 
-// جلب عناوين المحافظ الرسمية
+// جلب عناوين المحافظ الرسمية (يتم استدعاؤها من الواجهة لعرض العناوين)
 app.get('/api/wallets/info', (req, res) => {
     res.json(OFFICIAL_WALLETS);
 });
