@@ -5,9 +5,9 @@ mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح وبأعلى معايير الأمان'))
 .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err));
 
-// --- ١. مخطط المستخدمين المطور والمحمي الشامل ---
+// --- ١. مخطط المستخدمين المطور (شامل حماية الكازينو والمحاولات المجانية) ---
 const UserSchema = new mongoose.Schema({
-  // الحقول القديمة (مضمونة ومحفوظة بالكامل لضمان عدم فقدان أي بيانات مسجلة)
+  // الحقول القديمة (مضمونة ومحفوظة بالكامل)
   telegramId: { type: String, required: true, unique: true, index: true },
   fullName: { type: String, default: 'مستخدم جديد' },
   phoneNumber: { type: String, default: 'غير محدد' },
@@ -18,46 +18,64 @@ const UserSchema = new mongoose.Schema({
   walletAddress: { type: String, default: '' },
   pendingWithdrawals: { type: Number, default: 0 },
 
-  // الإضافات الجديدة لتغطية التحديثات والأمان الفائق
-  usdBalance: { type: Number, default: 0.000 }, // رصيد الدولار بدقة 3 خانات عشرية للاحتساب الدقيق
-  miningEnergy: { type: Number, default: 1000 }, // عداد الطاقة المحمي بالسيرفر
-  lastMiningClick: { type: Date, default: Date.now }, // لحساب وتدقيق سرعة النقر ومنع الـ Auto-Clicker
-  vipPlanLevel: { type: Number, default: 1 }, // مستوى الخطة الاستثمارية
-  customMiningInvestment: { type: Number, default: 0 }, // قيمة الخطة المخصصة التي يطلبها العميل
-  role: { type: String, default: 'user' } // لتحديد الصلاحيات (user أو admin للوحة الإدارة الذاتية)
+  // الإضافات السابقة (التعدين والإعلانات)
+  usdBalance: { type: Number, default: 0.000 },
+  miningEnergy: { type: Number, default: 1000 },
+  lastMiningClick: { type: Date, default: Date.now },
+  vipPlanLevel: { type: Number, default: 1 },
+  customMiningInvestment: { type: Number, default: 0 },
+  role: { type: String, default: 'user' },
+
+  // 🔥 إضافات الكازينو الجديدة والأمان ضد الحسابات المتعددة 🔥
+  freeCasinoSpins: { type: Number, default: 2 }, // محاولتين مجانيتين لكل حساب جديد
+  totalCasinoPlayed: { type: Number, default: 0 }, // عدد المرات الإجمالية للتدقيق
+  lastCasinoPlay: { type: Date, default: null } // لمنع السبام والنقرات السريعة جداً
 });
 
-// --- ٢. مخطط نظام الإعلانات الحقيقي والمدفوع (مربوط بميزانية المعلنين) ---
+// --- ٢. مخطط نظام الإعلانات الحقيقي والمدفوع ---
 const AdSchema = new mongoose.Schema({
   title: { type: String, default: 'إعلان حقيقي ممول' },
-  link: { type: String, required: true },          // رابط القناة أو البوت الخاص بالمعلن
-  totalBudget: { type: Number, required: true },    // الميزانية الإجمالية المدفوعة للإدارة
-  remainingBudget: { type: Number, required: true },// الميزانية المتبقية (يُخصم منها 0.001 مع كل مشاهدة)
-  costPerView: { type: Number, default: 0.001 },    // القيمة الدقيقة للمشاهدة الواحدة التي تذهب للمستخدم
-  totalViewsRequired: { type: Number, default: 0 }, // عدد المشاهدات الكلي المطلوبة (الميزانية ÷ 0.001)
-  viewsCount: { type: Number, default: 0 },          // عدد المشاهدات الحالية التي حصل عليها الإعلان
-  isActive: { type: Boolean, default: false },      // لا يظهر للعملاء إلا بعد موافقة الإدارة وتأكيد الدفع
-  advertiserId: { type: String, required: true },   // آيدي العميل (المعلن) الذي أنشأ الحملة
+  link: { type: String, required: true },
+  totalBudget: { type: Number, required: true },
+  remainingBudget: { type: Number, required: true },
+  costPerView: { type: Number, default: 0.001 },
+  totalViewsRequired: { type: Number, default: 0 },
+  viewsCount: { type: Number, default: 0 },
+  isActive: { type: Boolean, default: false },
+  advertiserId: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
 
-// سجل المشاهدات لمنع المستخدم من مشاهدة نفس الإعلان مرتين والتلاعب بالأرباح
 const AdLogSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, index: true },
   adId: { type: mongoose.Schema.Types.ObjectId, required: true },
   viewedAt: { type: Date, default: Date.now }
 });
 
-// --- ٣. مخطط المعاملات والطلبات اليدوية وعناوين الإيداع الرسمية الخاصة بك ---
+// --- ٣. مخطط ألعاب الكازينو المنفصلة (لإدارة إعدادات وخوارزمية كل لعبة على حدة) ---
+const CasinoGameSchema = new mongoose.Schema({
+  gameId: { type: String, required: true, unique: true }, // مثل: 'wheel', 'slots', 'dice'
+  gameName: { type: String, required: true }, // اسم اللعبة بالعربي للواجهة
+  minBet: { type: Number, default: 0.1 }, // الحد الأدنى للرهان بالدولار
+  maxBet: { type: Number, default: 100 }, // الحد الأقصى للرهان
+  isActive: { type: Boolean, default: true },
+  
+  // إعدادات الخوارزمية الحاكمة (تتحكم بها أنت كمسؤول لصالح السيرفر)
+  houseEdgeSettings: {
+    lowRiskWinChance: { type: Number, default: 45 },    // نسبة ربح اللاعب في المخاطرة المنخفضة (أقل من 50%)
+    mediumRiskWinChance: { type: Number, default: 35 }, // نسبة ربح اللاعب في المخاطرة المتوسطة
+    highRiskWinChance: { type: Number, default: 15 }    // نسبة ربح اللاعب في المخاطرة العالية (صعبة جداً)
+  }
+});
+
+// --- ٤. مخطط المعاملات والطلبات اليدوية ---
 const TransactionRequestSchema = new mongoose.Schema({
   userId: { type: String, required: true, index: true },
-  type: { type: String, enum: ['deposit', 'withdrawal', 'custom_plan', 'ad_campaign'], required: true },
+  type: { type: String, enum: ['deposit', 'withdrawal', 'custom_plan', 'ad_campaign', 'casino_bet'], required: true },
   amount: { type: Number, required: true },
   txHash: { type: String, default: '' }, 
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }, 
-  details: { type: String, default: '' }, // يحمل رابط الإعلان أو تفاصيل الخطة المخصصة
-  
-  // حفظ عناوين محفظتك الخاصة داخل كل معاملة كمرجع آمن وموثق للمستخدمين والإدارة
+  details: { type: String, default: '' },
   adminDepositWallets: {
     type: Object,
     default: {
@@ -73,6 +91,7 @@ const TransactionRequestSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema);
 const Ad = mongoose.model('Ad', AdSchema);
 const AdLog = mongoose.model('AdLog', AdLogSchema);
+const CasinoGame = mongoose.model('CasinoGame', CasinoGameSchema);
 const TransactionRequest = mongoose.model('TransactionRequest', TransactionRequestSchema);
 
-module.exports = { User, Ad, AdLog, TransactionRequest };
+module.exports = { User, Ad, AdLog, CasinoGame, TransactionRequest };
