@@ -6,50 +6,72 @@ mongoose.connect(process.env.MONGO_URI)
 .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err));
 
 // ==========================================
-// 1. مخطط المستخدمين
+// 1. مخطط المستخدمين (User) - الأكثر شمولاً
 // ==========================================
 const UserSchema = new mongoose.Schema({
+  // الحقول الأساسية للتواصل
   telegramId: { type: String, required: true, unique: true, index: true },
   fullName: { type: String, default: 'مستخدم جديد' },
   phoneNumber: { type: String, default: 'غير محدد' },
   email: { type: String, default: '' },
   password: { type: String, default: '' },
-  points: { type: Number, default: 0 },
-  miningLevel: { type: Number, default: 1 },
-  referredBy: { type: String, default: null },
-  lastBonusDate: { type: Date, default: null },
-  walletAddress: { type: String, default: '' },
-  pendingWithdrawals: { type: Number, default: 0 },
+  
+  // الحقول المالية
   usdBalance: { type: Number, default: 0.000 },
   casinoBalance: { type: Number, default: 0.000 },
+  points: { type: Number, default: 0 },
+  
+  // التعدين والطاقة
   miningEnergy: { type: Number, default: 1000 },
-  lastMiningClick: { type: Date, default: Date.now },
+  miningLevel: { type: Number, default: 1 },
   vipPlanLevel: { type: Number, default: 1 },
   customMiningInvestment: { type: Number, default: 0 },
-  role: { type: String, default: 'user' },
+  lastMiningClick: { type: Date, default: Date.now },
+  
+  // الإعلانات
+  watchedAdsCount: { type: Number, default: 0 },
+  lastAdTime: { type: Number, default: 0 },
+  
+  // الكازينو
   freeCasinoSpins: { type: Number, default: 2 },
   totalCasinoPlayed: { type: Number, default: 0 },
   lastCasinoPlay: { type: Date, default: null },
-  watchedAdsCount: { type: Number, default: 0 },
-  lastAdTime: { type: Number, default: 0 },
+  
+  // الإحالات
+  referredBy: { type: String, default: null },
+  walletAddress: { type: String, default: '' },
+  pendingWithdrawals: { type: Number, default: 0 },
+  
+  // الصلاحيات والأمان
+  role: { type: String, default: 'user' }, // user, admin, manager, assistant
   verified: { type: Boolean, default: false },
   verificationCode: { type: String, default: '' },
   codeExpiry: { type: Date, default: null },
-  lastDailyClaimDate: { type: Date, default: null },
+  
+  // الإعدادات الشخصية
+  language: { type: String, default: 'ar' },
+  
+  // طلبات العملات المفتوحة
   tokenRequests: { type: Array, default: [] },
-  language: { type: String, default: 'ar' }
+  
+  // المكافآت اليومية
+  lastDailyClaimDate: { type: Date, default: null },
+  
+  // تاريخ الإنشاء والتحديث
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 // ==========================================
-// 2. مخطط الإعلانات
+// 2. مخطط الإعلانات (Ad) - المدفوعة فقط
 // ==========================================
 const AdSchema = new mongoose.Schema({
   title: { type: String, default: 'إعلان حقيقي ممول' },
   link: { type: String, required: true },
   totalBudget: { type: Number, required: true },
   remainingBudget: { type: Number, required: true },
-  costPerView: { type: Number, default: 0.001 },
-  totalViewsRequired: { type: Number, default: 0 },
+  costPerView: { type: Number, default: 0.005 },
+  totalViewsRequired: { type: Number, default: 1000 },
   viewsCount: { type: Number, default: 0 },
   isActive: { type: Boolean, default: false },
   advertiserId: { type: String, required: true },
@@ -57,7 +79,7 @@ const AdSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 3. مخطط سجل مشاهدة الإعلانات
+// 3. مخطط سجل مشاهدة الإعلانات (AdLog)
 // ==========================================
 const AdLogSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, index: true },
@@ -66,7 +88,7 @@ const AdLogSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 4. مخطط ألعاب الكازينو
+// 4. مخطط ألعاب الكازينو (CasinoGame) - للإدارة
 // ==========================================
 const CasinoGameSchema = new mongoose.Schema({
   gameId: { type: String, required: true, unique: true },
@@ -82,7 +104,7 @@ const CasinoGameSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 5. مخطط طلبات المعاملات
+// 5. مخطط طلبات المعاملات (TransactionRequest) - المعلقة
 // ==========================================
 const TransactionRequestSchema = new mongoose.Schema({
   userId: { type: String, required: true, index: true },
@@ -103,7 +125,7 @@ const TransactionRequestSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 6. مخطط المعاملات المالية (جديد)
+// 6. مخطط المعاملات المالية (Transaction) - النهائية
 // ==========================================
 const TransactionSchema = new mongoose.Schema({
   userId: { type: String, required: true, index: true },
@@ -116,7 +138,7 @@ const TransactionSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 7. مخطط الإحصائيات (جديد)
+// 7. مخطط الإحصائيات (Stats) - للتحديث التلقائي
 // ==========================================
 const StatsSchema = new mongoose.Schema({
   totalUsers: { type: Number, default: 0 },
@@ -128,7 +150,7 @@ const StatsSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 8. مخطط سجل الإدارة (جديد)
+// 8. مخطط سجل الإدارة (AdminLog) - للمتابعة
 // ==========================================
 const AdminLogSchema = new mongoose.Schema({
   adminId: { type: String, required: true },
@@ -136,6 +158,19 @@ const AdminLogSchema = new mongoose.Schema({
   targetId: { type: String, default: '' },
   details: { type: String, default: '' },
   timestamp: { type: Date, default: Date.now }
+});
+
+// ==========================================
+// 9. مخطط خطط التعدين (MiningPlan) - متعددة
+// ==========================================
+const MiningPlanSchema = new mongoose.Schema({
+  name: { type: String, required: true }, // برونزي، فضي، ذهبي، ماسي
+  price: { type: Number, required: true },
+  dailyReturn: { type: Number, required: true }, // النسبة المئوية
+  minDays: { type: Number, default: 7 },
+  maxDays: { type: Number, default: 30 },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
 });
 
 // ==========================================
@@ -149,6 +184,7 @@ const TransactionRequest = mongoose.model('TransactionRequest', TransactionReque
 const Transaction = mongoose.model('Transaction', TransactionSchema);
 const Stats = mongoose.model('Stats', StatsSchema);
 const AdminLog = mongoose.model('AdminLog', AdminLogSchema);
+const MiningPlan = mongoose.model('MiningPlan', MiningPlanSchema);
 
 // ==========================================
 // تصدير الموديلات
@@ -161,5 +197,6 @@ module.exports = {
     TransactionRequest,
     Transaction,
     Stats,
-    AdminLog
+    AdminLog,
+    MiningPlan
 };
