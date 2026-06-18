@@ -87,11 +87,57 @@ const TransactionRequestSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// تعيين الموديلات وتجهيزها للاستخدام
-const User = mongoose.model('User', UserSchema);
-const Ad = mongoose.model('Ad', AdSchema);
-const AdLog = mongoose.model('AdLog', AdLogSchema);
-const CasinoGame = mongoose.model('CasinoGame', CasinoGameSchema);
-const TransactionRequest = mongoose.model('TransactionRequest', TransactionRequestSchema);
+// ==========================================
+// 🔥 ٥. النماذج الجديدة (الإضافات المطلوبة)
+// ==========================================
 
-module.exports = { User, Ad, AdLog, CasinoGame, TransactionRequest };
+// 5. نموذج المعاملات (الإيداع والسحب)
+const TransactionSchema = new mongoose.Schema({
+    userId: { type: String, required: true, index: true },
+    type: { type: String, enum: ['deposit', 'withdrawal'], required: true },
+    amount: { type: Number, required: true },
+    txHash: { type: String, default: '' },
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    note: { type: String, default: '' },
+    createdAt: { type: Date, default: Date.now }
+});
+
+// 6. نموذج الإحصائيات (لتتبع الأرقام بسرعة)
+const StatsSchema = new mongoose.Schema({
+    totalUsers: { type: Number, default: 0 },
+    totalDeposits: { type: Number, default: 0 },
+    totalWithdrawals: { type: Number, default: 0 },
+    totalDepositsAmount: { type: Number, default: 0 },
+    totalWithdrawalsAmount: { type: Number, default: 0 },
+    updatedAt: { type: Date, default: Date.now }
+});
+
+// 7. نموذج سجل النشاط (لمراقبة المدراء)
+const AdminLogSchema = new mongoose.Schema({
+    adminId: { type: String, required: true },
+    action: { type: String, required: true },
+    targetId: { type: String, default: '' },
+    details: { type: String, default: '' },
+    timestamp: { type: Date, default: Date.now }
+});
+
+// ==========================================
+// إنشاء الموديلات الجديدة
+// ==========================================
+const Transaction = mongoose.model('Transaction', TransactionSchema);
+const Stats = mongoose.model('Stats', StatsSchema);
+const AdminLog = mongoose.model('AdminLog', AdminLogSchema);
+
+// ==========================================
+// تحديث الـ module.exports (إضافة الموديلات الجديدة)
+// ==========================================
+module.exports = { 
+    User, 
+    Ad, 
+    AdLog, 
+    CasinoGame, 
+    TransactionRequest,
+    Transaction,
+    Stats,
+    AdminLog
+};
