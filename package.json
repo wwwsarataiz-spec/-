@@ -1,11 +1,12 @@
 {
   "name": "nexora-elite",
   "version": "1.0.0",
-  "description": "Nexora Elite - منصة التعدين والكازينو المتكاملة",
+  "description": "Nexora Elite - منصة التعدين والكازينو المتكاملة مع بوت تيليغرام",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "bot": "node bot.js"
   },
   "dependencies": {
     "express": "^4.19.2",
@@ -27,7 +28,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "keywords": ["nexora", "mining", "casino", "telegram", "webapp"],
+  "keywords": ["nexora", "mining", "casino", "telegram", "webapp", "crypto"],
   "author": "Nexora Team",
   "license": "MIT"
 }
