@@ -6,64 +6,43 @@ mongoose.connect(process.env.MONGO_URI)
 .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err));
 
 // ==========================================
-// 1. مخطط المستخدمين (User) - الأكثر شمولاً
+// 1. مخطط المستخدمين (User)
 // ==========================================
 const UserSchema = new mongoose.Schema({
-  // الحقول الأساسية للتواصل
   telegramId: { type: String, required: true, unique: true, index: true },
   fullName: { type: String, default: 'مستخدم جديد' },
   phoneNumber: { type: String, default: 'غير محدد' },
   email: { type: String, default: '' },
   password: { type: String, default: '' },
-  
-  // الحقول المالية
   usdBalance: { type: Number, default: 0.000 },
   casinoBalance: { type: Number, default: 0.000 },
   points: { type: Number, default: 0 },
-  
-  // التعدين والطاقة
   miningEnergy: { type: Number, default: 1000 },
   miningLevel: { type: Number, default: 1 },
   vipPlanLevel: { type: Number, default: 1 },
   customMiningInvestment: { type: Number, default: 0 },
   lastMiningClick: { type: Date, default: Date.now },
-  
-  // الإعلانات
   watchedAdsCount: { type: Number, default: 0 },
   lastAdTime: { type: Number, default: 0 },
-  
-  // الكازينو
   freeCasinoSpins: { type: Number, default: 2 },
   totalCasinoPlayed: { type: Number, default: 0 },
   lastCasinoPlay: { type: Date, default: null },
-  
-  // الإحالات
   referredBy: { type: String, default: null },
   walletAddress: { type: String, default: '' },
   pendingWithdrawals: { type: Number, default: 0 },
-  
-  // الصلاحيات والأمان
-  role: { type: String, default: 'user' }, // user, admin, manager, assistant
+  role: { type: String, default: 'user' },
   verified: { type: Boolean, default: false },
   verificationCode: { type: String, default: '' },
   codeExpiry: { type: Date, default: null },
-  
-  // الإعدادات الشخصية
   language: { type: String, default: 'ar' },
-  
-  // طلبات العملات المفتوحة
   tokenRequests: { type: Array, default: [] },
-  
-  // المكافآت اليومية
   lastDailyClaimDate: { type: Date, default: null },
-  
-  // تاريخ الإنشاء والتحديث
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
 
 // ==========================================
-// 2. مخطط الإعلانات (Ad) - المدفوعة فقط
+// 2. مخطط الإعلانات (Ad)
 // ==========================================
 const AdSchema = new mongoose.Schema({
   title: { type: String, default: 'إعلان حقيقي ممول' },
@@ -88,7 +67,7 @@ const AdLogSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 4. مخطط ألعاب الكازينو (CasinoGame) - للإدارة
+// 4. مخطط ألعاب الكازينو (CasinoGame)
 // ==========================================
 const CasinoGameSchema = new mongoose.Schema({
   gameId: { type: String, required: true, unique: true },
@@ -104,7 +83,7 @@ const CasinoGameSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 5. مخطط طلبات المعاملات (TransactionRequest) - المعلقة
+// 5. مخطط طلبات المعاملات (TransactionRequest)
 // ==========================================
 const TransactionRequestSchema = new mongoose.Schema({
   userId: { type: String, required: true, index: true },
@@ -125,7 +104,7 @@ const TransactionRequestSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 6. مخطط المعاملات المالية (Transaction) - النهائية
+// 6. مخطط المعاملات المالية (Transaction)
 // ==========================================
 const TransactionSchema = new mongoose.Schema({
   userId: { type: String, required: true, index: true },
@@ -138,7 +117,7 @@ const TransactionSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 7. مخطط الإحصائيات (Stats) - للتحديث التلقائي
+// 7. مخطط الإحصائيات (Stats)
 // ==========================================
 const StatsSchema = new mongoose.Schema({
   totalUsers: { type: Number, default: 0 },
@@ -150,7 +129,7 @@ const StatsSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 8. مخطط سجل الإدارة (AdminLog) - للمتابعة
+// 8. مخطط سجل الإدارة (AdminLog)
 // ==========================================
 const AdminLogSchema = new mongoose.Schema({
   adminId: { type: String, required: true },
@@ -161,12 +140,12 @@ const AdminLogSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 9. مخطط خطط التعدين (MiningPlan) - متعددة
+// 9. مخطط خطط التعدين (MiningPlan)
 // ==========================================
 const MiningPlanSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // برونزي، فضي، ذهبي، ماسي
+  name: { type: String, required: true },
   price: { type: Number, required: true },
-  dailyReturn: { type: Number, required: true }, // النسبة المئوية
+  dailyReturn: { type: Number, required: true },
   minDays: { type: Number, default: 7 },
   maxDays: { type: Number, default: 30 },
   isActive: { type: Boolean, default: true },
