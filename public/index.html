@@ -12,75 +12,147 @@
     html, body { height: 100%; margin: 0; padding: 0; }
     body {
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Kufi Arabic", sans-serif;
-      background: radial-gradient(circle at 50% 0%, #1a1508 0%, #06070a 60%);
-      color: #e9e9f3;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 50%, #d1d8e0 100%);
+      color: #2d3436;
       overflow-x: hidden;
-      background-size: cover;
-      background-position: center;
+      min-height: 100vh;
     }
     .app { min-height: 100svh; display: flex; flex-direction: column; padding-bottom: 95px; }
     
     /* ========== الشريط العلوي ========== */
-    .topbar { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 215, 0, 0.05); }
+    .topbar { 
+      padding: 16px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+    }
     .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .brand i { color: #ffd700; font-size: 20px; filter: drop-shadow(0 0 8px #ffd700); }
-    .brand__title { font-weight: 800; font-size: 16px; color: #ffd700; }
+    .brand i { color: #b8860b; font-size: 22px; filter: drop-shadow(0 0 6px rgba(184,134,11,0.3)); }
+    .brand__title { font-weight: 900; font-size: 17px; color: #2d3436; letter-spacing: -0.5px; }
     
     /* ========== المحتوى ========== */
     .content { padding: 14px; flex: 1; }
     .tab-section { display: none; }
-    .tab-section.active { display: block; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-section.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     
     /* ========== البطاقات ========== */
     .card {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-      border: 1px solid rgba(255, 215, 0, 0.15);
-      border-radius: 24px; padding: 20px; margin-bottom: 16px;
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 24px; 
+      padding: 22px; 
+      margin-bottom: 16px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
     }
     
     /* ========== الرصيد ========== */
     .balance-box { display: flex; justify-content: space-around; align-items: center; padding: 5px 0; text-align: center; }
     .balance-item { flex: 1; }
-    .balance-label { font-size: 11px; color: rgba(233,233,243,0.6); }
-    .balance-amount { font-size: 24px; font-weight: 900; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 4px 0; }
-    .balance-amount.casino { background: linear-gradient(90deg, #00ff88, #00cc66); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .balance-divider { width: 1px; height: 40px; background: rgba(255,215,0,0.2); }
+    .balance-label { font-size: 11px; color: #636e72; font-weight: 600; }
+    .balance-amount { 
+      font-size: 26px; 
+      font-weight: 900; 
+      background: linear-gradient(135deg, #b8860b, #daa520); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      margin: 6px 0; 
+    }
+    .balance-amount.casino { 
+      background: linear-gradient(135deg, #00b894, #00a885); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+    }
+    .balance-amount.gift { 
+      background: linear-gradient(135deg, #e17055, #d63031); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+    }
+    .balance-divider { width: 1px; height: 45px; background: rgba(0,0,0,0.08); }
     
     /* ========== الإحصائيات العامة ========== */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 12px;
+      gap: 10px;
+      margin-top: 14px;
     }
     .stat-box {
-      background: rgba(255,215,0,0.05);
-      border-radius: 12px;
-      padding: 10px;
+      background: rgba(184,134,11,0.06);
+      border-radius: 16px;
+      padding: 12px;
       text-align: center;
-      border: 1px solid rgba(255,215,0,0.08);
+      border: 1px solid rgba(184,134,11,0.1);
+      transition: all 0.2s;
     }
-    .stat-box .num { font-size: 18px; font-weight: 900; color: #ffd700; }
-    .stat-box .label { font-size: 9px; color: rgba(233,233,243,0.5); }
-    .stat-box.green .num { color: #00ff88; }
-    .stat-box.red .num { color: #ff4444; }
+    .stat-box:hover { background: rgba(184,134,11,0.1); transform: scale(1.02); }
+    .stat-box .num { font-size: 20px; font-weight: 900; color: #b8860b; }
+    .stat-box .label { font-size: 9px; color: #636e72; margin-top: 4px; }
+    .stat-box.green { background: rgba(0,184,148,0.06); border-color: rgba(0,184,148,0.1); }
+    .stat-box.green .num { color: #00b894; }
+    .stat-box.red { background: rgba(214,48,49,0.06); border-color: rgba(214,48,49,0.1); }
+    .stat-box.red .num { color: #d63031; }
     
     /* ========== الأزرار ========== */
     .btn {
-      padding: 14px; border-radius: 16px; border: none; font-weight: 800; font-size: 14px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px; 
+      border-radius: 16px; 
+      border: none; 
+      font-weight: 800; 
+      font-size: 14px;
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px;
       transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .btn-deposit { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; box-shadow: 0 8px 20px rgba(255, 215, 0, 0.2); }
-    .btn-withdraw { background: rgba(255, 255, 255, 0.06); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
-    .btn-action { background: linear-gradient(90deg, #b8860b, #ffd700); color: #000; width: 100%; margin-top: 10px; }
-    .btn-danger { background: linear-gradient(135deg, #ff4444, #cc0000); color: #fff; }
-    .btn-success { background: linear-gradient(135deg, #00cc66, #009944); color: #fff; }
-    .btn:active { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .btn-deposit { 
+      background: linear-gradient(135deg, #b8860b, #daa520); 
+      color: #fff; 
+      box-shadow: 0 6px 20px rgba(184,134,11,0.3); 
+    }
+    .btn-withdraw { 
+      background: rgba(255,255,255,0.9); 
+      color: #2d3436; 
+      border: 2px solid rgba(0,0,0,0.08); 
+    }
+    .btn-action { 
+      background: linear-gradient(135deg, #00b894, #00a885); 
+      color: #fff; 
+      width: 100%; 
+      margin-top: 10px; 
+      box-shadow: 0 6px 20px rgba(0,184,148,0.3);
+    }
+    .btn-danger { 
+      background: linear-gradient(135deg, #ff6b6b, #ee5a5a); 
+      color: #fff; 
+      box-shadow: 0 6px 20px rgba(255,107,107,0.3);
+    }
+    .btn-success { 
+      background: linear-gradient(135deg, #00b894, #00a885); 
+      color: #fff; 
+      box-shadow: 0 6px 20px rgba(0,184,148,0.3);
+    }
+    .btn-info { 
+      background: linear-gradient(135deg, #74b9ff, #0984e3); 
+      color: #fff; 
+      box-shadow: 0 6px 20px rgba(116,185,255,0.3);
+    }
     .btn-sm { padding: 8px 14px; font-size: 12px; }
     
     .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
@@ -88,91 +160,339 @@
     /* ========== الشريط السفلي ========== */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; height: 78px;
-      background: rgba(6,7,10,0.94); backdrop-filter: blur(25px);
-      border-top: 1px solid rgba(255,215,0,0.15);
-      display: grid; grid-template-columns: repeat(6,1fr); padding: 5px; z-index: 999;
+      background: rgba(255,255,255,0.95); 
+      backdrop-filter: blur(25px);
+      border-top: 1px solid rgba(0,0,0,0.06);
+      display: grid; 
+      grid-template-columns: repeat(6,1fr); 
+      padding: 5px; 
+      z-index: 999;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
     }
     .nav-item {
-      background: none; border: none; color: rgba(233,233,243,0.5);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 4px; cursor: pointer; font-size: 9px; font-weight: 600; padding: 2px;
+      background: none; 
+      border: none; 
+      color: #b2bec3;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center;
+      gap: 4px; 
+      cursor: pointer; 
+      font-size: 9px; 
+      font-weight: 700; 
+      padding: 2px;
+      transition: all 0.2s;
     }
-    .nav-item i { font-size: 16px; }
-    .nav-item.active { color: #ffd700; }
+    .nav-item i { font-size: 18px; transition: all 0.2s; }
+    .nav-item.active { color: #b8860b; }
+    .nav-item.active i { transform: translateY(-2px); filter: drop-shadow(0 2px 4px rgba(184,134,11,0.3)); }
+    .nav-item:active { transform: scale(0.9); }
     
     /* ========== الحقول ========== */
     .input-group { margin-bottom: 14px; }
-    .input-group label { display: block; font-size: 12px; color: rgba(233,233,243,0.6); margin-bottom: 6px; }
-    .input-field { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; color: #fff; outline: none; font-size: 14px; }
-    .input-field option { background: #0c0e12; color: #fff; }
-    .wallet-address-box { background: rgba(255,215,0,0.06); border: 1px dashed #ffd700; padding: 12px; border-radius: 12px; font-size: 11px; font-family: monospace; word-break: break-all; margin-top: 5px; color: #fff; text-align: left; }
+    .input-group label { display: block; font-size: 12px; color: #636e72; margin-bottom: 6px; font-weight: 600; }
+    .input-field { 
+      width: 100%; 
+      padding: 14px; 
+      background: rgba(255,255,255,0.9); 
+      border: 2px solid rgba(0,0,0,0.08); 
+      border-radius: 14px; 
+      color: #2d3436; 
+      outline: none; 
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .input-field:focus { border-color: #b8860b; box-shadow: 0 0 0 4px rgba(184,134,11,0.1); }
+    .input-field option { background: #fff; color: #2d3436; }
+    .wallet-address-box { 
+      background: rgba(184,134,11,0.05); 
+      border: 2px dashed #b8860b; 
+      padding: 14px; 
+      border-radius: 14px; 
+      font-size: 12px; 
+      font-family: 'Courier New', monospace; 
+      word-break: break-all; 
+      margin-top: 5px; 
+      color: #2d3436;
+      text-align: left;
+      direction: ltr;
+    }
     
     /* ========== شاشة الدخول ========== */
     .auth-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.94); z-index: 10000;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
+      background: rgba(245,247,250,0.98); 
+      z-index: 10000;
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px;
     }
     .auth-modal {
-      width: 100%; max-width: 400px; background: #0c0e12;
-      border: 1px solid #ffd700; border-radius: 24px; padding: 25px;
-      box-shadow: 0 0 30px rgba(255,215,0,0.2);
+      width: 100%; 
+      max-width: 420px; 
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08); 
+      border-radius: 28px; 
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
     }
-    .lang-switcher-top { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); color: #ffd700; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .lang-switcher-top { 
+      background: rgba(255,255,255,0.9); 
+      border: 1px solid rgba(0,0,0,0.1); 
+      color: #b8860b; 
+      padding: 6px 12px; 
+      border-radius: 10px; 
+      font-size: 12px; 
+      font-weight: bold; 
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-switcher-top:hover { background: #b8860b; color: #fff; }
     
     /* ========== التقدم ========== */
-    .progress-container { margin-top: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,215,0,0.1); }
-    .progress-header { display: flex; justify-content: space-between; font-size: 11px; color: rgba(233,233,243,0.7); margin-bottom: 5px; }
-    .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
-    .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #00cc66); border-radius: 999px; transition: width 0.5s; }
-    .ad-status { margin-top: 10px; text-align: center; font-weight: bold; display: none; }
-    .ad-note { color: rgba(233,233,243,0.4); font-size: 10px; display: block; margin-top: 5px; }
+    .progress-container { 
+      margin-top: 15px; 
+      background: rgba(255,255,255,0.9); 
+      border-radius: 14px; 
+      padding: 12px; 
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .progress-header { display: flex; justify-content: space-between; font-size: 12px; color: #636e72; margin-bottom: 6px; font-weight: 600; }
+    .progress-bar-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.06); border-radius: 999px; overflow: hidden; }
+    .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00b894, #00a885); border-radius: 999px; transition: width 0.5s ease; }
+    .ad-status { margin-top: 10px; text-align: center; font-weight: bold; display: none; color: #00b894; }
+    .ad-note { color: #636e72; font-size: 10px; display: block; margin-top: 6px; }
     
     /* ========== الإدارة ========== */
     .admin-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 15px; }
-    .admin-stat-box { background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 10px; text-align: center; }
-    .admin-stat-box .num { font-size: 22px; font-weight: 900; color: #ffd700; }
-    .admin-stat-box .label { font-size: 10px; color: rgba(233,233,243,0.5); }
-    .admin-table { width: 100%; font-size: 11px; border-collapse: collapse; }
-    .admin-table th { background: rgba(255,215,0,0.1); padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,215,0,0.1); }
-    .admin-table td { padding: 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    .badge { padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; }
-    .badge-pending { background: #ffaa00; color: #000; }
-    .badge-approved { background: #00cc66; color: #000; }
-    .badge-rejected { background: #ff4444; color: #fff; }
+    .admin-stat-box { 
+      background: rgba(184,134,11,0.06); 
+      border: 1px solid rgba(184,134,11,0.1); 
+      border-radius: 14px; 
+      padding: 12px; 
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .admin-stat-box:hover { transform: translateY(-2px); }
+    .admin-stat-box .num { font-size: 24px; font-weight: 900; color: #b8860b; }
+    .admin-stat-box .label { font-size: 10px; color: #636e72; margin-top: 4px; }
+    .admin-table { width: 100%; font-size: 11px; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
+    .admin-table th { background: rgba(184,134,11,0.1); padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.06); color: #2d3436; font-weight: 700; }
+    .admin-table td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.04); color: #2d3436; }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+    .badge-pending { background: #fdcb6e; color: #2d3436; }
+    .badge-approved { background: #00b894; color: #fff; }
+    .badge-rejected { background: #ff6b6b; color: #fff; }
     
     /* ========== ألعاب الكازينو ========== */
-    .game-container { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 16px; margin-top: 10px; border: 1px solid rgba(255,215,0,0.1); text-align: center; }
-    .wheel-container { position: relative; width: 180px; height: 180px; margin: 0 auto 15px; }
-    .wheel-canvas { width: 180px; height: 180px; border-radius: 50%; border: 4px solid #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.3); }
-    .wheel-pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); font-size: 28px; color: #ff4444; filter: drop-shadow(0 0 10px #ff4444); z-index: 10; }
-    .dice-container { display: flex; justify-content: center; gap: 20px; margin: 15px 0; }
-    .dice-box { width: 70px; height: 70px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; color: #222; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: transform 0.3s; }
+    .game-container { 
+      background: rgba(255,255,255,0.9); 
+      border-radius: 20px; 
+      padding: 20px; 
+      margin-top: 12px; 
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .wheel-container { position: relative; width: 200px; height: 200px; margin: 0 auto 20px; }
+    .wheel-canvas { 
+      width: 200px; 
+      height: 200px; 
+      border-radius: 50%; 
+      border: 4px solid #b8860b; 
+      box-shadow: 0 0 40px rgba(184,134,11,0.2);
+      background: #fff;
+    }
+    .wheel-pointer { 
+      position: absolute; 
+      top: -14px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      font-size: 32px; 
+      color: #d63031; 
+      filter: drop-shadow(0 0 8px rgba(214,48,49,0.4)); 
+      z-index: 10; 
+    }
+    
+    .dice-container { display: flex; justify-content: center; gap: 24px; margin: 20px 0; }
+    .dice-box { 
+      width: 80px; 
+      height: 80px; 
+      background: linear-gradient(135deg, #fff, #f5f7fa); 
+      border-radius: 16px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 42px; 
+      color: #2d3436; 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.8);
+      border: 2px solid rgba(0,0,0,0.06);
+      transition: transform 0.3s;
+    }
     .dice-box.rolling { animation: diceRoll 0.6s ease; }
-    @keyframes diceRoll { 0% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(90deg) scale(1.2); } 50% { transform: rotate(180deg) scale(0.8); } 75% { transform: rotate(270deg) scale(1.1); } 100% { transform: rotate(360deg) scale(1); } }
-    .crash-container { background: rgba(0,0,0,0.4); border-radius: 12px; padding: 15px; margin: 10px 0; }
-    .crash-multiplier { font-size: 36px; font-weight: 900; color: #ffd700; transition: color 0.3s; }
-    .crash-progress-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; margin: 10px 0; overflow: hidden; }
-    .crash-progress-fill { height: 100%; background: linear-gradient(90deg, #00ff88, #ffd700, #ff4444); border-radius: 5px; transition: width 0.1s; width: 0%; }
-    .crash-chicken { font-size: 48px; display: inline-block; animation: chickenRun 0.3s infinite alternate; }
-    @keyframes chickenRun { 0% { transform: translateX(0px) rotate(-5deg); } 100% { transform: translateX(20px) rotate(5deg); } }
+    @keyframes diceRoll { 
+      0% { transform: rotate(0deg) scale(1); } 
+      25% { transform: rotate(90deg) scale(1.2); } 
+      50% { transform: rotate(180deg) scale(0.8); } 
+      75% { transform: rotate(270deg) scale(1.1); } 
+      100% { transform: rotate(360deg) scale(1); } 
+    }
+    
+    .crash-container { 
+      background: rgba(255,255,255,0.9); 
+      border-radius: 16px; 
+      padding: 20px; 
+      margin: 12px 0;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .crash-multiplier { 
+      font-size: 48px; 
+      font-weight: 900; 
+      color: #00b894; 
+      transition: color 0.3s;
+      text-shadow: 0 2px 10px rgba(0,184,148,0.2);
+    }
+    .crash-multiplier.danger { color: #d63031; text-shadow: 0 2px 10px rgba(214,48,49,0.2); }
+    .crash-progress-bg { 
+      width: 100%; 
+      height: 12px; 
+      background: rgba(0,0,0,0.06); 
+      border-radius: 6px; 
+      margin: 12px 0; 
+      overflow: hidden;
+    }
+    .crash-progress-fill { 
+      height: 100%; 
+      background: linear-gradient(90deg, #00b894, #b8860b, #d63031); 
+      border-radius: 6px; 
+      transition: width 0.1s linear; 
+      width: 0%; 
+    }
+    
+    /* ========== خطط التعدين ========== */
+    .mining-plan-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(245,247,250,0.95));
+      border: 2px solid rgba(184,134,11,0.15);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .mining-plan-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #b8860b, #daa520);
+    }
+    .mining-plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(184,134,11,0.15);
+      border-color: rgba(184,134,11,0.3);
+    }
+    .mining-plan-card.active {
+      border-color: #00b894;
+      box-shadow: 0 0 0 3px rgba(0,184,148,0.1);
+    }
+    .mining-plan-card.active::before {
+      background: linear-gradient(90deg, #00b894, #00a885);
+    }
+    .plan-name { font-size: 16px; font-weight: 800; color: #2d3436; margin-bottom: 6px; }
+    .plan-price { font-size: 22px; font-weight: 900; color: #b8860b; }
+    .plan-return { font-size: 12px; color: #00b894; font-weight: 600; }
+    .plan-duration { font-size: 11px; color: #636e72; }
+    
+    /* ========== إشعارات ========== */
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #fff;
+      padding: 14px 24px;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      z-index: 10001;
+      font-weight: 600;
+      font-size: 13px;
+      transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      border: 1px solid rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notification.show { transform: translateX(-50%) translateY(0); }
+    .notification.success { border-left: 4px solid #00b894; }
+    .notification.error { border-left: 4px solid #d63031; }
+    .notification.warning { border-left: 4px solid #fdcb6e; }
+    
+    /* ========== رسالة السحب الأسبوعي ========== */
+    .withdrawal-limit {
+      background: linear-gradient(135deg, rgba(253,203,110,0.1), rgba(253,203,110,0.05));
+      border: 1px solid rgba(253,203,110,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 12px;
+      color: #2d3436;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .withdrawal-limit.locked {
+      background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,107,107,0.05));
+      border-color: rgba(255,107,107,0.3);
+    }
+    
+    /* ========== تأثيرات إضافية ========== */
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .shine {
+      position: relative;
+      overflow: hidden;
+    }
+    .shine::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: rotate(45deg);
+      animation: shine 3s infinite;
+    }
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
   </style>
-</head>
-<body>
+</head><body>
+
+<!-- ===== إشعارات ===== -->
+<div id="notification" class="notification">
+  <span id="notifIcon">✅</span>
+  <span id="notifText">تم بنجاح!</span>
+</div>
 
 <!-- ===== شاشة الدخول ===== -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal">
-    <div style="text-align:center;margin-bottom:20px;">
-      <i class="fa-solid fa-cubes-nordic" style="font-size:40px;color:#ffd700;filter:drop-shadow(0 0 10px #ffd700);"></i>
-      <h3 style="color:#ffd700;margin:10px 0 5px 0;">Nexora Elite</h3>
-      <p style="font-size:11px;color:rgba(233,233,243,0.5);margin:0;">منصة التعدين والكازينو الأقوى</p>
+    <div style="text-align:center;margin-bottom:24px;">
+      <i class="fa-solid fa-cubes" style="font-size:48px;color:#b8860b;filter:drop-shadow(0 0 12px rgba(184,134,11,0.3));"></i>
+      <h3 style="color:#2d3436;margin:12px 0 6px 0;font-size:22px;font-weight:900;">Nexora Elite</h3>
+      <p style="font-size:12px;color:#636e72;margin:0;">منصة التعدين والكازينو الفاخرة</p>
     </div>
     
-    <!-- حقل الاسم (يظهر في وضع التسجيل فقط) -->
+    <!-- الاسم (يظهر في التسجيل فقط) -->
     <div class="input-group" id="groupRegName" style="display:none;">
       <label>الاسم الكامل</label>
-      <input type="text" id="authName" class="input-field" placeholder="John Doe">
+      <input type="text" id="authName" class="input-field" placeholder="محمد أحمد">
     </div>
     
     <!-- البريد الإلكتروني -->
@@ -181,13 +501,12 @@
       <input type="email" id="authEmail" class="input-field" placeholder="example@mail.com">
     </div>
     
-    <!-- رقم الهاتف (اختياري + رمز الدولة) -->
+    <!-- رقم الهاتف (اختياري - بدون رقم سعودي) -->
     <div class="input-group" id="groupAuthPhone">
       <label>رقم الهاتف (اختياري)</label>
       <div style="display:flex;gap:8px;align-items:center;">
-        <select id="countryCode" class="input-field" style="width:100px;padding:12px;">
-          <option value="+966">🇸🇦 +966</option>
-          <option value="+967">🇾🇪 +967</option> <!-- ✅ تم إضافة رمز اليمن -->
+        <select id="countryCode" class="input-field" style="width:110px;padding:12px;">
+          <option value="+967">🇾🇪 +967</option>
           <option value="+971">🇦🇪 +971</option>
           <option value="+20">🇪🇬 +20</option>
           <option value="+212">🇲🇦 +212</option>
@@ -201,9 +520,9 @@
           <option value="+49">🇩🇪 +49</option>
           <option value="+33">🇫🇷 +33</option>
         </select>
-        <input type="text" id="authPhone" class="input-field" placeholder="مثال: 512345678" style="flex:1;">
+        <input type="text" id="authPhone" class="input-field" placeholder="512345678" style="flex:1;">
       </div>
-      <small style="color:rgba(233,233,243,0.4);font-size:10px;">يمكنك ترك الحقل فارغاً</small>
+      <small style="color:#636e72;font-size:10px;">يمكنك ترك الحقل فارغاً</small>
     </div>
     
     <!-- كلمة المرور -->
@@ -212,23 +531,23 @@
       <input type="password" id="authPassword" class="input-field" placeholder="••••••••">
     </div>
     
-    <!-- رمز التحقق (يظهر بعد التسجيل) -->
+    <!-- رمز التحقق -->
     <div class="input-group" id="groupVerifyCode" style="display:none;">
       <label>🔑 رمز التأكيد المرسل لبريدك</label>
-      <input type="text" id="verifyCodeInput" class="input-field" placeholder="أدخل الرقم 6 أرقام">
+      <input type="text" id="verifyCodeInput" class="input-field" placeholder="أدخل 6 أرقام">
       <button class="btn btn-action" onclick="verifyEmailCode()" style="margin-top:8px;">تفعيل الحساب</button>
     </div>
     
     <!-- زر الإجراء الرئيسي -->
-    <button class="btn btn-deposit" id="btnMainAuth" onclick="handleAuthAction()" style="width:100%;margin-top:10px;">تسجيل الدخول</button>
+    <button class="btn btn-deposit" id="btnMainAuth" onclick="handleAuthAction()" style="width:100%;margin-top:12px;">تسجيل الدخول</button>
     
-    <div style="display:flex;justify-content:space-between;margin-top:15px;font-size:12px;">
-      <span onclick="toggleAuthMode('register')" style="color:#ffd700;cursor:pointer;font-weight:bold;">إنشاء حساب</span>
-      <span onclick="toggleAuthMode('recover')" style="color:rgba(233,233,243,0.6);cursor:pointer;">نسيت كلمة السر؟</span>
+    <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:13px;">
+      <span onclick="toggleAuthMode('register')" style="color:#b8860b;cursor:pointer;font-weight:700;">إنشاء حساب</span>
+      <span onclick="toggleAuthMode('recover')" style="color:#636e72;cursor:pointer;">نسيت كلمة السر؟</span>
     </div>
     
-    <!-- زر الإدارة (في أسفل شاشة الدخول) -->
-    <button onclick="openAdminFromAuth()" style="background:none;border:none;color:rgba(255,215,0,0.5);font-size:11px;cursor:pointer;margin-top:12px;text-align:center;width:100%;">
+    <!-- زر الإدارة -->
+    <button onclick="openAdminFromAuth()" style="background:none;border:none;color:#b8860b;font-size:11px;cursor:pointer;margin-top:14px;text-align:center;width:100%;opacity:0.6;">
       ⚙️ إدارة
     </button>
   </div>
@@ -240,15 +559,15 @@
   <!-- ===== الشريط العلوي ===== -->
   <header class="topbar">
     <div class="brand" onclick="toggleAdmin()">
-      <i class="fa-solid fa-cubes-nordic"></i>
+      <i class="fa-solid fa-cubes"></i>
       <div class="brand__title" id="topBrandTitle">Nexora Elite</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <div onclick="claimDailyBonus()" style="background:linear-gradient(135deg,#2b1f0c,#110e05);border:1px solid #ffd700;border-radius:12px;padding:6px 10px;cursor:pointer;font-size:11px;color:#ffd700;">
+      <div onclick="claimDailyBonus()" style="background:linear-gradient(135deg,#b8860b,#daa520);border-radius:12px;padding:6px 12px;cursor:pointer;font-size:11px;color:#fff;font-weight:700;box-shadow:0 4px 12px rgba(184,134,11,0.3);">
         <i class="fa-solid fa-gift"></i> <span id="miniBonusText">مكافأة اليوم</span>
       </div>
       <button class="lang-switcher-top" onclick="switchLanguage()">EN</button>
-      <div style="font-size:11px;color:#ffd700;background:rgba(255,215,0,0.1);padding:4px 8px;border-radius:8px;">VIP 1</div>
+      <div style="font-size:11px;color:#b8860b;background:rgba(184,134,11,0.1);padding:4px 10px;border-radius:10px;font-weight:700;">VIP 1</div>
     </div>
   </header>
 
@@ -268,13 +587,18 @@
             <div class="balance-label">🎰 رصيد الكازينو</div>
             <div class="balance-amount casino" id="casinoBalanceAmount">0.000</div>
           </div>
+          <div class="balance-divider"></div>
+          <div class="balance-item">
+            <div class="balance-label">🎁 نقاط الهدايا</div>
+            <div class="balance-amount gift" id="giftPointsAmount">0</div>
+          </div>
         </div>
         <div class="action-buttons">
           <button class="btn btn-deposit" onclick="switchTab('sec-wallet')">إيداع</button>
           <button class="btn btn-withdraw" onclick="switchTab('sec-wallet')">سحب</button>
         </div>
         
-        <!-- ===== الإحصائيات العامة ===== -->
+        <!-- الإحصائيات -->
         <div class="stats-grid">
           <div class="stat-box">
             <div class="num" id="statsUsers">0</div>
@@ -291,33 +615,34 @@
         </div>
       </article>
 
-      <!-- ===== التعدين ===== -->
+      <!-- التعدين -->
       <div style="text-align:center;padding:10px 0;">
-        <div onclick="handleMining()" style="width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,0.25) 0%,rgba(26,21,8,0.8) 70%);border:3px dashed #ffd700;display:grid;place-items:center;margin:0 auto;cursor:pointer;box-shadow:0 0 30px rgba(255,215,0,0.3);">
-          <i class="fa-solid fa-atom" style="font-size:48px;color:#ffd700;filter:drop-shadow(0 0 15px #ffd700);"></i>
+        <div onclick="handleMining()" style="width:180px;height:180px;border-radius:50%;background:linear-gradient(135deg,rgba(184,134,11,0.2),rgba(218,165,32,0.1));border:3px solid #b8860b;display:grid;place-items:center;margin:0 auto;cursor:pointer;box-shadow:0 0 40px rgba(184,134,11,0.2);transition:all 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          <i class="fa-solid fa-atom" style="font-size:52px;color:#b8860b;filter:drop-shadow(0 0 15px rgba(184,134,11,0.3));"></i>
         </div>
-        <div style="width:100%;margin-top:15px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(233,233,243,0.7);">
-            <span>الطاقة</span>
+        <div style="width:100%;margin-top:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#636e72;font-weight:600;">
+            <span>⚡ الطاقة</span>
             <span id="energyText">1000 / 1000</span>
           </div>
-          <div style="width:100%;height:12px;background:rgba(255,255,255,0.05);border-radius:999px;border:1px solid rgba(255,255,255,0.1);">
-            <div id="energyFill" style="width:100%;height:100%;background:linear-gradient(90deg,#b8860b,#ffd700);border-radius:999px;"></div>
+          <div style="width:100%;height:14px;background:rgba(0,0,0,0.05);border-radius:999px;border:1px solid rgba(0,0,0,0.06);overflow:hidden;">
+            <div id="energyFill" style="width:100%;height:100%;background:linear-gradient(90deg,#b8860b,#daa520);border-radius:999px;transition:width 0.5s;"></div>
           </div>
         </div>
       </div>
 
-      <!-- ===== خطط التعدين ===== -->
-      <h4 style="color:#ffd700;margin:20px 0 10px 0;">⛏️ خطط التعدين</h4>
+      <!-- خطط التعدين -->
+      <h4 style="color:#2d3436;margin:24px 0 12px 0;font-size:16px;font-weight:800;">⛏️ خطط التعدين</h4>
       <div id="miningPlansContainer">
         <!-- سيتم تحميلها من الخادم -->
+        <p style="text-align:center;color:#636e72;font-size:13px;">جاري تحميل الخطط...</p>
       </div>
 
-      <!-- ===== الإعلانات ===== -->
+      <!-- الإعلانات -->
       <article class="card">
-        <h5 style="color:#ffd700;margin:0 0 6px 0;"><i class="fa-solid fa-rectangle-ad"></i> الإعلانات الممولة</h5>
-        <p style="font-size:11px;color:rgba(233,233,243,0.6);margin:0 0 10px 0;">كل 15 إعلان = 0.01$ في رصيد الكازينو</p>
-        <button class="btn btn-action" onclick="handleWatchAd()" style="padding:10px;font-size:12px;">
+        <h5 style="color:#2d3436;margin:0 0 8px 0;font-size:15px;font-weight:800;"><i class="fa-solid fa-rectangle-ad" style="color:#b8860b;"></i> الإعلانات الممولة</h5>
+        <p style="font-size:12px;color:#636e72;margin:0 0 12px 0;">كل 15 إعلان = 0.01$ في رصيد الكازينو</p>
+        <button class="btn btn-action" onclick="handleWatchAd()" style="padding:12px;font-size:13px;">
           <i class="fa-solid fa-play"></i> مشاهدة إعلان
         </button>
         <div class="progress-container">
@@ -336,57 +661,60 @@
 
     <!-- ======== الكازينو ======== -->
     <section id="sec-casino" class="tab-section">
-      <h3 style="color:#ffd700;margin-top:0;display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="color:#2d3436;margin-top:0;display:flex;justify-content:space-between;align-items:center;font-size:18px;font-weight:900;">
         <span>🎰 كازينو Nexora</span>
-        <span id="freeSpinsBadge" style="font-size:11px;background:#ffaa00;color:#000;padding:3px 8px;border-radius:20px;font-weight:800;">جولات مجانية: 2</span>
+        <span id="freeSpinsBadge" style="font-size:12px;background:#fdcb6e;color:#2d3436;padding:4px 10px;border-radius:20px;font-weight:800;">جولات مجانية: 2</span>
       </h3>
 
       <!-- عجلة الحظ -->
       <article class="card">
-        <h4 style="color:#ffd700;margin:0 0 10px 0;">🎡 عجلة الحظ</h4>
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">🎡 عجلة الحظ</h4>
         <div class="game-container">
           <div class="wheel-container">
             <div class="wheel-pointer">▼</div>
-            <canvas id="wheelCanvas" class="wheel-canvas" width="180" height="180"></canvas>
+            <canvas id="wheelCanvas" class="wheel-canvas" width="200" height="200"></canvas>
           </div>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-            <input type="number" id="wheelBet" class="input-field" style="width:120px;padding:8px;" placeholder="رهان" value="0" step="0.01">
-            <button class="btn btn-deposit" onclick="spinWheel()" style="padding:8px 20px;">لف 🎡</button>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;">
+            <input type="number" id="wheelBet" class="input-field" style="width:120px;padding:10px;" placeholder="رهان" value="0" step="0.01" min="0">
+            <button class="btn btn-deposit" onclick="spinWheel()" style="padding:10px 24px;">🎡 لف</button>
+            <button class="btn btn-info" onclick="spinWheel(true)" style="padding:10px 16px;">🎟️ مجاني</button>
           </div>
-          <div id="wheelResult" style="margin-top:10px;font-size:16px;font-weight:bold;"></div>
+          <div id="wheelResult" style="margin-top:12px;font-size:16px;font-weight:800;text-align:center;"></div>
+          <div id="wheelProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
         </div>
       </article>
 
       <!-- لعبة الهامش -->
       <article class="card">
-        <h4 style="color:#ffd700;margin:0 0 10px 0;">📊 لعبة الهامش</h4>
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">📊 لعبة الهامش</h4>
         <div class="game-container">
           <div class="input-group">
-            <label>💰 المبلغ (من رصيد الكازينو)</label>
-            <input type="number" id="marginBet" class="input-field" placeholder="1.00" min="0.01" max="10" step="0.01" value="0.01">
+            <label>💰 المبلغ (من رصيد الكازينو + نقاط الهدايا)</label>
+            <input type="number" id="marginBet" class="input-field" placeholder="1.00" min="0.01" max="100" step="0.01" value="0.01">
           </div>
           <div class="input-group">
-            <label>📊 نسبة الفوز: <span id="percentageDisplay">50%</span></label>
-            <input type="range" id="marginSlider" min="1" max="100" value="50" oninput="document.getElementById('percentageDisplay').innerText=this.value+'%'" style="width:100%;accent-color:#ffd700;">
+            <label>📊 نسبة الفوز: <span id="percentageDisplay" style="color:#b8860b;font-weight:800;">50%</span></label>
+            <input type="range" id="marginSlider" min="1" max="100" value="50" oninput="document.getElementById('percentageDisplay').innerText=this.value+'%'" style="width:100%;accent-color:#b8860b;height:8px;">
           </div>
-          <button class="btn btn-deposit" onclick="playMarginGame()" style="width:100%;padding:10px;">
+          <button class="btn btn-deposit" onclick="playMarginGame()" style="width:100%;padding:12px;">
             <i class="fa-solid fa-dice"></i> اقلب الحظ
           </button>
-          <div id="marginResult" style="margin-top:10px;font-size:14px;font-weight:bold;"></div>
+          <div id="marginResult" style="margin-top:12px;font-size:14px;font-weight:800;text-align:center;"></div>
+          <div id="marginProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
         </div>
       </article>
 
       <!-- لعبة النرد -->
       <article class="card">
-        <h4 style="color:#ffd700;margin:0 0 10px 0;">🎲 لعبة النرد</h4>
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">🎲 لعبة النرد</h4>
         <div class="game-container">
           <div class="dice-container">
             <div class="dice-box" id="dice1">⚀</div>
             <div class="dice-box" id="dice2">⚀</div>
           </div>
           <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;">
-            <input type="number" id="diceBet" class="input-field" style="width:100px;padding:8px;" placeholder="رهان" value="0.01" step="0.01">
-            <select id="diceGuess" class="input-field" style="width:120px;padding:8px;">
+            <input type="number" id="diceBet" class="input-field" style="width:100px;padding:10px;" placeholder="رهان" value="0.01" step="0.01" min="0">
+            <select id="diceGuess" class="input-field" style="width:120px;padding:10px;">
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -396,26 +724,49 @@
               <option value="even">زوجي</option>
               <option value="odd">فردي</option>
             </select>
-            <button class="btn btn-deposit" onclick="playDiceGame()" style="padding:8px 20px;">رمي 🎲</button>
+            <button class="btn btn-deposit" onclick="playDiceGame()" style="padding:10px 20px;">🎲 رمي</button>
           </div>
-          <div id="diceResult" style="margin-top:10px;font-size:16px;font-weight:bold;"></div>
+          <div id="diceResult" style="margin-top:12px;font-size:16px;font-weight:800;text-align:center;"></div>
+          <div id="diceProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
+        </div>
+      </article>
+
+      <!-- لعبة Crash -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">💥 لعبة Crash</h4>
+        <div class="game-container">
+          <div class="crash-container">
+            <div style="text-align:center;">
+              <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
+              <div class="crash-progress-bg">
+                <div class="crash-progress-fill" id="crashProgressFill"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin-top:10px;">
+              <input type="number" id="crashBet" class="input-field" style="width:100px;padding:10px;" placeholder="رهان" value="0.01" step="0.01" min="0">
+              <button class="btn btn-deposit" id="crashStartBtn" onclick="startCrashGame()">🚀 ابدأ</button>
+              <button class="btn btn-danger" id="crashCashoutBtn" onclick="cashoutCrash()" disabled style="opacity:0.5;">💰 اسحب</button>
+            </div>
+            <div id="crashResult" style="margin-top:12px;font-size:14px;font-weight:800;text-align:center;"></div>
+            <div id="crashProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
+          </div>
         </div>
       </article>
     </section>
 
     <!-- ======== صنع العملة ======== -->
     <section id="sec-tokencreator" class="tab-section">
-      <h3 style="color:#ffd700;margin-top:0;"><i class="fa-solid fa-coins"></i> صانع العملات</h3>
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-coins" style="color:#b8860b;"></i> صانع العملات</h3>
       <article class="card">
         <div class="input-group"><label>اسم العملة</label><input type="text" id="tokenName" class="input-field" placeholder="Nexora Gold"></div>
         <div class="input-group"><label>كود العملة</label><input type="text" id="tokenSymbol" class="input-field" placeholder="NXG"></div>
         <div class="input-group"><label>الشعار</label><input type="file" id="tokenLogoFile" class="input-field" style="padding:8px;" accept="image/*"></div>
-        <div style="background:rgba(255,215,0,0.04);padding:12px;border-radius:12px;font-size:12px;border:1px solid rgba(255,215,0,0.15);margin-bottom:15px;">
-          <div style="font-weight:bold;color:#ffd700;">الرسوم: 10 USDT</div>
+        <div style="background:rgba(184,134,11,0.05);padding:14px;border-radius:14px;font-size:13px;border:1px solid rgba(184,134,11,0.15);margin-bottom:15px;">
+          <div style="font-weight:800;color:#b8860b;">الرسوم: 10 USDT</div>
         </div>
         <div class="input-group"><label>قيمة التمويل (اختياري)</label><input type="number" id="tokenFundingAmount" class="input-field" placeholder="0.00"></div>
-        <button class="btn btn-deposit" style="width:100%;margin-bottom:10px;" onclick="payTokenFees()"><i class="fa-solid fa-wallet"></i> دفع من الرصيد</button>
-        <div style="border-top:1px dashed rgba(255,215,0,0.2);padding-top:15px;">
+        <button class="btn btn-deposit" style="width:100%;margin-bottom:12px;" onclick="payTokenFees()"><i class="fa-solid fa-wallet"></i> دفع من الرصيد</button>
+        <div style="border-top:1px dashed rgba(0,0,0,0.1);padding-top:15px;">
           <div class="input-group"><label>إثبات الدفع (Hash)</label><input type="text" id="tokenPaymentProof" class="input-field" placeholder="أدخل الهاش"></div>
           <button class="btn btn-action" style="width:100%;" onclick="submitTokenRequest()">إرسال الطلب</button>
         </div>
@@ -424,12 +775,12 @@
 
     <!-- ======== الإعلانات الممولة ======== -->
     <section id="sec-ads" class="tab-section">
-      <h3 style="color:#ffd700;margin-top:0;"><i class="fa-solid fa-rectangle-ad"></i> نشر حملة</h3>
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-rectangle-ad" style="color:#b8860b;"></i> نشر حملة</h3>
       <article class="card">
         <div class="input-group"><label>رابط الإعلان</label><input type="url" id="adLink" class="input-field" placeholder="https://..."></div>
         <div class="input-group"><label>المنصة</label><select id="adPlatform" class="input-field"><option value="telegram">تيليغرام</option><option value="youtube">يوتيوب</option><option value="website">موقع</option></select></div>
         <div class="input-group"><label>عدد المشاهدات</label><input type="number" id="adViews" class="input-field" placeholder="1000" min="100" value="1000" oninput="document.getElementById('adTotalCost').innerText=(this.value*0.005).toFixed(2)"></div>
-        <div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:10px;text-align:center;margin:10px 0;">
+        <div style="background:rgba(184,134,11,0.05);border:1px solid rgba(184,134,11,0.15);border-radius:14px;padding:12px;text-align:center;margin:12px 0;font-weight:800;color:#b8860b;">
           التكلفة: <span id="adTotalCost">5.00</span> USDT
         </div>
         <button class="btn btn-deposit" style="width:100%;" onclick="submitAdCampaign()"><i class="fa-solid fa-credit-card"></i> دفع وتفعيل</button>
@@ -439,66 +790,98 @@
     <!-- ======== المحفظة ======== -->
     <section id="sec-wallet" class="tab-section">
       <article class="card">
-        <h4 style="color:#ffd700;margin-top:0;"><i class="fa-solid fa-wallet"></i> المحفظة</h4>
-        <div style="background:rgba(255,255,255,0.02);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);">
-          <span style="font-size:12px;color:#ffd700;font-weight:bold;">عنوانك (TRC20):</span>
+        <h4 style="color:#2d3436;margin-top:0;font-size:16px;font-weight:800;"><i class="fa-solid fa-wallet" style="color:#b8860b;"></i> المحفظة</h4>
+        <div style="background:rgba(255,255,255,0.9);padding:14px;border-radius:14px;border:1px solid rgba(0,0,0,0.06);">
+          <span style="font-size:13px;color:#b8860b;font-weight:800;">عنوانك (TRC20):</span>
           <div class="wallet-address-box" id="trcAddress">0x2975dc1f8188c30b2a4be0ec27e33494da66cb46</div>
-          <span style="font-size:12px;color:#ffd700;font-weight:bold;display:block;margin-top:10px;">🏦 عنوان المنصة:</span>
+          <span style="font-size:13px;color:#b8860b;font-weight:800;display:block;margin-top:12px;">🏦 عنوان المنصة:</span>
           <div class="wallet-address-box" id="platformAddress">0x2975dc1f8188c30b2a4be0ec27e33494da66cb46</div>
-          <button class="btn btn-deposit" style="padding:6px;width:100%;margin-top:5px;font-size:12px;" onclick="copyPlatformAddress()">نسخ العنوان</button>
+          <button class="btn btn-deposit" style="padding:8px;width:100%;margin-top:8px;font-size:12px;" onclick="copyPlatformAddress()">📋 نسخ العنوان</button>
         </div>
+        
+        <!-- رسالة حد السحب الأسبوعي -->
+        <div class="withdrawal-limit" id="withdrawalLimitMsg">
+          <i class="fa-solid fa-circle-info" style="color:#b8860b;"></i>
+          <span>يمكنك السحب 3 مرات في الأسبوع فقط</span>
+        </div>
+        
         <div class="input-group"><label>المبلغ (USDT)</label><input type="number" id="txAmount" class="input-field" placeholder="0.00"></div>
         <div class="input-group"><label>هاش التحويل</label><input type="text" id="txHash" class="input-field" placeholder="أدخل الهاش"></div>
         <div class="action-buttons">
-          <button class="btn btn-deposit" onclick="sendDeposit()">إرسال إثبات</button>
-          <button class="btn btn-withdraw" onclick="sendWithdraw()">طلب سحب</button>
+          <button class="btn btn-deposit" onclick="sendDeposit()">📥 إرسال إثبات</button>
+          <button class="btn btn-withdraw" onclick="sendWithdraw()">📤 طلب سحب</button>
         </div>
       </article>
     </section>
 
     <!-- ======== الإعدادات ======== -->
     <section id="sec-settings" class="tab-section">
-      <h3 style="color:#ffd700;margin-top:0;"><i class="fa-solid fa-sliders"></i> الإعدادات</h3>
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-sliders" style="color:#b8860b;"></i> الإعدادات</h3>
       <article class="card">
-        <div style="border-bottom:1px solid rgba(255,215,0,0.1);padding-bottom:15px;margin-bottom:15px;">
-          <div style="font-size:12px;color:rgba(233,233,243,0.6);">رابط الإحالة</div>
-          <input type="text" id="referralLinkField" class="input-field" value="" readonly style="margin:10px 0;text-align:left;direction:ltr;border:1px dashed #ffd700;">
-          <button class="btn btn-deposit" style="padding:10px;width:100%;" onclick="copyReferralLink()">نسخ الرابط</button>
+        <div style="border-bottom:1px solid rgba(0,0,0,0.06);padding-bottom:15px;margin-bottom:15px;">
+          <div style="font-size:13px;color:#636e72;font-weight:600;">رابط الإحالة</div>
+          <input type="text" id="referralLinkField" class="input-field" value="" readonly style="margin:10px 0;text-align:left;direction:ltr;border:2px dashed #b8860b;">
+          <button class="btn btn-deposit" style="padding:12px;width:100%;" onclick="copyReferralLink()">📋 نسخ الرابط</button>
         </div>
-        <div class="input-group"><label>تعديل الاسم</label><input type="text" id="settingProfileName" class="input-field" placeholder="الاسم الجديد"><button class="btn btn-action" style="margin-top:8px;" onclick="updateProfileName()">حفظ</button></div>
+        <div class="input-group"><label>تعديل الاسم</label><input type="text" id="settingProfileName" class="input-field" placeholder="الاسم الجديد"><button class="btn btn-action" style="margin-top:8px;" onclick="updateProfileName()">💾 حفظ</button></div>
         <div class="input-group"><label>خلفية مخصصة</label><input type="file" id="settingBgFile" class="input-field" style="padding:8px;" accept="image/*" onchange="applyBackground(this)"></div>
-        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-          <span>اللغة</span>
+        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.06);align-items:center;">
+          <span style="font-weight:600;">اللغة</span>
           <button class="lang-switcher-top" onclick="switchLanguage()">عربي / EN</button>
         </div>
       </article>
-      <h4 style="color:#ffd700;margin-top:15px;">📜 سجل المعاملات</h4>
-      <article class="card" style="padding:10px;">
-        <div id="txList" style="text-align:center;font-size:11px;color:rgba(233,233,243,0.4);padding:15px;">لا يوجد معاملات</div>
+      <h4 style="color:#2d3436;margin-top:15px;font-size:16px;font-weight:800;">📜 سجل المعاملات</h4>
+      <article class="card" style="padding:12px;">
+        <div id="txList" style="text-align:center;font-size:12px;color:#636e72;padding:15px;">لا يوجد معاملات</div>
       </article>
     </section>
 
     <!-- ======== الإدارة ======== -->
     <section id="sec-admin" class="tab-section">
-      <h3 style="color:#ffd700;margin-top:0;"><i class="fa-solid fa-user-gear"></i> لوحة الإدارة</h3>
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-user-gear" style="color:#b8860b;"></i> لوحة الإدارة</h3>
+      
+      <!-- الإحصائيات -->
       <div class="admin-stats">
         <div class="admin-stat-box"><div class="num" id="adminUsersCount">0</div><div class="label">👥 المستخدمين</div></div>
         <div class="admin-stat-box"><div class="num" id="adminPendingCount">0</div><div class="label">⏳ معلق</div></div>
         <div class="admin-stat-box"><div class="num" id="adminTotalBalance">0</div><div class="label">💰 الأرصدة</div></div>
       </div>
+      
+      <!-- إرسال نقاط هدايا -->
       <article class="card">
-        <h4 style="color:#ffd700;margin-top:0;">تعديل رصيد</h4>
-        <div class="input-group"><label>البريد</label><input type="email" id="adminTargetEmail" class="input-field" placeholder="user@mail.com"></div>
+        <h4 style="color:#2d3436;margin-top:0;font-size:15px;font-weight:800;">🎁 إرسال نقاط هدايا</h4>
+        <p style="font-size:12px;color:#636e72;margin:0 0 10px 0;">النقاط تُلعب في الكازينو لكن لا تُسحب</p>
+        <div class="input-group"><label>البريد الإلكتروني للمستلم</label><input type="email" id="adminGiftEmail" class="input-field" placeholder="user@mail.com"></div>
+        <div class="input-group"><label>عدد النقاط (1 - 1,000,000)</label><input type="number" id="adminGiftPoints" class="input-field" placeholder="1000" min="1" max="1000000"></div>
+        <button class="btn btn-success" onclick="adminSendGiftPoints()">🎁 إرسال النقاط</button>
+      </article>
+      
+      <!-- إرسال رصيد كازينو -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin-top:0;font-size:15px;font-weight:800;">🎰 إرسال رصيد كازينو</h4>
+        <div class="input-group"><label>البريد الإلكتروني للمستلم</label><input type="email" id="adminCasinoEmail" class="input-field" placeholder="user@mail.com"></div>
+        <div class="input-group"><label>المبلغ (USDT)</label><input type="number" id="adminCasinoAmount" class="input-field" placeholder="0.00"></div>
+        <button class="btn btn-info" onclick="adminSendCasinoBalance()">💰 إرسال الرصيد</button>
+      </article>
+      
+      <!-- تعديل رصيد -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin-top:0;font-size:15px;font-weight:800;">⚙️ تعديل رصيد</h4>
+        <div class="input-group"><label>البريد الإلكتروني</label><input type="email" id="adminTargetEmail" class="input-field" placeholder="user@mail.com"></div>
         <div class="input-group"><label>الرصيد الجديد</label><input type="number" id="adminUpdateBalance" class="input-field" placeholder="0.00"></div>
-        <button class="btn btn-deposit" onclick="adminSetBalance()">تحديث</button>
+        <button class="btn btn-deposit" onclick="adminSetBalance()">💾 تحديث</button>
       </article>
-      <h4 style="color:#ffd700;margin:15px 0 10px 0;">📋 الطلبات</h4>
-      <article class="card" style="padding:10px;overflow-x:auto;">
-        <div id="adminRequestsContainer"><p style="color:rgba(233,233,243,0.5);text-align:center;">جاري التحميل...</p></div>
+      
+      <!-- الطلبات -->
+      <h4 style="color:#2d3436;margin:18px 0 12px 0;font-size:16px;font-weight:800;">📋 الطلبات</h4>
+      <article class="card" style="padding:12px;overflow-x:auto;">
+        <div id="adminRequestsContainer"><p style="color:#636e72;text-align:center;">جاري التحميل...</p></div>
       </article>
-      <h4 style="color:#ffd700;margin:15px 0 10px 0;">👥 المستخدمين</h4>
-      <article class="card" style="padding:10px;overflow-x:auto;">
-        <div id="adminUsersContainer"><p style="color:rgba(233,233,243,0.5);text-align:center;">جاري التحميل...</p></div>
+      
+      <!-- المستخدمين -->
+      <h4 style="color:#2d3436;margin:18px 0 12px 0;font-size:16px;font-weight:800;">👥 المستخدمين</h4>
+      <article class="card" style="padding:12px;overflow-x:auto;">
+        <div id="adminUsersContainer"><p style="color:#636e72;text-align:center;">جاري التحميل...</p></div>
       </article>
     </section>
 
@@ -511,11 +894,9 @@
     <button class="nav-item" onclick="switchTab('sec-tokencreator',this)"><i class="fa-solid fa-coins"></i><span>صنع عملة</span></button>
     <button class="nav-item" onclick="switchTab('sec-ads',this)"><i class="fa-solid fa-rectangle-ad"></i><span>إعلانات</span></button>
     <button class="nav-item" onclick="switchTab('sec-wallet',this)"><i class="fa-solid fa-wallet"></i><span>المحفظة</span></button>
-    <button class="nav-item" onclick="switchTab('sec-settings',this)"><i class="fa-solid fa-sliders"></i><span>الإعدادات</span></button>
+    <button class="nav-item" onclick="switchTab('sec-settings',this)"><i class="fa-solid fa-sliders"></i><span>إعدادات</span></button>
   </nav>
-</div>
-
-<script>
+          </div><script>
 // ==========================================
 // المتغيرات الأساسية
 // ==========================================
@@ -524,10 +905,30 @@ let currentUser = null;
 let currentUserEmail = "";
 let globalBalance = 0;
 let globalCasinoBalance = 0;
+let globalGiftPoints = 0;
 let freeSpins = 2;
 let watchedAdsCount = 0;
 let isAdPlaying = false;
 let authToken = localStorage.getItem('nexora_token');
+let currentCrashGame = null;
+let crashInterval = null;
+
+// ==========================================
+// دالة الإشعارات
+// ==========================================
+function showNotification(message, type = 'success') {
+    const notif = document.getElementById('notification');
+    const icon = document.getElementById('notifIcon');
+    const text = document.getElementById('notifText');
+    
+    text.innerText = message;
+    icon.innerText = type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️';
+    notif.className = `notification ${type} show`;
+    
+    setTimeout(() => {
+        notif.classList.remove('show');
+    }, 3000);
+}
 
 // ==========================================
 // دوال الاتصال بالخادم
@@ -569,6 +970,7 @@ function loadSavedLogin() {
         document.getElementById('authOverlay').style.display = 'none';
         syncUserData();
         loadStats();
+        loadMiningPlans();
         return true;
     }
     return false;
@@ -589,40 +991,96 @@ function switchTab(tabId, btn) {
 function toggleAuthMode(mode) {
     document.getElementById('groupRegName').style.display = mode === 'register' ? 'block' : 'none';
     document.getElementById('btnMainAuth').innerText = mode === 'login' ? 'تسجيل الدخول' : mode === 'register' ? 'إنشاء حساب' : 'استعادة';
+    document.getElementById('btnMainAuth').onclick = mode === 'recover' ? handleRecover : handleAuthAction;
 }
 
 // ==========================================
-// معالج الدخول
+// معالج الدخول (مُصلح!)
 // ==========================================
 async function handleAuthAction() {
-    const email = document.getElementById('authEmail').value;
-    const phone = document.getElementById('authPhone').value;
+    const email = document.getElementById('authEmail').value.trim();
+    const phone = document.getElementById('authPhone').value.trim();
     const password = document.getElementById('authPassword').value;
-    const name = document.getElementById('authName').value;
+    const name = document.getElementById('authName').value.trim();
     const countryCode = document.getElementById('countryCode').value;
     const fullPhone = phone ? countryCode + phone : '';
-
-    if (!email || !password) { alert('يرجى ملء البريد الإلكتروني وكلمة المرور'); return; }
-
-    const data = await callApi('/api/auth/login', { email, password });
-    if (data.success) {
-        currentUser = data.user;
-        currentUserEmail = email;
-        saveLogin(email, data.token);
-        document.getElementById('authOverlay').style.display = 'none';
-        document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${btoa(email).substring(0,8)}`;
-        syncUserData();
-        loadStats();
-    } else {
-        alert(data.message || 'خطأ في تسجيل الدخول');
+    
+    const btnText = document.getElementById('btnMainAuth').innerText;
+    
+    if (!email || !password) { 
+        showNotification('يرجى ملء البريد الإلكتروني وكلمة المرور', 'error'); 
+        return; 
     }
+    
+    if (btnText === 'إنشاء حساب') {
+        // ===== التسجيل =====
+        if (!name) {
+            showNotification('يرجى إدخال الاسم', 'error');
+            return;
+        }
+        if (password.length < 6) {
+            showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+            return;
+        }
+        
+        const data = await callApi('/api/auth/register', { 
+            email, 
+            password, 
+            name, 
+            phone: fullPhone 
+        });
+        
+        if (data.success) {
+            showNotification('✅ تم إنشاء الحساب بنجاح!');
+            saveLogin(email, data.token);
+            currentUserEmail = email;
+            document.getElementById('authOverlay').style.display = 'none';
+            document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${btoa(email).substring(0,8)}`;
+            syncUserData();
+            loadStats();
+            loadMiningPlans();
+        } else {
+            showNotification(data.message || 'خطأ في التسجيل', 'error');
+        }
+    } else {
+        // ===== تسجيل الدخول =====
+        const data = await callApi('/api/auth/login', { email, password });
+        
+        if (data.success) {
+            currentUser = data.user;
+            currentUserEmail = email;
+            saveLogin(email, data.token);
+            document.getElementById('authOverlay').style.display = 'none';
+            document.getElementById('referralLinkField').value = `https://t.me/NexoraBot?start=ref_${btoa(email).substring(0,8)}`;
+            syncUserData();
+            loadStats();
+            loadMiningPlans();
+            showNotification('✅ تم تسجيل الدخول بنجاح!');
+        } else {
+            showNotification(data.message || '❌ البريد أو كلمة المرور غير صحيحة', 'error');
+        }
+    }
+}
+
+// استعادة كلمة المرور
+async function handleRecover() {
+    const email = document.getElementById('authEmail').value.trim();
+    if (!email) {
+        showNotification('أدخل بريدك الإلكتروني', 'error');
+        return;
+    }
+    const data = await callApi('/api/auth/forgot-password', { email });
+    showNotification(data.message, data.success ? 'success' : 'error');
 }
 
 async function verifyEmailCode() {
     const code = document.getElementById('verifyCodeInput').value;
-    if (!code || code.length < 6) { alert('أدخل الرمز 6 أرقام'); return; }
+    if (!code || code.length < 6) { 
+        showNotification('أدخل الرمز 6 أرقام', 'error'); 
+        return; 
+    }
     const data = await callApi('/api/auth/verify-email', { email: currentUserEmail, code });
-    alert(data.message);
+    showNotification(data.message, data.success ? 'success' : 'error');
     if (data.success) {
         document.getElementById('authOverlay').style.display = 'none';
         syncUserData();
@@ -637,7 +1095,7 @@ function openAdminFromAuth() {
         switchTab('sec-admin');
         loadAdminDashboard();
     } else {
-        alert('مرفوض!');
+        showNotification('مرفوض!', 'error');
     }
 }
 
@@ -646,22 +1104,42 @@ function openAdminFromAuth() {
 // ==========================================
 async function syncUserData() {
     if (!currentUserEmail) return;
-    const data = await callApi('/api/user-data', { email: currentUserEmail });
+    const data = await callApi('/api/user/user-data', { email: currentUserEmail });
     if (data && !data.error) {
         globalBalance = parseFloat(data.usdBalance || 0);
         globalCasinoBalance = parseFloat(data.casinoBalance || 0);
+        globalGiftPoints = parseFloat(data.giftPoints || 0);
         freeSpins = parseInt(data.freeSpins || 0);
         watchedAdsCount = parseInt(data.watchedAdsCount || 0);
+        
         document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
         document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+        document.getElementById('giftPointsAmount').innerText = globalGiftPoints.toFixed(0);
         document.getElementById('freeSpinsBadge').innerText = 'جولات مجانية: ' + freeSpins;
+        document.getElementById('energyText').innerText = (data.energy || 1000) + ' / 1000';
+        document.getElementById('energyFill').style.width = ((data.energy || 1000) / 1000 * 100) + '%';
+        
+        // تحديث رسالة السحب
+        updateWithdrawalMessage(data.canWithdraw, data.withdrawalCount);
+        
         updateAdProgress();
+    }
+}
+
+function updateWithdrawalMessage(canWithdraw, count) {
+    const msg = document.getElementById('withdrawalLimitMsg');
+    if (!canWithdraw) {
+        msg.className = 'withdrawal-limit locked';
+        msg.innerHTML = '<i class="fa-solid fa-lock" style="color:#d63031;"></i> <span>⛔ لقد تجاوزت حد السحب الأسبوعي (3/3). انتظر الأسبوع القادم!</span>';
+    } else {
+        msg.className = 'withdrawal-limit';
+        msg.innerHTML = `<i class="fa-solid fa-unlock" style="color:#b8860b;"></i> <span>يمكنك السحب ${3 - (count || 0)} مرات هذا الأسبوع</span>`;
     }
 }
 
 async function loadStats() {
     try {
-        const data = await callApi('/api/stats/overview', {}, 'GET');
+        const data = await callApi('/api/admin/stats', {}, 'GET');
         if (data.success) {
             document.getElementById('statsUsers').innerText = data.totalUsers || 0;
             document.getElementById('statsDeposits').innerText = (data.totalDeposits || 0).toFixed(2) + '$';
@@ -674,9 +1152,9 @@ async function loadStats() {
 // المكافأة اليومية
 // ==========================================
 async function claimDailyBonus() {
-    if (!currentUserEmail) { alert('سجل دخول أولاً'); return; }
+    if (!currentUserEmail) { showNotification('سجل دخول أولاً', 'error'); return; }
     const data = await callApi('/api/bonus/daily-claim', { email: currentUserEmail });
-    alert(data.message);
+    showNotification(data.message, data.success ? 'success' : 'warning');
     if (data.success) {
         freeSpins = data.freeSpins;
         document.getElementById('freeSpinsBadge').innerText = 'جولات مجانية: ' + freeSpins;
@@ -695,8 +1173,8 @@ function updateAdProgress() {
 }
 
 async function handleWatchAd() {
-    if (isAdPlaying) { alert('يوجد إعلان قيد المشاهدة'); return; }
-    if (!currentUserEmail) { alert('سجل دخول أولاً'); return; }
+    if (isAdPlaying) { showNotification('يوجد إعلان قيد المشاهدة', 'warning'); return; }
+    if (!currentUserEmail) { showNotification('سجل دخول أولاً', 'error'); return; }
     
     isAdPlaying = true;
     const btn = document.querySelector('#sec-home .btn-action');
@@ -719,9 +1197,9 @@ async function handleWatchAd() {
                     globalCasinoBalance = data.casinoBalance || globalCasinoBalance;
                     document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
                     updateAdProgress();
-                    alert(data.message);
+                    showNotification(data.message);
                 } else {
-                    alert(data.message || 'لا توجد إعلانات حالياً');
+                    showNotification(data.message || 'لا توجد إعلانات حالياً', 'warning');
                 }
                 status.style.display = 'none';
                 btn.disabled = false;
@@ -733,27 +1211,69 @@ async function handleWatchAd() {
 }
 
 // ==========================================
-// ألعاب الكازينو
+// خطط التعدين
+// ==========================================
+async function loadMiningPlans() {
+    try {
+        const data = await callApi('/api/mining/plans', {}, 'GET');
+        const container = document.getElementById('miningPlansContainer');
+        
+        if (data.success && data.plans.length > 0) {
+            let html = '';
+            data.plans.forEach(plan => {
+                const roi = ((plan.dailyReturn * plan.duration) / plan.price * 100).toFixed(0);
+                html += `
+                    <div class="mining-plan-card" onclick="buyMiningPlan('${plan._id}')">
+                        <div class="plan-name">${plan.name}</div>
+                        <div class="plan-price">${plan.price} USDT</div>
+                        <div class="plan-return">📈 ${plan.dailyReturn} USDT/يوم</div>
+                        <div class="plan-duration">📅 ${plan.duration} يوم | العائد: ${roi}%</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p style="text-align:center;color:#636e72;">لا توجد خطط متاحة</p>';
+        }
+    } catch (e) {
+        console.error('Error loading plans:', e);
+    }
+}
+
+async function buyMiningPlan(planId) {
+    if (!currentUserEmail) { showNotification('سجل دخول أولاً', 'error'); return; }
+    if (!confirm('هل تريد شراء هذه الخطة؟')) return;
+    
+    const data = await callApi('/api/mining/buy-plan', { planId });
+    showNotification(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        globalBalance = data.newBalance;
+        document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+    }
+}
+
+// ==========================================
+// ألعاب الكازينو (حقيقية!)
 // ==========================================
 
 // عجلة الحظ
 let wheelAngle = 0;
 const wheelSegments = [
-    { label: '×1', color: '#ffd700' },
-    { label: '×2', color: '#ff4444' },
-    { label: '×0', color: '#444' },
-    { label: '×3', color: '#00cc66' },
-    { label: '×0', color: '#444' },
-    { label: '×1.5', color: '#ffaa00' },
-    { label: '×0', color: '#444' },
-    { label: '×2', color: '#ff4444' }
+    { label: '×0', color: '#ff6b6b' },
+    { label: '×1', color: '#fdcb6e' },
+    { label: '×1.5', color: '#74b9ff' },
+    { label: '×2', color: '#00b894' },
+    { label: '×0', color: '#ff6b6b' },
+    { label: '×3', color: '#0984e3' },
+    { label: '×0', color: '#ff6b6b' },
+    { label: '×5', color: '#b8860b' }
 ];
 
 function drawWheel(angle = wheelAngle) {
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const cw = canvas.width, ch = canvas.height;
-    const cx = cw/2, cy = ch/2, r = 80;
+    const cx = cw/2, cy = ch/2, r = 90;
     ctx.clearRect(0, 0, cw, ch);
     const segCount = wheelSegments.length;
     const segAngle = (2 * Math.PI) / segCount;
@@ -766,54 +1286,79 @@ function drawWheel(angle = wheelAngle) {
         ctx.closePath();
         ctx.fillStyle = seg.color;
         ctx.fill();
-        ctx.strokeStyle = '#222';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 3;
         ctx.stroke();
         const mid = start + segAngle/2;
-        const tx = cx + r * 0.7 * Math.cos(mid);
-        const ty = cy + r * 0.7 * Math.sin(mid);
+        const tx = cx + r * 0.65 * Math.cos(mid);
+        const ty = cy + r * 0.65 * Math.sin(mid);
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 12px Arial';
+        ctx.font = 'bold 13px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(seg.label, tx, ty);
     });
     ctx.beginPath();
-    ctx.arc(cx, cy, 12, 0, 2*Math.PI);
-    ctx.fillStyle = '#ffd700';
+    ctx.arc(cx, cy, 15, 0, 2*Math.PI);
+    ctx.fillStyle = '#b8860b';
     ctx.fill();
 }
 
-async function spinWheel() {
+async function spinWheel(useFreeSpin = false) {
     const bet = parseFloat(document.getElementById('wheelBet').value) || 0;
     const resultEl = document.getElementById('wheelResult');
-    if (bet > 0 && globalCasinoBalance < bet) {
-        resultEl.innerText = '❌ رصيد الكازينو غير كافٍ!';
-        resultEl.style.color = '#ff4444';
+    const fairEl = document.getElementById('wheelProvablyFair');
+    
+    if (!useFreeSpin && bet > 0 && (globalCasinoBalance + globalGiftPoints) < bet) {
+        resultEl.innerHTML = '<span style="color:#d63031;">❌ رصيد غير كافٍ!</span>';
         return;
     }
     
-    const data = await callApi('/api/casino/play-game', {
-        email: currentUserEmail,
+    // توليد client seed عشوائي
+    const clientSeed = Math.random().toString(36).substring(2, 15);
+    
+    const data = await callApi('/api/casino/wheel', {
         betAmount: bet,
-        riskLevel: 'low'
+        clientSeed,
+        useFreeSpin
     });
     
     if (data.success) {
-        globalBalance = data.newBalance || globalBalance;
-        freeSpins = data.freeSpinsLeft !== undefined ? data.freeSpinsLeft : freeSpins;
-        document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
-        document.getElementById('freeSpinsBadge').innerText = 'جولات مجانية: ' + freeSpins;
-        if (data.isWin) {
-            resultEl.innerText = `🎉 فوز! ربحت: ${data.prize.toFixed(2)}$`;
-            resultEl.style.color = '#00ff88';
-        } else {
-            resultEl.innerText = `😢 خسارة!`;
-            resultEl.style.color = '#ff4444';
+        // رسم العجلة تدريجياً
+        const targetAngle = data.multiplier * (Math.PI * 2);
+        const spins = 5 + Math.random() * 3;
+        const duration = 3000;
+        const startTime = Date.now();
+        
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3); // ease-out
+            wheelAngle = spins * Math.PI * 2 + targetAngle * ease;
+            drawWheel(wheelAngle);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // عرض النتيجة
+                if (data.isWin) {
+                    resultEl.innerHTML = `<span style="color:#00b894;">🎉 فوز! مضاعف: ${data.multiplier}x | ربح: ${data.profit}$</span>`;
+                } else {
+                    resultEl.innerHTML = `<span style="color:#d63031;">😢 خسارة! حظ أوفر المرة القادمة</span>`;
+                }
+                fairEl.innerHTML = `🔐 التحقق: ${data.serverSeedHash.substring(0, 16)}...`;
+                
+                globalCasinoBalance = data.newBalance;
+                globalGiftPoints = data.newGiftPoints;
+                freeSpins = data.freeSpinsLeft;
+                document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+                document.getElementById('giftPointsAmount').innerText = globalGiftPoints.toFixed(0);
+                document.getElementById('freeSpinsBadge').innerText = 'جولات مجانية: ' + freeSpins;
+            }
         }
+        animate();
     } else {
-        resultEl.innerText = '❌ ' + data.message;
-        resultEl.style.color = '#ff4444';
+        resultEl.innerHTML = `<span style="color:#d63031;">❌ ${data.message}</span>`;
     }
 }
 
@@ -822,27 +1367,35 @@ async function playMarginGame() {
     const bet = parseFloat(document.getElementById('marginBet').value);
     const pct = parseInt(document.getElementById('marginSlider').value);
     const resultEl = document.getElementById('marginResult');
-    if (!bet || bet <= 0) { resultEl.innerText = 'أدخل مبلغاً صحيحاً'; resultEl.style.color = '#ffaa00'; return; }
+    const fairEl = document.getElementById('marginProvablyFair');
+    
+    if (!bet || bet <= 0) { 
+        resultEl.innerHTML = '<span style="color:#fdcb6e;">أدخل مبلغاً صحيحاً</span>'; 
+        return; 
+    }
+    
+    const clientSeed = Math.random().toString(36).substring(2, 15);
     
     const data = await callApi('/api/casino/margin', {
-        email: currentUserEmail,
         amount: bet,
-        chosenPercentage: pct
+        chosenPercentage: pct,
+        clientSeed
     });
     
     if (data.success) {
-        globalCasinoBalance = data.newBalance || globalCasinoBalance;
+        globalCasinoBalance = data.newBalance;
+        globalGiftPoints = data.newGiftPoints;
         document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+        document.getElementById('giftPointsAmount').innerText = globalGiftPoints.toFixed(0);
+        
         if (data.win) {
-            resultEl.innerText = `🎉 فوز! الرقم: ${data.rollResult} | ربحت: ${data.profit.toFixed(2)}$`;
-            resultEl.style.color = '#00ff88';
+            resultEl.innerHTML = `<span style="color:#00b894;">🎉 فوز! الرقم: ${data.rollResult} | مضاعف: ${data.multiplier}x | ربح: ${data.profit}$</span>`;
         } else {
-            resultEl.innerText = `💔 خسارة! الرقم: ${data.rollResult} | خسرت: ${bet.toFixed(2)}$`;
-            resultEl.style.color = '#ff4444';
+            resultEl.innerHTML = `<span style="color:#d63031;">💔 خسارة! الرقم: ${data.rollResult} | خسرت: ${bet.toFixed(2)}$</span>`;
         }
+        fairEl.innerHTML = `🔐 التحقق: ${data.serverSeedHash.substring(0, 16)}...`;
     } else {
-        resultEl.innerText = '❌ ' + data.message;
-        resultEl.style.color = '#ff4444';
+        resultEl.innerHTML = `<span style="color:#d63031;">❌ ${data.message}</span>`;
     }
 }
 
@@ -851,46 +1404,154 @@ async function playDiceGame() {
     const bet = parseFloat(document.getElementById('diceBet').value);
     const guess = document.getElementById('diceGuess').value;
     const resultEl = document.getElementById('diceResult');
-    if (!bet || bet <= 0) { resultEl.innerText = 'أدخل رهاناً صحيحاً'; resultEl.style.color = '#ffaa00'; return; }
+    const fairEl = document.getElementById('diceProvablyFair');
+    
+    if (!bet || bet <= 0) { 
+        resultEl.innerHTML = '<span style="color:#fdcb6e;">أدخل رهاناً صحيحاً</span>'; 
+        return; 
+    }
+    
+    const clientSeed = Math.random().toString(36).substring(2, 15);
+    
+    // تأثير الرمي
+    const dice1 = document.getElementById('dice1');
+    const dice2 = document.getElementById('dice2');
+    dice1.classList.add('rolling');
+    dice2.classList.add('rolling');
     
     const data = await callApi('/api/casino/dice', {
-        email: currentUserEmail,
-        bet: bet,
-        guess: guess
+        bet,
+        guess,
+        clientSeed
+    });
+    
+    setTimeout(() => {
+        dice1.classList.remove('rolling');
+        dice2.classList.remove('rolling');
+        
+        if (data.success) {
+            globalCasinoBalance = data.newBalance;
+            globalGiftPoints = data.newGiftPoints;
+            document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+            document.getElementById('giftPointsAmount').innerText = globalGiftPoints.toFixed(0);
+            
+            const emojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            dice1.innerText = emojis[data.roll - 1];
+            dice2.innerText = emojis[data.roll - 1];
+            
+            if (data.win) {
+                resultEl.innerHTML = `<span style="color:#00b894;">🎲 فوز! الرقم: ${data.roll} | مضاعف: ${data.multiplier}x | ربح: ${data.profit}$</span>`;
+            } else {
+                resultEl.innerHTML = `<span style="color:#d63031;">🎲 خسارة! الرقم: ${data.roll} | خسرت: ${bet.toFixed(2)}$</span>`;
+            }
+            fairEl.innerHTML = `🔐 التحقق: ${data.serverSeedHash.substring(0, 16)}...`;
+        } else {
+            resultEl.innerHTML = `<span style="color:#d63031;">❌ ${data.message}</span>`;
+        }
+    }, 600);
+}
+
+// لعبة Crash
+async function startCrashGame() {
+    const bet = parseFloat(document.getElementById('crashBet').value) || 0;
+    if (!bet || bet <= 0) {
+        showNotification('أدخل مبلغاً صحيحاً', 'error');
+        return;
+    }
+    
+    const clientSeed = Math.random().toString(36).substring(2, 15);
+    
+    const data = await callApi('/api/casino/crash/start', {
+        bet,
+        clientSeed
     });
     
     if (data.success) {
-        globalCasinoBalance = data.newBalance || globalCasinoBalance;
-        document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
-        const emojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        document.getElementById('dice1').innerText = emojis[data.roll - 1];
-        document.getElementById('dice2').innerText = emojis[data.roll - 1];
-        if (data.win) {
-            resultEl.innerText = `🎲 فوز! الرقم: ${data.roll} | ربحت: ${data.profit.toFixed(2)}$`;
-            resultEl.style.color = '#00ff88';
-        } else {
-            resultEl.innerText = `🎲 خسارة! الرقم: ${data.roll} | خسرت: ${bet.toFixed(2)}$`;
-            resultEl.style.color = '#ff4444';
-        }
+        currentCrashGame = {
+            gameId: data.gameId,
+            bet,
+            currentMultiplier: 1.00,
+            crashed: false
+        };
+        
+        document.getElementById('crashStartBtn').disabled = true;
+        document.getElementById('crashStartBtn').style.opacity = '0.5';
+        document.getElementById('crashCashoutBtn').disabled = false;
+        document.getElementById('crashCashoutBtn').style.opacity = '1';
+        document.getElementById('crashResult').innerHTML = '';
+        
+        // بدء العد التصاعدي
+        let multiplier = 1.00;
+        crashInterval = setInterval(() => {
+            multiplier += 0.01 + (Math.random() * 0.02);
+            multiplier = Math.floor(multiplier * 100) / 100;
+            
+            const multEl = document.getElementById('crashMultiplier');
+            multEl.innerText = multiplier.toFixed(2) + 'x';
+            
+            // تغيير اللون حسب المضاعف
+            if (multiplier < 2) multEl.style.color = '#00b894';
+            else if (multiplier < 5) multEl.style.color = '#fdcb6e';
+            else multEl.style.color = '#d63031';
+            
+            // تحديث شريط التقدم
+            const progress = Math.min((multiplier / 10) * 100, 100);
+            document.getElementById('crashProgressFill').style.width = progress + '%';
+            
+            currentCrashGame.currentMultiplier = multiplier;
+        }, 100);
+        
+        document.getElementById('crashProvablyFair').innerHTML = `🔐 التحقق: ${data.serverSeedHash.substring(0, 16)}...`;
     } else {
-        resultEl.innerText = '❌ ' + data.message;
-        resultEl.style.color = '#ff4444';
+        showNotification(data.message, 'error');
     }
+}
+
+async function cashoutCrash() {
+    if (!currentCrashGame || currentCrashGame.crashed) return;
+    
+    clearInterval(crashInterval);
+    
+    const data = await callApi('/api/casino/crash/cashout', {
+        gameId: currentCrashGame.gameId,
+        cashoutMultiplier: currentCrashGame.currentMultiplier
+    });
+    
+    document.getElementById('crashStartBtn').disabled = false;
+    document.getElementById('crashStartBtn').style.opacity = '1';
+    document.getElementById('crashCashoutBtn').disabled = true;
+    document.getElementById('crashCashoutBtn').style.opacity = '0.5';
+    
+    if (data.success) {
+        globalCasinoBalance = data.newBalance;
+        globalGiftPoints = data.newGiftPoints;
+        document.getElementById('casinoBalanceAmount').innerText = globalCasinoBalance.toFixed(3);
+        document.getElementById('giftPointsAmount').innerText = globalGiftPoints.toFixed(0);
+        
+        if (data.crashed) {
+            document.getElementById('crashResult').innerHTML = `<span style="color:#d63031;">💥 انفجرت عند ${data.crashPoint}x! خسرت كل شيء</span>`;
+        } else {
+            document.getElementById('crashResult').innerHTML = `<span style="color:#00b894;">🎉 نجحت! سحبت عند ${data.cashoutMultiplier}x | ربح: ${data.profit}$</span>`;
+        }
+    }
+    
+    currentCrashGame = null;
 }
 
 // ==========================================
 // التعدين
 // ==========================================
 async function handleMining() {
-    if (!currentUserEmail) { alert('سجل دخول أولاً'); return; }
+    if (!currentUserEmail) { showNotification('سجل دخول أولاً', 'error'); return; }
     const data = await callApi('/api/mining/click', { email: currentUserEmail });
     if (data.success) {
-        globalBalance = data.newBalance || globalBalance;
+        globalBalance = data.newBalance;
         document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
         document.getElementById('energyText').innerText = data.energy + ' / 1000';
         document.getElementById('energyFill').style.width = ((data.energy / 1000) * 100) + '%';
+        showNotification(data.message);
     } else {
-        alert(data.message || 'حدث خطأ');
+        showNotification(data.message || 'حدث خطأ', 'error');
     }
 }
 
@@ -900,7 +1561,7 @@ async function handleMining() {
 async function payTokenFees() {
     const name = document.getElementById('tokenName').value;
     const symbol = document.getElementById('tokenSymbol').value;
-    if (!name || !symbol) { alert('املأ اسم العملة والرمز'); return; }
+    if (!name || !symbol) { showNotification('املأ اسم العملة والرمز', 'error'); return; }
     const funding = parseFloat(document.getElementById('tokenFundingAmount').value) || 0;
     
     const data = await callApi('/api/tokens/pay-from-balance', {
@@ -910,9 +1571,9 @@ async function payTokenFees() {
         funding: funding
     });
     
-    alert(data.message);
+    showNotification(data.message, data.success ? 'success' : 'error');
     if (data.success) {
-        globalBalance = data.newBalance || globalBalance;
+        globalBalance = data.newBalance;
         document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
         document.getElementById('tokenName').value = '';
         document.getElementById('tokenSymbol').value = '';
@@ -924,8 +1585,8 @@ function submitTokenRequest() {
     const name = document.getElementById('tokenName').value;
     const symbol = document.getElementById('tokenSymbol').value;
     const proof = document.getElementById('tokenPaymentProof').value;
-    if (!name || !symbol || !proof) { alert('املأ جميع الحقول'); return; }
-    alert(`تم إرسال طلب ${name} (${symbol}) للإدارة.`);
+    if (!name || !symbol || !proof) { showNotification('املأ جميع الحقول', 'error'); return; }
+    showNotification(`تم إرسال طلب ${name} (${symbol}) للإدارة`);
     document.getElementById('tokenPaymentProof').value = '';
 }
 
@@ -936,8 +1597,8 @@ async function submitAdCampaign() {
     const link = document.getElementById('adLink').value;
     const views = parseInt(document.getElementById('adViews').value) || 0;
     const platform = document.getElementById('adPlatform').value;
-    if (!link) { alert('أدخل رابطاً'); return; }
-    if (views < 100) { alert('الحد الأدنى 100 مشاهدة'); return; }
+    if (!link) { showNotification('أدخل رابطاً', 'error'); return; }
+    if (views < 100) { showNotification('الحد الأدنى 100 مشاهدة', 'error'); return; }
     
     const data = await callApi('/api/ads/create', {
         email: currentUserEmail,
@@ -945,9 +1606,9 @@ async function submitAdCampaign() {
         platform,
         views
     });
-    alert(data.message);
+    showNotification(data.message, data.success ? 'success' : 'error');
     if (data.success) {
-        globalBalance = data.newBalance || globalBalance;
+        globalBalance = data.newBalance;
         document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
     }
 }
@@ -958,25 +1619,26 @@ async function submitAdCampaign() {
 function copyPlatformAddress() {
     const text = document.getElementById('platformAddress').innerText;
     navigator.clipboard?.writeText(text);
-    alert('تم النسخ!');
+    showNotification('تم النسخ!');
 }
 
 async function sendDeposit() {
     const amount = document.getElementById('txAmount').value;
     const hash = document.getElementById('txHash').value;
-    if (!amount || !hash) { alert('املأ المبلغ والهاش'); return; }
-    const data = await callApi('/api/deposit-notify', { email: currentUserEmail, amount, txHash: hash });
-    alert(data.message);
+    if (!amount || !hash) { showNotification('املأ المبلغ والهاش', 'error'); return; }
+    const data = await callApi('/api/admin/deposit', { email: currentUserEmail, amount, txHash: hash });
+    showNotification(data.message, data.success ? 'success' : 'error');
 }
 
 async function sendWithdraw() {
     const amount = parseFloat(document.getElementById('txAmount').value);
-    if (!amount || amount <= 0) { alert('أدخل مبلغاً صحيحاً'); return; }
-    const data = await callApi('/api/withdraw/submit', { email: currentUserEmail, amount });
-    alert(data.message);
+    if (!amount || amount <= 0) { showNotification('أدخل مبلغاً صحيحاً', 'error'); return; }
+    const data = await callApi('/api/admin/withdraw', { email: currentUserEmail, amount });
+    showNotification(data.message, data.success ? 'success' : 'error');
     if (data.success) {
-        globalBalance = data.newBalance || globalBalance;
+        globalBalance = data.newBalance;
         document.getElementById('balanceAmount').innerText = globalBalance.toFixed(3);
+        updateWithdrawalMessage(data.canWithdraw, data.withdrawalCount);
     }
 }
 
@@ -987,13 +1649,14 @@ function copyReferralLink() {
     const text = document.getElementById('referralLinkField');
     text.select();
     navigator.clipboard?.writeText(text.value);
-    alert('تم النسخ!');
+    showNotification('تم النسخ!');
 }
 
 function updateProfileName() {
     const name = document.getElementById('settingProfileName').value;
-    if (!name) { alert('أدخل اسماً'); return; }
-    alert(`تم حفظ الاسم: ${name}`);
+    if (!name) { showNotification('أدخل اسماً', 'error'); return; }
+    callApi('/api/user/update-profile', { name });
+    showNotification(`تم حفظ الاسم: ${name}`);
     document.getElementById('settingProfileName').value = '';
 }
 
@@ -1002,8 +1665,10 @@ function applyBackground(input) {
         const reader = new FileReader();
         reader.onload = function(e) {
             document.body.style.backgroundImage = `url('${e.target.result}')`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
             localStorage.setItem(`bg_${currentUserEmail}`, e.target.result);
-            alert('تم تحديث الخلفية!');
+            showNotification('تم تحديث الخلفية!');
         };
         reader.readAsDataURL(input.files[0]);
     }
@@ -1029,7 +1694,7 @@ async function loadAdminDashboard() {
             const pending = (data.requests || []).filter(r => r.status === 'pending').length;
             document.getElementById('adminPendingCount').innerText = pending;
             let total = 0;
-            (data.users || []).forEach(u => total += parseFloat(u.balance || 0));
+            (data.users || []).forEach(u => total += parseFloat(u.usdBalance || 0));
             document.getElementById('adminTotalBalance').innerText = total.toFixed(2);
             
             // الطلبات
@@ -1038,47 +1703,83 @@ async function loadAdminDashboard() {
                 let html = `<table class="admin-table"><thead><tr><th>#</th><th>البريد</th><th>النوع</th><th>المبلغ</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>`;
                 data.requests.forEach((r, i) => {
                     const isPending = r.status === 'pending';
-                    html += `<tr><td>${i+1}</td><td>${r.userId}</td><td>${r.type}</td><td>${parseFloat(r.amount).toFixed(2)}$</td><td><span class="badge ${isPending ? 'badge-pending' : 'badge-approved'}">${r.status}</span></td><td>${isPending ? `<button class="btn btn-success btn-sm" onclick="processRequest('${r._id}','approve')">✅</button><button class="btn btn-danger btn-sm" onclick="processRequest('${r._id}','reject')">❌</button>` : 'تم'}</td></tr>`;
+                    html += `<tr><td>${i+1}</td><td>${r.userId}</td><td>${r.type}</td><td>${parseFloat(r.amount).toFixed(2)}$</td><td><span class="badge ${isPending ? 'badge-pending' : r.status === 'approved' ? 'badge-approved' : 'badge-rejected'}">${r.status}</span></td><td>${isPending ? `<button class="btn btn-success btn-sm" onclick="processRequest('${r._id}','approve')">✅</button><button class="btn btn-danger btn-sm" onclick="processRequest('${r._id}','reject')">❌</button>` : 'تم'}</td></tr>`;
                 });
                 html += `</tbody></table>`;
                 reqContainer.innerHTML = html;
             } else {
-                reqContainer.innerHTML = '<p style="color:rgba(233,233,243,0.5);text-align:center;">لا توجد طلبات</p>';
+                reqContainer.innerHTML = '<p style="color:#636e72;text-align:center;">لا توجد طلبات</p>';
             }
             
             // المستخدمين
             const usersContainer = document.getElementById('adminUsersContainer');
             if (data.users && data.users.length > 0) {
-                let html = `<table class="admin-table"><thead><tr><th>#</th><th>الاسم</th><th>البريد</th><th>الرصيد</th><th>رصيد الكازينو</th><th>الدور</th><th>مفعل</th></tr></thead><tbody>`;
+                let html = `<table class="admin-table"><thead><tr><th>#</th><th>الاسم</th><th>البريد</th><th>الرصيد</th><th>رصيد الكازينو</th><th>نقاط</th><th>الدور</th><th>مفعل</th></tr></thead><tbody>`;
                 data.users.forEach((u, i) => {
-                    html += `<tr><td>${i+1}</td><td>${u.name}</td><td>${u.email}</td><td>${parseFloat(u.balance).toFixed(2)}$</td><td>${parseFloat(u.casinoBalance).toFixed(2)}$</td><td>${u.role || 'مستخدم'}</td><td>${u.verified ? '✅' : '❌'}</td></tr>`;
+                    html += `<tr><td>${i+1}</td><td>${u.fullName || '-'}</td><td>${u.email}</td><td>${parseFloat(u.usdBalance || 0).toFixed(2)}$</td><td>${parseFloat(u.casinoBalance || 0).toFixed(2)}$</td><td>${parseFloat(u.giftPoints || 0).toFixed(0)} ⭐</td><td>${u.role || 'مستخدم'}</td><td>${u.verified ? '✅' : '❌'}</td></tr>`;
                 });
                 html += `</tbody></table>`;
                 usersContainer.innerHTML = html;
             } else {
-                usersContainer.innerHTML = '<p style="color:rgba(233,233,243,0.5);text-align:center;">لا يوجد مستخدمين</p>';
+                usersContainer.innerHTML = '<p style="color:#636e72;text-align:center;">لا يوجد مستخدمين</p>';
             }
         }
     } catch (e) {
-        document.getElementById('adminRequestsContainer').innerHTML = '<p style="color:#ff4444;">خطأ في التحميل</p>';
-        document.getElementById('adminUsersContainer').innerHTML = '<p style="color:#ff4444;">خطأ في التحميل</p>';
+        document.getElementById('adminRequestsContainer').innerHTML = '<p style="color:#d63031;">خطأ في التحميل</p>';
+        document.getElementById('adminUsersContainer').innerHTML = '<p style="color:#d63031;">خطأ في التحميل</p>';
     }
 }
 
 async function processRequest(id, action) {
     if (!confirm(`تأكيد ${action === 'approve' ? 'القبول' : 'الرفض'}؟`)) return;
     const data = await callApi('/api/admin/process-request', { requestId: id, action });
-    alert(data.message);
+    showNotification(data.message, data.success ? 'success' : 'error');
     loadAdminDashboard();
 }
 
 async function adminSetBalance() {
     const email = document.getElementById('adminTargetEmail').value;
     const balance = document.getElementById('adminUpdateBalance').value;
-    if (!email || !balance) { alert('املأ البريد والرصيد'); return; }
+    if (!email || !balance) { showNotification('املأ البريد والرصيد', 'error'); return; }
     const data = await callApi('/api/admin/modify-balance', { email, newBalance: balance });
-    alert(data.message);
+    showNotification(data.message, data.success ? 'success' : 'error');
     if (data.success) loadAdminDashboard();
+}
+
+// إرسال نقاط هدايا
+async function adminSendGiftPoints() {
+    const email = document.getElementById('adminGiftEmail').value;
+    const points = parseFloat(document.getElementById('adminGiftPoints').value);
+    
+    if (!email || !points || points <= 0) {
+        showNotification('املأ جميع الحقول', 'error');
+        return;
+    }
+    
+    const data = await callApi('/api/admin/send-gift-points', { email, points });
+    showNotification(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        document.getElementById('adminGiftEmail').value = '';
+        document.getElementById('adminGiftPoints').value = '';
+    }
+}
+
+// إرسال رصيد كازينو
+async function adminSendCasinoBalance() {
+    const email = document.getElementById('adminCasinoEmail').value;
+    const amount = parseFloat(document.getElementById('adminCasinoAmount').value);
+    
+    if (!email || !amount || amount <= 0) {
+        showNotification('املأ جميع الحقول', 'error');
+        return;
+    }
+    
+    const data = await callApi('/api/admin/send-casino-balance', { email, amount });
+    showNotification(data.message, data.success ? 'success' : 'error');
+    if (data.success) {
+        document.getElementById('adminCasinoEmail').value = '';
+        document.getElementById('adminCasinoAmount').value = '';
+    }
 }
 
 // ==========================================
@@ -1094,7 +1795,7 @@ document.getElementById('topBrandTitle').addEventListener('click', () => {
             logoClickCount = 0;
             loadAdminDashboard();
         } else {
-            alert('مرفوض!');
+            showNotification('مرفوض!', 'error');
             logoClickCount = 0;
         }
     }
@@ -1109,7 +1810,8 @@ window.onload = function() {
     }
     drawWheel(0);
     updateAdProgress();
+    loadMiningPlans();
 };
 </script>
 </body>
-                                                                                                      </html>
+  </html>
