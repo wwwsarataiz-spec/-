@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
-// إعداد الاتصال بقاعدة البيانات
+// ==========================================
+// الاتصال بقاعدة البيانات
+// ==========================================
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح'))
 .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err));
@@ -9,13 +11,14 @@ mongoose.connect(process.env.MONGO_URI)
 // 1. مخطط المستخدمين (User)
 // ==========================================
 const UserSchema = new mongoose.Schema({
-  telegramId: { type: String, required: true, unique: true, index: true },
+  telegramId: { type: String, default: '', index: true },
   fullName: { type: String, default: 'مستخدم جديد' },
   phoneNumber: { type: String, default: 'غير محدد' },
-  email: { type: String, default: '' },
-  password: { type: String, default: '' },
+  email: { type: String, required: true, unique: true, index: true },
+  password: { type: String, required: true },
   usdBalance: { type: Number, default: 0.000 },
   casinoBalance: { type: Number, default: 0.000 },
+  giftPoints: { type: Number, default: 0 },           // ⭐ جديد: نقاط الهدايا (غير قابلة للسحب)
   points: { type: Number, default: 0 },
   miningEnergy: { type: Number, default: 1000 },
   miningLevel: { type: Number, default: 1 },
@@ -37,6 +40,8 @@ const UserSchema = new mongoose.Schema({
   language: { type: String, default: 'ar' },
   tokenRequests: { type: Array, default: [] },
   lastDailyClaimDate: { type: Date, default: null },
+  withdrawalCount: { type: Number, default: 0 },      // ⭐ جديد: عدد مرات السحب هذا الأسبوع
+  lastWithdrawalWeek: { type: Number, default: 0 },   // ⭐ جديد: أسبوع آخر سحب
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
@@ -92,6 +97,8 @@ const TransactionRequestSchema = new mongoose.Schema({
   txHash: { type: String, default: '' },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
   details: { type: String, default: '' },
+  processedBy: { type: String, default: '' },
+  processedAt: { type: Date, default: null },
   adminDepositWallets: {
     type: Object,
     default: {
@@ -129,7 +136,7 @@ const StatsSchema = new mongoose.Schema({
 });
 
 // ==========================================
-// 8. مخطط سجل الإدارة (AdminLog)
+// 8. مخطط سجل الإدارة (AdminLog) — إصلاح: لم يعد مكرراً
 // ==========================================
 const AdminLogSchema = new mongoose.Schema({
   adminId: { type: String, required: true },
@@ -146,8 +153,26 @@ const MiningPlanSchema = new mongoose.Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   dailyReturn: { type: Number, required: true },
-  minDays: { type: Number, default: 7 },
-  maxDays: { type: Number, default: 30 },
+  duration: { type: Number, default: 30 },
+  level: { type: Number, default: 1 },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+// ==========================================
+// 10. ⭐ جديد: مخطط خطط المستخدم (UserMiningPlan)
+// لتتبع اشتراكات المستخدمين في خطط التعدين
+// ==========================================
+const UserMiningPlanSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true },
+  planId: { type: String, required: true },
+  planName: { type: String, required: true },
+  price: { type: Number, required: true },
+  dailyReturn: { type: Number, required: true },
+  duration: { type: Number, default: 30 },
+  startDate: { type: Date, default: Date.now },
+  endDate: { type: Date, required: true },
+  lastCollected: { type: Date, default: null },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
@@ -164,6 +189,7 @@ const Transaction = mongoose.model('Transaction', TransactionSchema);
 const Stats = mongoose.model('Stats', StatsSchema);
 const AdminLog = mongoose.model('AdminLog', AdminLogSchema);
 const MiningPlan = mongoose.model('MiningPlan', MiningPlanSchema);
+const UserMiningPlan = mongoose.model('UserMiningPlan', UserMiningPlanSchema); // ⭐ جديد
 
 // ==========================================
 // تصدير الموديلات
@@ -177,5 +203,6 @@ module.exports = {
     Transaction,
     Stats,
     AdminLog,
-    MiningPlan
+    MiningPlan,
+    UserMiningPlan  // ⭐ جديد
 };
