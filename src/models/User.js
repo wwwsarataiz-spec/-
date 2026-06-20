@@ -5,12 +5,11 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-  // ===== معلومات الحساب =====
-  fullName: {
+  // ===== المعلومات الأساسية =====
+  username: {
     type: String,
     required: true,
-    trim: true,
-    default: 'مستخدم جديد'
+    trim: true
   },
   email: {
     type: String,
@@ -19,15 +18,20 @@ const UserSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
-  phoneNumber: {
-    type: String,
-    default: 'غير محدد'
-  },
   password: {
     type: String,
     required: true
   },
-
+  phoneNumber: {
+    type: String,
+    default: ''
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'manager', 'assistant'],
+    default: 'user'
+  },
+  
   // ===== الأرصدة =====
   usdBalance: {
     type: Number,
@@ -41,7 +45,7 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-
+  
   // ===== التعدين =====
   miningEnergy: {
     type: Number,
@@ -51,13 +55,21 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-
+  vipLevel: {
+    type: Number,
+    default: 1
+  },
+  
   // ===== الكازينو =====
   freeCasinoSpins: {
     type: Number,
     default: 2
   },
-
+  totalCasinoPlayed: {
+    type: Number,
+    default: 0
+  },
+  
   // ===== الإعلانات =====
   watchedAdsCount: {
     type: Number,
@@ -67,7 +79,7 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-
+  
   // ===== الإحالات =====
   referredBy: {
     type: String,
@@ -75,34 +87,23 @@ const UserSchema = new mongoose.Schema({
   },
   referralCode: {
     type: String,
-    unique: true,
-    sparse: true
+    default: ''
   },
-
-  // ===== الصلاحيات =====
-  role: {
-    type: String,
-    enum: ['user', 'admin', 'manager', 'assistant'],
-    default: 'user'
-  },
-
-  // ===== الحالة =====
+  
+  // ===== حالة الحساب =====
   verified: {
-    type: Boolean,
-    default: true   // ✅ تم إلغاء تفعيل البريد الإلكتروني مؤقتاً
-  },
-  isActive: {
     type: Boolean,
     default: true
   },
-
-  // ===== الإعدادات =====
-  language: {
+  verificationCode: {
     type: String,
-    enum: ['ar', 'en'],
-    default: 'ar'
+    default: ''
   },
-
+  codeExpiry: {
+    type: Date,
+    default: null
+  },
+  
   // ===== السحب =====
   withdrawalCount: {
     type: Number,
@@ -112,7 +113,19 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-
+  
+  // ===== المكافآت =====
+  lastDailyClaimDate: {
+    type: Date,
+    default: null
+  },
+  
+  // ===== الإعدادات =====
+  language: {
+    type: String,
+    default: 'ar'
+  },
+  
   // ===== الطوابع الزمنية =====
   createdAt: {
     type: Date,
@@ -122,16 +135,15 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-}, {
-  timestamps: true
 });
 
-// ===== إنشاء كود إحالة فريد قبل الحفظ =====
-UserSchema.pre('save', async function(next) {
-  if (!this.referralCode) {
-    this.referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-  }
+// تحديث updatedAt تلقائياً قبل الحفظ
+UserSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
   next();
 });
 
-module.exports = mongoose.model('User', UserSchema);
+// إنشاء الموديل
+const User = mongoose.model('User', UserSchema);
+
+module.exports = User;
