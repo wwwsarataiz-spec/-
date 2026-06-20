@@ -1,9 +1,8 @@
 // ==========================================
-// server.js — السيرفر الرئيسي (Express API)
+// server.js — الخادم الرئيسي
 // ==========================================
 
 require('dotenv').config();
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -15,15 +14,15 @@ const path = require('path');
 // الاتصال بقاعدة البيانات
 // ==========================================
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ تم الاتصال بقاعدة البيانات'))
-  .catch(err => console.error('❌ فشل الاتصال:', err));
+  .then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح'))
+  .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err));
 
 // ==========================================
-// إعداد Express
+// إعداد التطبيق
 // ==========================================
 const app = express();
 
-// حماية ضد القرصنة (Helmet)
+// الأمان
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -31,27 +30,22 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       scriptSrc: ["'self'", "https://telegram.org"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://nexora-backend-ko1u.onrender.com"]
+      connectSrc: ["'self'", process.env.FRONTEND_URL || "https://nexora-backend-ko1u.onrender.com"]
     }
   }
 }));
 
-// السماح للواجهة بالتواصل
+// السماح بالطلبات من الواجهة
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   credentials: true
 }));
 
-// حماية ضد الهجوم (Rate Limiting)
+// الحد من الطلبات (منع الهجمات)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 دقيقة
   max: 100, // 100 طلب لكل IP
-  message: { 
-    success: false, 
-    message: '⛔ كثرة الطلبات، انتظر 15 دقيقة' 
-  },
-  standardHeaders: true,
-  legacyHeaders: false
+  message: { success: false, message: '⛔ كثرة الطلبات، انتظر 15 دقيقة' }
 });
 app.use('/api/', limiter);
 
@@ -71,6 +65,7 @@ app.use('/api/mining', require('./routes/mining'));
 app.use('/api/casino', require('./routes/casino'));
 app.use('/api/ads', require('./routes/ads'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/tokens', require('./routes/tokens'));
 
 // ==========================================
 // الصفحة الرئيسية
@@ -83,28 +78,17 @@ app.get('/', (req, res) => {
 // معالجة الأخطاء العامة
 // ==========================================
 app.use((err, req, res, next) => {
-  console.error('❌ خطأ:', err);
+  console.error('❌ خطأ في الخادم:', err);
   res.status(500).json({ 
     success: false, 
-    message: '❌ خطأ في السيرفر' 
+    message: '❌ خطأ في الخادم الداخلي' 
   });
 });
 
 // ==========================================
-// تشغيل السيرفر
+// تشغيل الخادم
 // ==========================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Nexora Elite Server يعمل على المنفذ ${PORT}`);
-  console.log(`📍 الرابط: ${process.env.FRONTEND_URL || `http://localhost:${PORT}`}`);
-});
-
-// معالجة الأخطاء غير المتوقعة
-process.on('unhandledRejection', (err) => {
-  console.error('❌ خطأ غير متوقع:', err);
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('❌ خطأ فادح:', err);
-  process.exit(1);
+  console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
 });
