@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Nexora Elite - منصة التعدين والكازينو</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/style.css" />
+  
+  <!-- أيقونة الموقع -->
+  <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+
+<!-- ===== إشعارات ===== -->
+<div id="notification" class="notification">
+  <span id="notifIcon">✅</span>
+  <span id="notifText">تم بنجاح!</span>
+</div>
+
+<!-- ===== شاشة الدخول ===== -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <div class="logo">
+      <i class="fa-solid fa-cubes"></i>
+      <h3>Nexora Elite</h3>
+      <p>منصة التعدين والكازينو الفاخرة</p>
+    </div>
+
+    <!-- نموذج تسجيل الدخول -->
+    <div id="loginForm">
+      <div class="input-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="authEmail" class="input-field" placeholder="example@mail.com" />
+      </div>
+      <div class="input-group" id="groupAuthPhone">
+        <label>رقم الهاتف (اختياري)</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="countryCode" class="input-field" style="width:100px;padding:12px;">
+            <option value="+967">🇾🇪 +967</option>
+            <option value="+971">🇦🇪 +971</option>
+            <option value="+20">🇪🇬 +20</option>
+            <option value="+212">🇲🇦 +212</option>
+            <option value="+216">🇹🇳 +216</option>
+            <option value="+213">🇩🇿 +213</option>
+            <option value="+962">🇯🇴 +962</option>
+            <option value="+961">🇱🇧 +961</option>
+            <option value="+90">🇹🇷 +90</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+33">🇫🇷 +33</option>
+          </select>
+          <input type="text" id="authPhone" class="input-field" placeholder="512345678" style="flex:1;" />
+        </div>
+        <small style="color:#636e72;font-size:10px;">يمكنك ترك الحقل فارغاً</small>
+      </div>
+      <div class="input-group" id="groupAuthPass">
+        <label>كلمة المرور</label>
+        <input type="password" id="authPassword" class="input-field" placeholder="••••••••" />
+      </div>
+      
+      <!-- حقل الاسم (يظهر في التسجيل فقط) -->
+      <div class="input-group" id="groupRegName" style="display:none;">
+        <label>الاسم الكامل</label>
+        <input type="text" id="authName" class="input-field" placeholder="محمد أحمد" />
+      </div>
+
+      <!-- حقل التحقق (يظهر عند استعادة كلمة المرور) -->
+      <div class="input-group" id="groupVerifyCode" style="display:none;">
+        <label>🔑 رمز التأكيد</label>
+        <input type="text" id="verifyCodeInput" class="input-field" placeholder="أدخل الرمز 6 أرقام" />
+        <button class="btn btn-action" id="btnVerifyEmail" onclick="verifyEmailCode()" style="margin-top:8px;">تفعيل</button>
+      </div>
+
+      <button class="btn btn-deposit" id="btnMainAuth" onclick="handleAuthAction()" style="width:100%;margin-top:12px;">تسجيل الدخول</button>
+
+      <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:13px;">
+        <span onclick="toggleAuthMode('register')" style="color:#b8860b;cursor:pointer;font-weight:700;">إنشاء حساب</span>
+        <span onclick="toggleAuthMode('recover')" style="color:#636e72;cursor:pointer;">نسيت كلمة السر؟</span>
+      </div>
+
+      <button class="admin-login-btn" onclick="openAdminFromAuth()">⚙️ إدارة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== التطبيق الرئيسي ===== -->
+<div class="app">
+
+  <!-- ===== الشريط العلوي ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <i class="fa-solid fa-cubes"></i>
+      <div class="brand__title" id="topBrandTitle">Nexora Elite</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div onclick="claimDailyBonus()" style="background:linear-gradient(135deg,#b8860b,#daa520);border-radius:12px;padding:6px 12px;cursor:pointer;font-size:11px;color:#fff;font-weight:700;box-shadow:0 4px 12px rgba(184,134,11,0.3);">
+        <i class="fa-solid fa-gift"></i> <span id="miniBonusText">مكافأة اليوم</span>
+      </div>
+      <button class="lang-switcher-top" onclick="switchLanguage()">EN</button>
+      <div style="font-size:11px;color:#b8860b;background:rgba(184,134,11,0.1);padding:4px 10px;border-radius:10px;font-weight:700;">VIP 1</div>
+    </div>
+  </header>
+
+  <!-- ===== المحتوى ===== -->
+  <main class="content">
+
+    <!-- ======== الصفحة الرئيسية ======== -->
+    <section id="sec-home" class="tab-section active">
+      <article class="card">
+        <div class="balance-box">
+          <div class="balance-item">
+            <div class="balance-label">💰 الرصيد الأساسي</div>
+            <div class="balance-amount" id="balanceAmount">0.000</div>
+          </div>
+          <div class="balance-divider"></div>
+          <div class="balance-item">
+            <div class="balance-label">🎰 رصيد الكازينو</div>
+            <div class="balance-amount casino" id="casinoBalanceAmount">0.000</div>
+          </div>
+          <div class="balance-divider"></div>
+          <div class="balance-item">
+            <div class="balance-label">🎁 نقاط الهدايا</div>
+            <div class="balance-amount gift" id="giftPointsAmount">0</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-deposit" onclick="switchTab('sec-wallet')">إيداع</button>
+          <button class="btn btn-withdraw" onclick="switchTab('sec-wallet')">سحب</button>
+        </div>
+
+        <!-- الإحصائيات -->
+        <div class="stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;">
+          <div class="stat-box" style="background:rgba(184,134,11,0.06);border-radius:16px;padding:12px;text-align:center;border:1px solid rgba(184,134,11,0.1);">
+            <div class="num" style="font-size:20px;font-weight:900;color:#b8860b;" id="statsUsers">0</div>
+            <div class="label" style="font-size:9px;color:#636e72;margin-top:4px;">👥 المستخدمين</div>
+          </div>
+          <div class="stat-box" style="background:rgba(0,184,148,0.06);border-radius:16px;padding:12px;text-align:center;border:1px solid rgba(0,184,148,0.1);">
+            <div class="num" style="font-size:20px;font-weight:900;color:#00b894;" id="statsDeposits">0</div>
+            <div class="label" style="font-size:9px;color:#636e72;margin-top:4px;">💰 إجمالي الإيداع</div>
+          </div>
+          <div class="stat-box" style="background:rgba(214,48,49,0.06);border-radius:16px;padding:12px;text-align:center;border:1px solid rgba(214,48,49,0.1);">
+            <div class="num" style="font-size:20px;font-weight:900;color:#d63031;" id="statsWithdrawals">0</div>
+            <div class="label" style="font-size:9px;color:#636e72;margin-top:4px;">💸 إجمالي السحب</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- التعدين -->
+      <div style="text-align:center;padding:10px 0;">
+        <div onclick="handleMining()" style="width:180px;height:180px;border-radius:50%;background:linear-gradient(135deg,rgba(184,134,11,0.2),rgba(218,165,32,0.1));border:3px solid #b8860b;display:grid;place-items:center;margin:0 auto;cursor:pointer;box-shadow:0 0 40px rgba(184,134,11,0.2);transition:all 0.3s;">
+          <i class="fa-solid fa-atom" style="font-size:52px;color:#b8860b;filter:drop-shadow(0 0 15px rgba(184,134,11,0.3));"></i>
+        </div>
+        <div style="width:100%;margin-top:18px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#636e72;font-weight:600;">
+            <span>⚡ الطاقة</span>
+            <span id="energyText">1000 / 1000</span>
+          </div>
+          <div style="width:100%;height:14px;background:rgba(0,0,0,0.05);border-radius:999px;border:1px solid rgba(0,0,0,0.06);overflow:hidden;">
+            <div id="energyFill" style="width:100%;height:100%;background:linear-gradient(90deg,#b8860b,#daa520);border-radius:999px;transition:width 0.5s;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- خطط التعدين -->
+      <h4 style="color:#2d3436;margin:24px 0 12px 0;font-size:16px;font-weight:800;">⛏️ خطط التعدين</h4>
+      <div id="miningPlansContainer">
+        <p style="text-align:center;color:#636e72;font-size:13px;">جاري تحميل الخطط...</p>
+      </div>
+
+      <!-- الإعلانات -->
+      <article class="card">
+        <h5 style="color:#2d3436;margin:0 0 8px 0;font-size:15px;font-weight:800;"><i class="fa-solid fa-rectangle-ad" style="color:#b8860b;"></i> الإعلانات الممولة</h5>
+        <p style="font-size:12px;color:#636e72;margin:0 0 12px 0;">كل 15 إعلان = 0.01$ في رصيد الكازينو</p>
+        <button class="btn btn-action" onclick="handleWatchAd()" style="padding:12px;font-size:13px;">
+          <i class="fa-solid fa-play"></i> مشاهدة إعلان
+        </button>
+        <div class="progress-container">
+          <div class="progress-header">
+            <span>📺 التقدم:</span>
+            <span id="adProgressText">0 / 15</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="adProgressFill"></div>
+          </div>
+          <div id="adStatusMessage" class="ad-status"></div>
+          <small class="ad-note">🎯 كل 15 إعلان = 0.01$ في رصيد الكازينو</small>
+        </div>
+      </article>
+    </section>
+
+    <!-- ======== الكازينو ======== -->
+    <section id="sec-casino" class="tab-section">
+      <h3 style="color:#2d3436;margin-top:0;display:flex;justify-content:space-between;align-items:center;font-size:18px;font-weight:900;">
+        <span>🎰 كازينو Nexora</span>
+        <span id="freeSpinsBadge" style="font-size:12px;background:#fdcb6e;color:#2d3436;padding:4px 10px;border-radius:20px;font-weight:800;">جولات مجانية: 2</span>
+      </h3>
+
+      <!-- عجلة الحظ -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">🎡 عجلة الحظ</h4>
+        <div class="game-container">
+          <div class="wheel-container">
+            <div class="wheel-pointer">▼</div>
+            <canvas id="wheelCanvas" class="wheel-canvas" width="200" height="200"></canvas>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;">
+            <input type="number" id="wheelBet" class="input-field" style="width:120px;padding:10px;" placeholder="رهان" value="0" step="0.01" min="0">
+            <button class="btn btn-deposit" onclick="spinWheel()" style="padding:10px 24px;">🎡 لف</button>
+            <button class="btn btn-info" onclick="spinWheel(true)" style="padding:10px 16px;">🎟️ مجاني</button>
+          </div>
+          <div id="wheelResult" style="margin-top:12px;font-size:16px;font-weight:800;text-align:center;"></div>
+          <div id="wheelProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
+        </div>
+      </article>
+
+      <!-- لعبة الهامش -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">📊 لعبة الهامش</h4>
+        <div class="game-container">
+          <div class="input-group">
+            <label>💰 المبلغ (من رصيد الكازينو + نقاط الهدايا)</label>
+            <input type="number" id="marginBet" class="input-field" placeholder="1.00" min="0.01" max="100" step="0.01" value="0.01">
+          </div>
+          <div class="input-group">
+            <label>📊 نسبة الفوز: <span id="percentageDisplay" style="color:#b8860b;font-weight:800;">50%</span></label>
+            <input type="range" id="marginSlider" min="1" max="100" value="50" oninput="document.getElementById('percentageDisplay').innerText=this.value+'%'" style="width:100%;accent-color:#b8860b;height:8px;">
+          </div>
+          <button class="btn btn-deposit" onclick="playMarginGame()" style="width:100%;padding:12px;">
+            <i class="fa-solid fa-dice"></i> اقلب الحظ
+          </button>
+          <div id="marginResult" style="margin-top:12px;font-size:14px;font-weight:800;text-align:center;"></div>
+          <div id="marginProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
+        </div>
+      </article>
+
+      <!-- لعبة النرد -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">🎲 لعبة النرد</h4>
+        <div class="game-container">
+          <div class="dice-container">
+            <div class="dice-box" id="dice1">⚀</div>
+            <div class="dice-box" id="dice2">⚀</div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;">
+            <input type="number" id="diceBet" class="input-field" style="width:100px;padding:10px;" placeholder="رهان" value="0.01" step="0.01" min="0">
+            <select id="diceGuess" class="input-field" style="width:120px;padding:10px;">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="even">زوجي</option>
+              <option value="odd">فردي</option>
+            </select>
+            <button class="btn btn-deposit" onclick="playDiceGame()" style="padding:10px 20px;">🎲 رمي</button>
+          </div>
+          <div id="diceResult" style="margin-top:12px;font-size:16px;font-weight:800;text-align:center;"></div>
+          <div id="diceProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
+        </div>
+      </article>
+
+      <!-- لعبة Crash -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin:0 0 12px 0;font-size:16px;font-weight:800;">💥 لعبة Crash</h4>
+        <div class="game-container">
+          <div class="crash-container">
+            <div style="text-align:center;">
+              <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
+              <div class="crash-progress-bg">
+                <div class="crash-progress-fill" id="crashProgressFill"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;align-items:center;margin-top:10px;">
+              <input type="number" id="crashBet" class="input-field" style="width:100px;padding:10px;" placeholder="رهان" value="0.01" step="0.01" min="0">
+              <button class="btn btn-deposit" id="crashStartBtn" onclick="startCrashGame()">🚀 ابدأ</button>
+              <button class="btn btn-danger" id="crashCashoutBtn" onclick="cashoutCrash()" disabled style="opacity:0.5;">💰 اسحب</button>
+            </div>
+            <div id="crashResult" style="margin-top:12px;font-size:14px;font-weight:800;text-align:center;"></div>
+            <div id="crashProvablyFair" style="margin-top:8px;font-size:10px;color:#636e72;text-align:center;"></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ======== صنع العملة ======== -->
+    <section id="sec-tokencreator" class="tab-section">
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-coins" style="color:#b8860b;"></i> صانع العملات</h3>
+      <article class="card">
+        <div class="input-group"><label>اسم العملة</label><input type="text" id="tokenName" class="input-field" placeholder="Nexora Gold"></div>
+        <div class="input-group"><label>كود العملة</label><input type="text" id="tokenSymbol" class="input-field" placeholder="NXG"></div>
+        <div class="input-group"><label>الشعار</label><input type="file" id="tokenLogoFile" class="input-field" style="padding:8px;" accept="image/*"></div>
+        <div style="background:rgba(184,134,11,0.05);padding:14px;border-radius:14px;font-size:13px;border:1px solid rgba(184,134,11,0.15);margin-bottom:15px;">
+          <div style="font-weight:800;color:#b8860b;">الرسوم: 10 USDT</div>
+        </div>
+        <div class="input-group"><label>قيمة التمويل (اختياري)</label><input type="number" id="tokenFundingAmount" class="input-field" placeholder="0.00"></div>
+        <button class="btn btn-deposit" style="width:100%;margin-bottom:12px;" onclick="payTokenFees()"><i class="fa-solid fa-wallet"></i> دفع من الرصيد</button>
+        <div style="border-top:1px dashed rgba(0,0,0,0.1);padding-top:15px;">
+          <div class="input-group"><label>إثبات الدفع (Hash)</label><input type="text" id="tokenPaymentProof" class="input-field" placeholder="أدخل الهاش"></div>
+          <button class="btn btn-action" style="width:100%;" onclick="submitTokenRequest()">إرسال الطلب</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- ======== الإعلانات الممولة ======== -->
+    <section id="sec-ads" class="tab-section">
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-rectangle-ad" style="color:#b8860b;"></i> نشر حملة</h3>
+      <article class="card">
+        <div class="input-group"><label>رابط الإعلان</label><input type="url" id="adLink" class="input-field" placeholder="https://..."></div>
+        <div class="input-group"><label>المنصة</label><select id="adPlatform" class="input-field"><option value="telegram">تيليغرام</option><option value="youtube">يوتيوب</option><option value="website">موقع</option></select></div>
+        <div class="input-group"><label>عدد المشاهدات</label><input type="number" id="adViews" class="input-field" placeholder="1000" min="100" value="1000" oninput="document.getElementById('adTotalCost').innerText=(this.value*0.005).toFixed(2)"></div>
+        <div style="background:rgba(184,134,11,0.05);border:1px solid rgba(184,134,11,0.15);border-radius:14px;padding:12px;text-align:center;margin:12px 0;font-weight:800;color:#b8860b;">
+          التكلفة: <span id="adTotalCost">5.00</span> USDT
+        </div>
+        <button class="btn btn-deposit" style="width:100%;" onclick="submitAdCampaign()"><i class="fa-solid fa-credit-card"></i> دفع وتفعيل</button>
+      </article>
+    </section>
+
+    <!-- ======== المحفظة ======== -->
+    <section id="sec-wallet" class="tab-section">
+      <article class="card">
+        <h4 style="color:#2d3436;margin-top:0;font-size:16px;font-weight:800;"><i class="fa-solid fa-wallet" style="color:#b8860b;"></i> المحفظة</h4>
+        <div style="background:rgba(255,255,255,0.9);padding:14px;border-radius:14px;border:1px solid rgba(0,0,0,0.06);">
+          <span style="font-size:13px;color:#b8860b;font-weight:800;">عنوانك (TRC20):</span>
+          <div class="wallet-address-box" id="trcAddress">0x2975dc1f8188c30b2a4be0ec27e33494da66cb46</div>
+          <span style="font-size:13px;color:#b8860b;font-weight:800;display:block;margin-top:12px;">🏦 عنوان المنصة:</span>
+          <div class="wallet-address-box" id="platformAddress">0x2975dc1f8188c30b2a4be0ec27e33494da66cb46</div>
+          <button class="btn btn-deposit" style="padding:8px;width:100%;margin-top:8px;font-size:12px;" onclick="copyPlatformAddress()">📋 نسخ العنوان</button>
+        </div>
+
+        <!-- رسالة حد السحب الأسبوعي -->
+        <div class="withdrawal-limit" id="withdrawalLimitMsg">
+          <i class="fa-solid fa-circle-info" style="color:#b8860b;"></i>
+          <span>يمكنك السحب 3 مرات في الأسبوع فقط</span>
+        </div>
+
+        <div class="input-group"><label>المبلغ (USDT)</label><input type="number" id="txAmount" class="input-field" placeholder="0.00"></div>
+        <div class="input-group"><label>هاش التحويل</label><input type="text" id="txHash" class="input-field" placeholder="أدخل الهاش"></div>
+        <div class="action-buttons">
+          <button class="btn btn-deposit" onclick="sendDeposit()">📥 إرسال إثبات</button>
+          <button class="btn btn-withdraw" onclick="sendWithdraw()">📤 طلب سحب</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- ======== الإعدادات ======== -->
+    <section id="sec-settings" class="tab-section">
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-sliders" style="color:#b8860b;"></i> الإعدادات</h3>
+      <article class="card">
+        <div style="border-bottom:1px solid rgba(0,0,0,0.06);padding-bottom:15px;margin-bottom:15px;">
+          <div style="font-size:13px;color:#636e72;font-weight:600;">رابط الإحالة</div>
+          <input type="text" id="referralLinkField" class="input-field" value="" readonly style="margin:10px 0;text-align:left;direction:ltr;border:2px dashed #b8860b;">
+          <button class="btn btn-deposit" style="padding:12px;width:100%;" onclick="copyReferralLink()">📋 نسخ الرابط</button>
+        </div>
+        <div class="input-group"><label>تعديل الاسم</label><input type="text" id="settingProfileName" class="input-field" placeholder="الاسم الجديد"><button class="btn btn-action" style="margin-top:8px;" onclick="updateProfileName()">💾 حفظ</button></div>
+        <div class="input-group"><label>خلفية مخصصة</label><input type="file" id="settingBgFile" class="input-field" style="padding:8px;" accept="image/*" onchange="applyBackground(this)"></div>
+        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.06);align-items:center;">
+          <span style="font-weight:600;">اللغة</span>
+          <button class="lang-switcher-top" onclick="switchLanguage()">عربي / EN</button>
+        </div>
+      </article>
+      <h4 style="color:#2d3436;margin-top:15px;font-size:16px;font-weight:800;">📜 سجل المعاملات</h4>
+      <article class="card" style="padding:12px;">
+        <div id="txList" style="text-align:center;font-size:12px;color:#636e72;padding:15px;">لا يوجد معاملات</div>
+      </article>
+    </section>
+
+    <!-- ======== الإدارة ======== -->
+    <section id="sec-admin" class="tab-section">
+      <h3 style="color:#2d3436;margin-top:0;font-size:18px;font-weight:900;"><i class="fa-solid fa-user-gear" style="color:#b8860b;"></i> لوحة الإدارة</h3>
+
+      <!-- الإحصائيات -->
+      <div class="admin-stats">
+        <div class="admin-stat-box"><div class="num" id="adminUsersCount">0</div><div class="label">👥 المستخدمين</div></div>
+        <div class="admin-stat-box"><div class="num" id="adminPendingCount">0</div><div class="label">⏳ معلق</div></div>
+        <div class="admin-stat-box"><div class="num" id="adminTotalBalance">0</div><div class="label">💰 الأرصدة</div></div>
+      </div>
+
+      <!-- إرسال نقاط هدايا -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin-top:0;font-size:15px;font-weight:800;">🎁 إرسال نقاط هدايا</h4>
+        <p style="font-size:12px;color:#636e72;margin:0 0 10px 0;">النقاط تُلعب في الكازينو لكن لا تُسحب</p>
+        <div class="input-group"><label>البريد الإلكتروني للمستلم</label><input type="email" id="adminGiftEmail" class="input-field" placeholder="user@mail.com"></div>
+        <div class="input-group"><label>عدد النقاط (1 - 1,000,000)</label><input type="number" id="adminGiftPoints" class="input-field" placeholder="1000" min="1" max="1000000"></div>
+        <button class="btn btn-success" onclick="adminSendGiftPoints()">🎁 إرسال النقاط</button>
+      </article>
+
+      <!-- إرسال رصيد كازينو -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin-top:0;font-size:15px;font-weight:800;">🎰 إرسال رصيد كازينو</h4>
+        <div class="input-group"><label>البريد الإلكتروني للمستلم</label><input type="email" id="adminCasinoEmail" class="input-field" placeholder="user@mail.com"></div>
+        <div class="input-group"><label>المبلغ (USDT)</label><input type="number" id="adminCasinoAmount" class="input-field" placeholder="0.00"></div>
+        <button class="btn btn-info" onclick="adminSendCasinoBalance()">💰 إرسال الرصيد</button>
+      </article>
+
+      <!-- تعديل رصيد -->
+      <article class="card">
+        <h4 style="color:#2d3436;margin-top:0;font-size:15px;font-weight:800;">⚙️ تعديل رصيد</h4>
+        <div class="input-group"><label>البريد الإلكتروني</label><input type="email" id="adminTargetEmail" class="input-field" placeholder="user@mail.com"></div>
+        <div class="input-group"><label>الرصيد الجديد</label><input type="number" id="adminUpdateBalance" class="input-field" placeholder="0.00"></div>
+        <button class="btn btn-deposit" onclick="adminSetBalance()">💾 تحديث</button>
+      </article>
+
+      <!-- الطلبات -->
+      <h4 style="color:#2d3436;margin:18px 0 12px 0;font-size:16px;font-weight:800;">📋 الطلبات</h4>
+      <article class="card" style="padding:12px;overflow-x:auto;">
+        <div id="adminRequestsContainer"><p style="color:#636e72;text-align:center;">جاري التحميل...</p></div>
+      </article>
+
+      <!-- المستخدمين -->
+      <h4 style="color:#2d3436;margin:18px 0 12px 0;font-size:16px;font-weight:800;">👥 المستخدمين</h4>
+      <article class="card" style="padding:12px;overflow-x:auto;">
+        <div id="adminUsersContainer"><p style="color:#636e72;text-align:center;">جاري التحميل...</p></div>
+      </article>
+    </section>
+
+  </main>
+
+  <!-- ===== الشريط السفلي ===== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('sec-home',this)"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+    <button class="nav-item" onclick="switchTab('sec-casino',this)"><i class="fa-solid fa-dice"></i><span>كازينو</span></button>
+    <button class="nav-item" onclick="switchTab('sec-tokencreator',this)"><i class="fa-solid fa-coins"></i><span>صنع عملة</span></button>
+    <button class="nav-item" onclick="switchTab('sec-ads',this)"><i class="fa-solid fa-rectangle-ad"></i><span>إعلانات</span></button>
+    <button class="nav-item" onclick="switchTab('sec-wallet',this)"><i class="fa-solid fa-wallet"></i><span>المحفظة</span></button>
+    <button class="nav-item" onclick="switchTab('sec-settings',this)"><i class="fa-solid fa-sliders"></i><span>إعدادات</span></button>
+  </nav>
+
+</div>
+
+<!-- ===== جافا سكريبت ===== -->
+<script src="/app.js"></script>
+
+</body>
+</html>
