@@ -1,77 +1,79 @@
 // ==========================================
-// middleware/auth.js — الحارس الشخصي
-// يتحقق من هوية المستخدم قبل السماح له بالوصول
+// middleware/auth.js - التحقق من التوكن (JWT)
 // ==========================================
 
 const jwt = require('jsonwebtoken');
-const { User } = require('../database');
+const User = require('../src/models/User');
 
-// التحقق من تسجيل الدخول (JWT Token)
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-    
-    // لو ما فيه توكن = ما مسجل دخول
-    if (!token) {
-        return res.status(401).json({ 
-            success: false, 
-            message: '❌ يجب تسجيل الدخول أولاً' 
-        });
+// ==========================================
+// دالة التحقق من التوكن
+// ==========================================
+async function authMiddleware(req, res, next) {
+  try {
+    // استخراج التوكن من الهيدر
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        message: '❌ غير مصرح: التوكن مطلوب'
+      });
     }
+
+    const token = authHeader.split(' ')[1];
+
+    // التحقق من صحة التوكن
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // فك التشفير والتحقق
-    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-        if (err) {
-            return res.status(403).json({ 
-                success: false, 
-                message: '❌ التوكن غير صالح أو منتهي الصلاحية' 
-            });
-        }
-        
-        // جلب بيانات المستخدم من قاعدة البيانات
-        try {
-            const user = await User.findOne({ email: decoded.email });
-            if (!user) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: '❌ المستخدم غير موجود' 
-                });
-            }
-            req.user = user; // نحفظ المستخدم في الطلب للاستخدام لاحقاً
-            next(); // نكمل للمسار التالي
-        } catch (error) {
-            return res.status(500).json({ 
-                success: false, 
-                message: '❌ خطأ في التحقق من الهوية' 
-            });
-        }
+    // جلب المستخدم من قاعدة البيانات
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: '❌ غير مصرح: المستغير غير موجود'
+      });
+    }
+
+    // إضافة المستخدم إلى الطلب
+    req.user = user;
+    next();
+
+  } catch (error) {
+    console.error('❌ Auth middleware error:', error);
+    return res.status(401).json({
+      success: false,
+      message: '❌ غير مصرح: توكن غير صالح'
     });
+  }
 }
 
-// التحقق من أنه مشرف
-function requireAdmin(req, res, next) {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ 
-            success: false, 
-            message: '⛔ صلاحيات غير كافية - يجب أن تكون مشرفاً' 
-        });
-    }
-    next();
+// ==========================================
+// دالة التحقق من صلاحية المدير
+// ==========================================
+function adminMiddleware(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: '⛔ غير مصرح: صلاحيات المدير مطلوبة'
+    });
+  }
+  next();
 }
 
-// التحقق من أنه مشرف أو مدير
-function requireManager(req, res, next) {
-    if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'manager')) {
-        return res.status(403).json({ 
-            success: false, 
-            message: '⛔ صلاحيات غير كافية' 
-        });
-    }
-    next();
+// ==========================================
+// دالة التحقق من صلاحية المدير أو المساعد
+// ==========================================
+function managerMiddleware(req, res, next) {
+  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'manager')) {
+    return res.status(403).json({
+      success: false,
+      message: '⛔ غير مصرح: صلاحيات المدير أو المساعد مطلوبة'
+    });
+  }
+  next();
 }
 
-module.exports = { 
-    authenticateToken, 
-    requireAdmin, 
-    requireManager 
+module.exports = {
+  authMiddleware,
+  adminMiddleware,
+  managerMiddleware
 };
