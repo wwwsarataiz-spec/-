@@ -5,10 +5,12 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { User } = require('../database');
+const { User } = require('../models/User'); // سيتم إنشاء هذا الملف لاحقاً
 const router = express.Router();
 
+// ==========================================
 // دالة إنشاء التوكن
+// ==========================================
 function generateToken(user) {
     return jwt.sign(
         { 
@@ -17,20 +19,22 @@ function generateToken(user) {
             role: user.role 
         },
         process.env.JWT_SECRET,
-        { expiresIn: '30d' } // صالح لـ 30 يوم
+        { expiresIn: '30d' }
     );
 }
 
-// ========== التسجيل (Register) ==========
+// ==========================================
+// 1. التسجيل (Register)
+// ==========================================
 router.post('/register', async (req, res) => {
     try {
         const { email, password, name, phone } = req.body;
         
-        // التحقق من البيانات
-        if (!email || !password) {
+        // التحقق من البيانات الأساسية
+        if (!email || !password || !name) {
             return res.status(400).json({ 
                 success: false, 
-                message: '❌ البريد الإلكتروني وكلمة المرور مطلوبان' 
+                message: '❌ البريد الإلكتروني، الاسم، وكلمة المرور مطلوبة' 
             });
         }
         
@@ -42,32 +46,30 @@ router.post('/register', async (req, res) => {
             });
         }
         
-        // التحقق من عدم وجود المستخدم
+        // التحقق من عدم وجود المستخدم مسبقاً
         const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             return res.status(409).json({ 
                 success: false, 
-                message: '❌ البريد الإلكتروني مستخدم بالفعل' 
+                message: '❌ هذا البريد الإلكتروني مستخدم بالفعل' 
             });
         }
         
-        // تشفير كلمة المرور (bcrypt)
+        // تشفير كلمة المرور
         const hashedPassword = await bcrypt.hash(password, 12);
         
         // إنشاء المستخدم الجديد
         const newUser = new User({
             email: email.toLowerCase(),
             password: hashedPassword,
-            fullName: name || 'مستخدم جديد',
+            fullName: name,
             phoneNumber: phone || 'غير محدد',
-            verified: true,
             role: 'user',
+            verified: true, // للتجربة، سنفعل الحساب تلقائياً
             usdBalance: 0,
             casinoBalance: 0,
-            giftPoints: 0,          // نقاط الهدايا (غير قابلة للسحب)
+            giftPoints: 0,
             freeCasinoSpins: 2,
-            withdrawalCount: 0,    // عدد مرات السحب هذا الأسبوع
-            lastWithdrawalWeek: 0, // أسبوع آخر سحب
             createdAt: new Date()
         });
         
@@ -83,20 +85,25 @@ router.post('/register', async (req, res) => {
             user: {
                 email: newUser.email,
                 name: newUser.fullName,
-                role: newUser.role
+                role: newUser.role,
+                balance: newUser.usdBalance,
+                casinoBalance: newUser.casinoBalance,
+                freeSpins: newUser.freeCasinoSpins
             }
         });
         
     } catch (error) {
-        console.error('Register error:', error);
+        console.error('❌ خطأ في التسجيل:', error);
         res.status(500).json({ 
             success: false, 
-            message: '❌ خطأ في إنشاء الحساب' 
+            message: '❌ حدث خطأ في إنشاء الحساب' 
         });
     }
 });
 
-// ========== تسجيل الدخول (Login) ==========
+// ==========================================
+// 2. تسجيل الدخول (Login)
+// ==========================================
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -118,8 +125,8 @@ router.post('/login', async (req, res) => {
         }
         
         // التحقق من كلمة المرور
-        const isValid = await bcrypt.compare(password, user.password);
-        if (!isValid) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
             return res.status(401).json({ 
                 success: false, 
                 message: '❌ البريد الإلكتروني أو كلمة المرور غير صحيحة' 
@@ -134,6 +141,7 @@ router.post('/login', async (req, res) => {
             message: '✅ تم تسجيل الدخول بنجاح!',
             token,
             user: {
+                id: user._id,
                 email: user.email,
                 name: user.fullName,
                 role: user.role,
@@ -145,18 +153,27 @@ router.post('/login', async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('❌ خطأ في تسجيل الدخول:', error);
         res.status(500).json({ 
             success: false, 
-            message: '❌ خطأ في تسجيل الدخول' 
+            message: '❌ حدث خطأ في تسجيل الدخول' 
         });
     }
 });
 
-// ========== استعادة كلمة المرور ==========
+// ==========================================
+// 3. استعادة كلمة المرور (نسيت كلمة السر)
+// ==========================================
 router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '❌ البريد الإلكتروني مطلوب' 
+            });
+        }
         
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
@@ -166,47 +183,74 @@ router.post('/forgot-password', async (req, res) => {
             });
         }
         
-        // إنشاء رمز التحقق (6 أرقام)
+        // إنشاء رمز تحقق عشوائي (6 أرقام)
         const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
         user.verificationCode = resetCode;
         user.codeExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 دقيقة
         await user.save();
         
-        // في الإنتاج: إرسال البريد الإلكتروني
-        // الآن: نطبع في الكونسول للتجربة
+        // في الوقت الحالي، نطبع الرمز في الكونسول للتجربة
         console.log(`🔑 رمز استعادة كلمة المرور لـ ${email}: ${resetCode}`);
+        
+        // هنا سيتم إرسال البريد الإلكتروني في المرحلة القادمة
+        // await sendResetEmail(email, resetCode);
         
         res.json({
             success: true,
-            message: '✅ تم إرسال رمز التحقق! تحقق من بريدك الإلكتروني',
-            resetCode // إزالة هذا في الإنتاج!
+            message: '✅ تم إرسال رمز التحقق إلى بريدك الإلكتروني',
+            // فقط للتجربة: نرسل الرمز في الرد (سيتم حذفه في الإنتاج)
+            resetCode: process.env.NODE_ENV === 'development' ? resetCode : undefined
         });
         
     } catch (error) {
-        console.error('Forgot password error:', error);
+        console.error('❌ خطأ في استعادة كلمة المرور:', error);
         res.status(500).json({ 
             success: false, 
-            message: '❌ خطأ في إرسال الرمز' 
+            message: '❌ حدث خطأ في إرسال الرمز' 
         });
     }
 });
 
-// ========== تغيير كلمة المرور ==========
+// ==========================================
+// 4. إعادة تعيين كلمة المرور
+// ==========================================
 router.post('/reset-password', async (req, res) => {
     try {
         const { email, code, newPassword } = req.body;
         
-        const user = await User.findOne({ email: email.toLowerCase() });
-        if (!user || user.verificationCode !== code || user.codeExpiry < new Date()) {
+        if (!email || !code || !newPassword) {
             return res.status(400).json({ 
                 success: false, 
-                message: '❌ رمز غير صالح أو منتهي الصلاحية' 
+                message: '❌ جميع الحقول مطلوبة' 
+            });
+        }
+        
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: '❌ المستخدم غير موجود' 
+            });
+        }
+        
+        // التحقق من صحة الرمز وصلاحيته
+        if (user.verificationCode !== code) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '❌ رمز غير صحيح' 
+            });
+        }
+        
+        if (user.codeExpiry && new Date() > new Date(user.codeExpiry)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '❌ انتهت صلاحية الرمز، يرجى طلب رمز جديد' 
             });
         }
         
         // تشفير كلمة المرور الجديدة
         user.password = await bcrypt.hash(newPassword, 12);
-        user.verificationCode = '';
+        user.verificationCode = null;
         user.codeExpiry = null;
         await user.save();
         
@@ -216,10 +260,10 @@ router.post('/reset-password', async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Reset password error:', error);
+        console.error('❌ خطأ في إعادة تعيين كلمة المرور:', error);
         res.status(500).json({ 
             success: false, 
-            message: '❌ خطأ في تغيير كلمة المرور' 
+            message: '❌ حدث خطأ في تغيير كلمة المرور' 
         });
     }
 });
