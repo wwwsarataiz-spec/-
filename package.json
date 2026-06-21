@@ -1,7 +1,7 @@
 {
   "name": "nexora-elite",
   "version": "1.0.0",
-  "description": "Nexora Elite - منصة التعدين والكازينو المتكاملة",
+  "description": "منصة Nexora Elite المتكاملة",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
