@@ -77,6 +77,17 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }
 
+        .game-box { background: rgba(255,255,255,0.03); border-radius: 14px; padding: 14px; margin-top: 8px; text-align: center; }
+        .wheel-container { position: relative; width: 180px; height: 180px; margin: 0 auto 14px; }
+        .wheel-canvas { width: 180px; height: 180px; border-radius: 50%; border: 3px solid #ffd700; background: #1a1a24; }
+        .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 22px; color: #ff6b6b; }
+        .crash-multiplier { font-size: 30px; font-weight: 900; color: #00b894; transition: 0.1s; }
+        .crash-multiplier.danger { color: #ff6b6b; }
+        .crash-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 4px; margin: 8px 0; overflow: hidden; }
+        .crash-bar .fill { height: 100%; background: linear-gradient(90deg, #00b894, #ffd700, #ff6b6b); width: 0%; transition: 0.08s linear; border-radius: 4px; }
+        .dice-row { display: flex; justify-content: center; gap: 16px; margin: 10px 0; }
+        .dice-box { width: 56px; height: 56px; background: rgba(255,255,255,0.06); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #e9e9f3; border: 1px solid rgba(255,255,255,0.06); }
+
         #authScreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10,10,15,0.98); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; }
         #authScreen .box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 28px 24px; max-width: 400px; width: 100%; }
         #authScreen .box h2 { text-align: center; color: #ffd700; margin-bottom: 4px; }
@@ -92,6 +103,8 @@
             .tabs button { font-size: 9px; padding: 6px 8px; }
             .card { padding: 12px; }
             .balance-row .item .num { font-size: 17px; }
+            .wheel-container { width: 150px; height: 150px; }
+            .wheel-canvas { width: 150px; height: 150px; }
         }
     </style>
 </head>
@@ -206,13 +219,12 @@
             </div>
         </div>
 
-        <!-- عجلة الحظ -->
         <div class="card">
             <h4>🎡 عجلة الحظ</h4>
-            <div class="game-box" style="background:rgba(255,255,255,0.03);border-radius:14px;padding:14px;margin-top:8px;text-align:center;">
-                <div class="wheel-container" style="position:relative;width:180px;height:180px;margin:0 auto 14px;">
-                    <div class="wheel-pointer" style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:22px;color:#ff6b6b;">▼</div>
-                    <canvas id="wheelCanvas" class="wheel-canvas" width="180" height="180" style="width:180px;height:180px;border-radius:50%;border:3px solid #ffd700;background:#1a1a24;"></canvas>
+            <div class="game-box">
+                <div class="wheel-container">
+                    <div class="wheel-pointer">▼</div>
+                    <canvas id="wheelCanvas" class="wheel-canvas" width="180" height="180"></canvas>
                 </div>
                 <div style="font-size:10px;color:#636e72;">House Edge: <span id="wheelHouseEdgeDisplay">5</span>%</div>
                 <div class="flex" style="justify-content:center;margin-top:4px;">
@@ -225,13 +237,12 @@
             </div>
         </div>
 
-        <!-- النرد -->
         <div class="card">
             <h4>🎲 النرد</h4>
-            <div class="game-box" style="background:rgba(255,255,255,0.03);border-radius:14px;padding:14px;margin-top:8px;text-align:center;">
-                <div class="dice-row" style="display:flex;justify-content:center;gap:16px;margin:10px 0;">
-                    <div class="dice-box" id="dice1" style="width:56px;height:56px;background:rgba(255,255,255,0.06);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#e9e9f3;border:1px solid rgba(255,255,255,0.06);">⚀</div>
-                    <div class="dice-box" id="dice2" style="width:56px;height:56px;background:rgba(255,255,255,0.06);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#e9e9f3;border:1px solid rgba(255,255,255,0.06);">⚀</div>
+            <div class="game-box">
+                <div class="dice-row">
+                    <div class="dice-box" id="dice1">⚀</div>
+                    <div class="dice-box" id="dice2">⚀</div>
                 </div>
                 <div style="font-size:10px;color:#636e72;">House Edge: <span id="diceHouseEdgeDisplay">5</span>%</div>
                 <div class="flex" style="justify-content:center;margin-top:4px;">
@@ -249,15 +260,12 @@
             </div>
         </div>
 
-        <!-- Crash -->
         <div class="card">
             <h4>🐔 لعبة الدجاج (Crash)</h4>
-            <div class="game-box" style="background:rgba(255,255,255,0.03);border-radius:14px;padding:14px;margin-top:8px;text-align:center;">
+            <div class="game-box">
                 <div style="font-size:40px;margin-bottom:2px;" id="crashEmoji">🐔</div>
-                <div class="crash-multiplier" id="crashMultiplier" style="font-size:30px;font-weight:900;color:#00b894;transition:0.1s;">1.00x</div>
-                <div class="crash-bar" style="height:6px;background:rgba(255,255,255,0.06);border-radius:4px;margin:8px 0;overflow:hidden;">
-                    <div class="fill" id="crashProgressFill" style="height:100%;background:linear-gradient(90deg,#00b894,#ffd700,#ff6b6b);width:0%;transition:0.08s linear;border-radius:4px;"></div>
-                </div>
+                <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
+                <div class="crash-bar"><div class="fill" id="crashProgressFill"></div></div>
                 <div style="font-size:10px;color:#636e72;">House Edge: <span id="crashHouseEdgeDisplay">5</span>%</div>
                 <div class="flex" style="justify-content:center;margin-top:6px;">
                     <input type="number" id="crashBet" class="input-field" style="width:80px;padding:6px;font-size:12px;" placeholder="رهان" value="1" step="0.1">
@@ -278,7 +286,7 @@
             <div id="symbolError" style="color:#ff6b6b;font-size:11px;display:none;">⚠️ يجب أن يكون الرمز 3-5 أحرف إنجليزية</div>
             <div class="input-group">
                 <label>شعار العملة (صورة)</label>
-                <div class="file-upload" onclick="document.getElementById('tokenImage').click()" style="padding:10px;border:2px dashed rgba(255,215,0,0.15);border-radius:12px;text-align:center;cursor:pointer;transition:0.2s;">
+                <div class="file-upload" onclick="document.getElementById('tokenImage').click()">
                     <i class="fa-solid fa-cloud-upload-alt"></i> اضغط لرفع صورة
                     <input type="file" id="tokenImage" accept="image/*" style="display:none;" onchange="handleTokenImage(event)">
                 </div>
@@ -349,7 +357,7 @@
             <div class="input-group"><label>المبلغ (USDT)</label><input type="number" id="depositAmount" class="input-field" placeholder="0.00"></div>
             <div class="input-group"><label>هاش التحويل</label><input type="text" id="depositHash" class="input-field" placeholder="أدخل الهاش"></div>
             <div class="input-group"><label>صورة الحوالة</label>
-                <div class="file-upload" onclick="document.getElementById('receiptImage').click()" style="padding:6px;border:2px dashed rgba(255,215,0,0.15);border-radius:12px;text-align:center;cursor:pointer;transition:0.2s;">
+                <div class="file-upload" onclick="document.getElementById('receiptImage').click()" style="padding:6px;">
                     <i class="fa-solid fa-image"></i> اضغط لرفع صورة
                     <input type="file" id="receiptImage" accept="image/*" style="display:none;" onchange="handleReceiptImage(event)">
                 </div>
@@ -738,4 +746,4 @@ window.onload = function() {
 };
 </script>
 </body>
-</html>
+                    </html>
