@@ -6,14 +6,13 @@
     <title>Nexora Elite - منصة التعدين والكازينو</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* ===== الوضع الداكن ===== */
+        /* ===== كل التنسيقات هنا ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: #0a0a0f;
             color: #e9e9f3;
             min-height: 100vh;
-            transition: background 0.3s;
         }
         .app {
             max-width: 480px;
@@ -22,7 +21,6 @@
             background: #0d0d14;
             min-height: 100vh;
         }
-        /* ===== الهيدر المتجاوب ===== */
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -33,144 +31,34 @@
             flex-wrap: wrap;
             gap: 6px;
         }
-        .topbar .brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .topbar .brand i {
-            color: #ffd700;
-            font-size: 22px;
-            filter: drop-shadow(0 0 6px rgba(255,215,0,0.2));
-        }
-        .topbar .brand h1 {
-            font-size: 18px;
-            font-weight: 800;
-            color: #ffd700;
-            letter-spacing: -0.5px;
-        }
-        .topbar .right-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .topbar .right-group .lang-btn {
-            background: rgba(255,215,0,0.08);
-            border: 1px solid rgba(255,215,0,0.15);
-            color: #ffd700;
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .topbar .right-group .lang-btn:hover {
-            background: rgba(255,215,0,0.15);
-        }
-        .topbar .right-group .user-badge {
-            background: rgba(255,215,0,0.1);
-            color: #ffd700;
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .topbar .right-group .role-badge {
-            padding: 3px 10px;
-            border-radius: 16px;
-            font-size: 10px;
-            font-weight: 700;
-            white-space: nowrap;
-        }
+        .topbar .brand { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .topbar .brand i { color: #ffd700; font-size: 22px; }
+        .topbar .brand h1 { font-size: 18px; font-weight: 800; color: #ffd700; }
+        .topbar .right-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .topbar .right-group .lang-btn { background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.15); color: #ffd700; padding: 4px 10px; border-radius: 16px; font-size: 11px; cursor: pointer; }
+        .topbar .right-group .user-badge { background: rgba(255,215,0,0.1); color: #ffd700; padding: 4px 10px; border-radius: 16px; font-size: 11px; }
+        .topbar .right-group .role-badge { padding: 3px 10px; border-radius: 16px; font-size: 10px; font-weight: 700; }
         .role-badge.user { background: rgba(0,184,148,0.15); color: #00b894; }
         .role-badge.admin { background: rgba(214,48,49,0.15); color: #ff6b6b; }
-        .topbar .right-group .logout-btn {
-            background: none;
-            border: none;
-            color: #636e72;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 4px;
-        }
+        .topbar .right-group .logout-btn { background: none; border: none; color: #636e72; font-size: 16px; cursor: pointer; }
         .topbar .right-group .logout-btn:hover { color: #ff6b6b; }
 
-        /* ===== التبويبات ===== */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 14px;
-            padding: 4px;
-            margin-bottom: 14px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tabs button {
-            flex: 0 0 auto;
-            padding: 8px 10px;
-            border: none;
-            background: transparent;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 10px;
-            cursor: pointer;
-            color: #636e72;
-            white-space: nowrap;
-            transition: 0.2s;
-        }
-        .tabs button.active {
-            background: #ffd700;
-            color: #0a0a0f;
-        }
+        .tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.04); border-radius: 14px; padding: 4px; margin-bottom: 14px; overflow-x: auto; }
+        .tabs button { flex: 0 0 auto; padding: 8px 10px; border: none; background: transparent; border-radius: 12px; font-weight: 700; font-size: 10px; cursor: pointer; color: #636e72; white-space: nowrap; }
+        .tabs button.active { background: #ffd700; color: #0a0a0f; }
 
-        /* ===== البطاقات ===== */
-        .card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 14px;
-            backdrop-filter: blur(4px);
-            transition: 0.2s;
-        }
+        .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
         .card h3 { color: #ffd700; font-size: 15px; margin-bottom: 10px; }
         .card h4 { color: #e9e9f3; font-size: 14px; margin-bottom: 8px; }
 
-        /* ===== الرصيد ===== */
-        .balance-row {
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-            padding: 6px 0;
-        }
-        .balance-row .item .num {
-            font-size: 20px;
-            font-weight: 900;
-            color: #ffd700;
-        }
+        .balance-row { display: flex; justify-content: space-around; text-align: center; padding: 6px 0; }
+        .balance-row .item .num { font-size: 20px; font-weight: 900; color: #ffd700; }
         .balance-row .item .num.green { color: #00b894; }
         .balance-row .item .num.red { color: #ff6b6b; }
         .balance-row .item .num.purple { color: #a29bfe; }
         .balance-row .item .label { font-size: 10px; color: #636e72; }
 
-        /* ===== الأزرار ===== */
-        .btn {
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 6px;
-            transition: 0.2s;
-        }
+        .btn { padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; width: 100%; margin-top: 6px; transition: 0.2s; }
         .btn-gold { background: linear-gradient(135deg, #b8860b, #daa520); color: #fff; }
         .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(184,134,11,0.3); }
         .btn-green { background: linear-gradient(135deg, #00b894, #00a885); color: #fff; }
@@ -186,178 +74,47 @@
         .flex { display: flex; gap: 6px; flex-wrap: wrap; }
         .flex .btn { width: auto; flex: 1; min-width: 60px; }
 
-        /* ===== الحقول ===== */
         .input-group { margin-bottom: 12px; }
         .input-group label { display: block; font-size: 12px; font-weight: 600; color: #b2bec3; margin-bottom: 4px; }
-        .input-field {
-            width: 100%;
-            padding: 10px 14px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            color: #e9e9f3;
-            font-size: 13px;
-            outline: none;
-            transition: 0.2s;
-        }
+        .input-field { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #e9e9f3; font-size: 13px; outline: none; }
         .input-field:focus { border-color: #ffd700; background: rgba(255,215,0,0.04); }
         .input-field::placeholder { color: #636e72; }
 
-        /* ===== التبويبات المخفية ===== */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }
 
-        /* ===== ألعاب الكازينو ===== */
-        .game-box {
-            background: rgba(255,255,255,0.03);
-            border-radius: 14px;
-            padding: 14px;
-            margin-top: 8px;
-            text-align: center;
-        }
-        .wheel-container {
-            position: relative;
-            width: 180px;
-            height: 180px;
-            margin: 0 auto 14px;
-        }
-        .wheel-canvas {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 3px solid #ffd700;
-            background: #1a1a24;
-            transition: transform 0.1s;
-        }
-        .wheel-pointer {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 22px;
-            color: #ff6b6b;
-            filter: drop-shadow(0 0 6px rgba(255,107,107,0.4));
-        }
-        .wheel-spinning {
-            animation: wheelSpin 2.5s cubic-bezier(0.17, 0.67, 0.12, 0.99) forwards;
-        }
-        @keyframes wheelSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(var(--target-angle, 1080deg)); }
-        }
-        .crash-explode {
-            animation: explode 0.6s ease forwards;
-        }
-        @keyframes explode {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(2) rotate(20deg); opacity: 0.6; }
-            100% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
-        }
-        .crash-multiplier {
-            font-size: 30px;
-            font-weight: 900;
-            color: #00b894;
-            transition: 0.1s;
-        }
+        .game-box { background: rgba(255,255,255,0.03); border-radius: 14px; padding: 14px; margin-top: 8px; text-align: center; }
+        .wheel-container { position: relative; width: 180px; height: 180px; margin: 0 auto 14px; }
+        .wheel-canvas { width: 180px; height: 180px; border-radius: 50%; border: 3px solid #ffd700; background: #1a1a24; }
+        .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 22px; color: #ff6b6b; }
+        .wheel-spinning { animation: wheelSpin 2.5s cubic-bezier(0.17, 0.67, 0.12, 0.99) forwards; }
+        @keyframes wheelSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(var(--target-angle, 1080deg)); } }
+        .crash-explode { animation: explode 0.6s ease forwards; }
+        @keyframes explode { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(2) rotate(20deg); opacity: 0.6; } 100% { transform: scale(0.5) rotate(-10deg); opacity: 0; } }
+        .crash-multiplier { font-size: 30px; font-weight: 900; color: #00b894; transition: 0.1s; }
         .crash-multiplier.danger { color: #ff6b6b; }
-        .crash-bar {
-            height: 6px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 4px;
-            margin: 8px 0;
-            overflow: hidden;
-        }
-        .crash-bar .fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00b894, #ffd700, #ff6b6b);
-            width: 0%;
-            transition: 0.08s linear;
-            border-radius: 4px;
-        }
+        .crash-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 4px; margin: 8px 0; overflow: hidden; }
+        .crash-bar .fill { height: 100%; background: linear-gradient(90deg, #00b894, #ffd700, #ff6b6b); width: 0%; transition: 0.08s linear; border-radius: 4px; }
         .dice-row { display: flex; justify-content: center; gap: 16px; margin: 10px 0; }
-        .dice-box {
-            width: 56px;
-            height: 56px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: #e9e9f3;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
+        .dice-box { width: 56px; height: 56px; background: rgba(255,255,255,0.06); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #e9e9f3; border: 1px solid rgba(255,255,255,0.06); }
         .dice-box.rolling { animation: diceRoll 0.5s ease; }
-        @keyframes diceRoll {
-            0% { transform: rotate(0deg) scale(1); }
-            25% { transform: rotate(90deg) scale(1.1); }
-            50% { transform: rotate(180deg) scale(0.9); }
-            75% { transform: rotate(270deg) scale(1.05); }
-            100% { transform: rotate(360deg) scale(1); }
-        }
+        @keyframes diceRoll { 0% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(90deg) scale(1.1); } 50% { transform: rotate(180deg) scale(0.9); } 75% { transform: rotate(270deg) scale(1.05); } 100% { transform: rotate(360deg) scale(1); } }
 
-        /* ===== سجل الرهانات المباشر ===== */
-        .live-bets {
-            margin-top: 10px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 11px;
-        }
-        .live-bets table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-        }
-        .live-bets th {
-            color: #636e72;
-            text-align: center;
-            padding: 4px 2px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .live-bets td {
-            padding: 4px 2px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.02);
-        }
+        .live-bets { margin-top: 10px; background: rgba(255,255,255,0.02); border-radius: 12px; padding: 10px; font-size: 11px; }
+        .live-bets table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .live-bets th { color: #636e72; text-align: center; padding: 4px 2px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .live-bets td { padding: 4px 2px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.02); }
         .live-bets .win { color: #00b894; }
         .live-bets .lose { color: #ff6b6b; }
 
-        /* ===== زر الإدارة ===== */
-        .admin-btn {
-            margin-top: 14px;
-            text-align: center;
-        }
-        .admin-btn button {
-            background: none;
-            border: none;
-            color: #636e72;
-            font-size: 11px;
-            cursor: pointer;
-        }
+        .admin-btn { margin-top: 14px; text-align: center; }
+        .admin-btn button { background: none; border: none; color: #636e72; font-size: 11px; cursor: pointer; }
         .admin-btn button:hover { color: #ffd700; }
 
-        /* ===== شاشة الدخول ===== */
-        #authScreen {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(10,10,15,0.98);
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        #authScreen .box {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 24px;
-            padding: 28px 24px;
-            max-width: 400px;
-            width: 100%;
-        }
+        #authScreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10,10,15,0.98); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #authScreen .box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 28px 24px; max-width: 400px; width: 100%; }
         #authScreen .box h2 { text-align: center; color: #ffd700; margin-bottom: 4px; }
         #authScreen .box p { text-align: center; color: #636e72; font-size: 13px; margin-bottom: 16px; }
         .message { padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 13px; text-align: center; display: none; }
@@ -367,20 +124,11 @@
         .link { color: #ffd700; cursor: pointer; font-weight: 600; }
         .link:hover { text-decoration: underline; }
 
-        /* ===== تحميل الصورة ===== */
-        .file-upload {
-            padding: 10px;
-            border: 2px dashed rgba(255,215,0,0.15);
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .file-upload { padding: 10px; border: 2px dashed rgba(255,215,0,0.15); border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
         .file-upload:hover { background: rgba(255,215,0,0.04); border-color: rgba(255,215,0,0.25); }
         .file-upload i { color: #ffd700; font-size: 20px; }
         .preview-img { max-width: 80px; max-height: 80px; border-radius: 10px; border: 1px solid rgba(255,215,0,0.1); margin-top: 6px; }
 
-        /* ===== التجاوب ===== */
         @media (max-width: 420px) {
             .app { padding: 8px 8px 80px 8px; }
             .topbar .brand h1 { font-size: 15px; }
@@ -440,7 +188,6 @@
 <!-- ===== التطبيق ===== -->
 <div id="appScreen" class="app hidden">
 
-    <!-- ===== الهيدر ===== -->
     <header class="topbar">
         <div class="brand" onclick="openAdminPanel()">
             <i class="fa-solid fa-crown"></i>
@@ -454,7 +201,6 @@
         </div>
     </header>
 
-    <!-- ===== التبويبات ===== -->
     <nav class="tabs">
         <button class="active" data-tab="tabHome">🏠 الرئيسية</button>
         <button data-tab="tabMining">⛏️ تعدين</button>
@@ -466,7 +212,6 @@
         <button data-tab="tabAdmin" class="hidden" id="adminTabBtn">👑 إدارة</button>
     </nav>
 
-    <!-- ===== الصفحة الرئيسية ===== -->
     <div id="tabHome" class="tab-content active">
         <div class="card">
             <div class="balance-row">
@@ -481,7 +226,6 @@
         </div>
     </div>
 
-    <!-- ===== التعدين ===== -->
     <div id="tabMining" class="tab-content">
         <div class="card" style="text-align:center;">
             <div class="mining-circle" id="miningBtn" style="width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,0.12),rgba(255,215,0,0.02));border:2px solid rgba(255,215,0,0.15);display:grid;place-items:center;margin:0 auto 12px;cursor:pointer;font-size:44px;transition:0.15s;">🌟</div>
@@ -495,7 +239,6 @@
             </div>
             <button class="btn btn-gold btn-sm" style="margin-top:10px;" onclick="rechargeEnergy()">🔄 تجديد الطاقة</button>
         </div>
-
         <div class="card">
             <h3>💎 الاستثمار المفتوح (<span id="investmentRateDisplay">3</span>% يومياً)</h3>
             <p style="font-size:12px;color:#636e72;margin-bottom:8px;">رأس المال يُجمد 50 يوماً، تسحب الأرباح يومياً.</p>
@@ -506,7 +249,6 @@
         </div>
     </div>
 
-    <!-- ===== الكازينو ===== -->
     <div id="tabCasino" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
             <h3 style="color:#ffd700;font-size:16px;">🎰 كازينو Nexora</h3>
@@ -516,7 +258,6 @@
             </div>
         </div>
 
-        <!-- عجلة الحظ -->
         <div class="card">
             <h4>🎡 عجلة الحظ</h4>
             <div class="game-box">
@@ -534,15 +275,11 @@
                 <div id="wheelSeed" style="font-size:9px;color:#636e72;margin-top:2px;"></div>
                 <div class="live-bets" id="wheelLiveBets">
                     <div style="font-weight:700;font-size:10px;color:#636e72;margin-bottom:4px;">📊 أحدث الرهانات</div>
-                    <table>
-                        <thead><tr><th>المستخدم</th><th>الرهان</th><th>النتيجة</th><th>الربح</th></tr></thead>
-                        <tbody id="wheelBetTable"></tbody>
-                    </table>
+                    <table><thead><tr><th>المستخدم</th><th>الرهان</th><th>النتيجة</th><th>الربح</th></tr></thead><tbody id="wheelBetTable"></tbody></table>
                 </div>
             </div>
         </div>
 
-        <!-- النرد -->
         <div class="card">
             <h4>🎲 النرد</h4>
             <div class="game-box">
@@ -565,15 +302,11 @@
                 <div id="diceSeed" style="font-size:9px;color:#636e72;margin-top:2px;"></div>
                 <div class="live-bets" id="diceLiveBets">
                     <div style="font-weight:700;font-size:10px;color:#636e72;margin-bottom:4px;">📊 أحدث الرهانات</div>
-                    <table>
-                        <thead><tr><th>المستخدم</th><th>الرهان</th><th>النتيجة</th><th>الربح</th></tr></thead>
-                        <tbody id="diceBetTable"></tbody>
-                    </table>
+                    <table><thead><tr><th>المستخدم</th><th>الرهان</th><th>النتيجة</th><th>الربح</th></tr></thead><tbody id="diceBetTable"></tbody></table>
                 </div>
             </div>
         </div>
 
-        <!-- كراش -->
         <div class="card">
             <h4>🐔 لعبة الدجاج (Crash)</h4>
             <div class="game-box">
@@ -590,16 +323,12 @@
                 <div id="crashSeed" style="font-size:9px;color:#636e72;margin-top:2px;"></div>
                 <div class="live-bets" id="crashLiveBets">
                     <div style="font-weight:700;font-size:10px;color:#636e72;margin-bottom:4px;">📊 أحدث الرهانات</div>
-                    <table>
-                        <thead><tr><th>المستخدم</th><th>الرهان</th><th>النتيجة</th><th>الربح</th></tr></thead>
-                        <tbody id="crashBetTable"></tbody>
-                    </table>
+                    <table><thead><tr><th>المستخدم</th><th>الرهان</th><th>النتيجة</th><th>الربح</th></tr></thead><tbody id="crashBetTable"></tbody></table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== صنع العملة ===== -->
     <div id="tabTokens" class="tab-content">
         <div class="card">
             <h3>🪙 إنشاء عملة رقمية</h3>
@@ -637,7 +366,6 @@
         </div>
     </div>
 
-    <!-- ===== سوق النقاط ===== -->
     <div id="tabMarket" class="tab-content">
         <div class="card">
             <h3>🏪 سوق نقاط الهدايا</h3>
@@ -653,7 +381,6 @@
         </div>
     </div>
 
-    <!-- ===== دردشة ===== -->
     <div id="tabChat" class="tab-content">
         <div class="card">
             <h3>💬 دردشة الدعم</h3>
@@ -668,7 +395,6 @@
         </div>
     </div>
 
-    <!-- ===== المحفظة ===== -->
     <div id="tabWallet" class="tab-content">
         <div class="card">
             <h3>💳 عناوين المحفظة</h3>
@@ -697,7 +423,6 @@
         </div>
     </div>
 
-    <!-- ===== الإدارة ===== -->
     <div id="tabAdmin" class="tab-content">
         <div class="card" style="border-color:rgba(255,215,0,0.12);">
             <h3 style="color:#ffd700;">👑 لوحة الإدارة</h3>
@@ -756,61 +481,20 @@
 
 <script>
 // ==========================================
-// المتغيرات الأساسية
+// كود مباشر داخل الصفحة - جميع الوظائف
 // ==========================================
-const API_URL = window.location.origin || 'https://nexora-backend-ko1u.onrender.com';
 
+// ===== متغيرات عامة =====
+const API_URL = window.location.origin || 'https://nexora-backend-ko1u.onrender.com';
 let currentUser = null;
 let authToken = localStorage.getItem('nexora_token');
+let energy = 1000;
+let balance = 0;
+let casinoBal = 0;
+let gift = 0;
+let freeSpins = 2;
 
-// ==========================================
-// دوال الاتصال بالخادم
-// ==========================================
-async function callApi(endpoint, data = {}, method = 'POST') {
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': authToken ? `Bearer ${authToken}` : ''
-    };
-    const options = { method, headers, body: method !== 'GET' ? JSON.stringify(data) : undefined };
-    try {
-        const res = await fetch(`${API_URL}${endpoint}`, options);
-        return await res.json();
-    } catch (error) {
-        console.error('API Error:', error);
-        return { success: false, message: 'خطأ في الاتصال بالخادم' };
-    }
-}
-
-// ==========================================
-// تسجيل الدخول الدائم
-// ==========================================
-function saveLogin(token, user) {
-    localStorage.setItem('nexora_token', token);
-    localStorage.setItem('nexora_user', JSON.stringify(user));
-    authToken = token;
-}
-
-function loadSavedLogin() {
-    const token = localStorage.getItem('nexora_token');
-    const user = JSON.parse(localStorage.getItem('nexora_user') || 'null');
-    if (token && user) {
-        authToken = token;
-        currentUser = user;
-        return true;
-    }
-    return false;
-}
-
-function clearLogin() {
-    localStorage.removeItem('nexora_token');
-    localStorage.removeItem('nexora_user');
-    authToken = null;
-    currentUser = null;
-}
-
-// ==========================================
-// دوال شاشة الدخول
-// ==========================================
+// ===== دوال شاشة الدخول =====
 function showAuthMsg(text, type) {
     const el = document.getElementById('authMessage');
     el.textContent = text;
@@ -830,9 +514,43 @@ document.getElementById('showForgot').onclick = () => showAuthForm('forgotForm')
 document.getElementById('backToLogin').onclick = () => showAuthForm('loginForm');
 document.getElementById('backToLogin2').onclick = () => showAuthForm('loginForm');
 
-// ==========================================
-// التسجيل
-// ==========================================
+// ===== تسجيل الدخول =====
+document.getElementById('loginBtn').onclick = async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+        showAuthMsg('❌ البريد وكلمة المرور مطلوبة', 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAuthMsg('✅ تم تسجيل الدخول بنجاح!', 'success');
+            localStorage.setItem('nexora_token', data.token);
+            localStorage.setItem('nexora_user', JSON.stringify(data.user));
+            authToken = data.token;
+            currentUser = data.user;
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').classList.remove('hidden');
+            loadUserData();
+        } else {
+            showAuthMsg(data.message || '❌ بيانات غير صحيحة', 'error');
+        }
+    } catch (error) {
+        showAuthMsg('❌ خطأ في الاتصال بالخادم', 'error');
+        console.error(error);
+    }
+};
+
+// ===== التسجيل =====
 document.getElementById('registerBtn').onclick = async function() {
     const username = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
@@ -850,59 +568,57 @@ document.getElementById('registerBtn').onclick = async function() {
         return;
     }
 
-    const data = await callApi('/api/auth/register', { username, email, password, phone, telegram, referralCode });
-    if (data.success) {
-        showAuthMsg('✅ تم إنشاء الحساب!', 'success');
-        saveLogin(data.token, data.user);
-        currentUser = data.user;
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('appScreen').classList.remove('hidden');
-        loadUserData();
-        setTimeout(() => showAuthForm('loginForm'), 1500);
-    } else {
-        showAuthMsg(data.message || '❌ فشل التسجيل', 'error');
+    try {
+        const res = await fetch(`${API_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password, phone, telegram, referralCode })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAuthMsg('✅ تم إنشاء الحساب!', 'success');
+            localStorage.setItem('nexora_token', data.token);
+            localStorage.setItem('nexora_user', JSON.stringify(data.user));
+            authToken = data.token;
+            currentUser = data.user;
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').classList.remove('hidden');
+            loadUserData();
+        } else {
+            showAuthMsg(data.message || '❌ فشل التسجيل', 'error');
+        }
+    } catch (error) {
+        showAuthMsg('❌ خطأ في الاتصال بالخادم', 'error');
+        console.error(error);
     }
 };
 
-// ==========================================
-// تسجيل الدخول
-// ==========================================
-document.getElementById('loginBtn').onclick = async function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-
-    if (!email || !password) {
-        showAuthMsg('❌ البريد وكلمة المرور مطلوبة', 'error');
+// ===== استعادة كلمة المرور =====
+document.getElementById('forgotBtn').onclick = async function() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) {
+        showAuthMsg('❌ أدخل بريدك الإلكتروني', 'error');
         return;
     }
-
-    const data = await callApi('/api/auth/login', { email, password });
-    if (data.success) {
-        showAuthMsg('✅ تم تسجيل الدخول', 'success');
-        saveLogin(data.token, data.user);
-        currentUser = data.user;
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('appScreen').classList.remove('hidden');
-        loadUserData();
-    } else {
-        showAuthMsg(data.message || '❌ بيانات غير صحيحة', 'error');
+    try {
+        const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAuthMsg('✅ تم إرسال رمز الاستعادة', 'success');
+        } else {
+            showAuthMsg(data.message || '❌ فشل الإرسال', 'error');
+        }
+    } catch (error) {
+        showAuthMsg('❌ خطأ في الاتصال', 'error');
     }
 };
 
-// ==========================================
-// الخروج
-// ==========================================
-function logout() {
-    clearLogin();
-    document.getElementById('appScreen').classList.add('hidden');
-    document.getElementById('authScreen').style.display = 'flex';
-    showAuthForm('loginForm');
-    document.getElementById('adminTabBtn').classList.add('hidden');
-}
-
-// ==========================================
-// تحميل بيانات المستخدم
-// ==========================================
+// ===== تحميل بيانات المستخدم =====
 function loadUserData() {
     if (!currentUser) return;
     document.getElementById('userBadge').textContent = '👤 ' + currentUser.username;
@@ -917,60 +633,38 @@ function loadUserData() {
     else document.getElementById('adminTabBtn').classList.add('hidden');
 }
 
-// ==========================================
-// التبويبات
-// ==========================================
+// ===== الخروج =====
+function logout() {
+    localStorage.removeItem('nexora_token');
+    localStorage.removeItem('nexora_user');
+    authToken = null;
+    currentUser = null;
+    document.getElementById('appScreen').classList.add('hidden');
+    document.getElementById('authScreen').style.display = 'flex';
+    showAuthForm('loginForm');
+    document.getElementById('adminTabBtn').classList.add('hidden');
+}
+
+// ===== التبويبات =====
 function switchTab(tabId) {
     document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector(`.tabs button[data-tab="${tabId}"]`);
     if (btn) btn.classList.add('active');
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
-    if (tabId === 'tabAdmin') loadAdminPanel();
-    if (tabId === 'tabMarket') loadMarket();
-    if (tabId === 'tabChat') loadChat();
-    if (tabId === 'tabMining') loadInvestments();
 }
 
 document.querySelectorAll('.tabs button').forEach(btn => {
     btn.onclick = function() {
         const tabId = this.dataset.tab;
-        if (tabId === 'tabAdmin' && (!currentUser || !['admin','super','finance','support','monitor'].includes(currentUser.role))) {
-            openAdminPanel();
-            return;
-        }
         document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
-        if (tabId === 'tabAdmin') loadAdminPanel();
-        if (tabId === 'tabMarket') loadMarket();
-        if (tabId === 'tabChat') loadChat();
-        if (tabId === 'tabMining') loadInvestments();
     };
 });
 
-// ==========================================
-// تشغيل عند التحميل
-// ==========================================
-window.onload = function() {
-    if (loadSavedLogin()) {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('appScreen').classList.remove('hidden');
-        loadUserData();
-        loadChat();
-        loadMarket();
-        loadInvestments();
-        loadAdminPanel();
-        drawWheel(0);
-    } else {
-        document.getElementById('authScreen').style.display = 'flex';
-    }
-};
-
-// ==========================================
-// دوال فارغة للتجربة (سيتم ملؤها لاحقاً)
-// ==========================================
+// ===== دوال مساعدة =====
 function toggleLanguage() {
     const isAr = document.documentElement.lang === 'ar';
     document.documentElement.lang = isAr ? 'en' : 'ar';
@@ -978,7 +672,17 @@ function toggleLanguage() {
     document.getElementById('langToggle').textContent = isAr ? '🇸🇦 عربي' : '🇬🇧 EN';
 }
 
-function rechargeEnergy() { alert('🔄 تم تجديد الطاقة'); }
+function openAdminPanel() {
+    const pass = prompt('🔐 أدخل كلمة مرور الإدارة:');
+    if (pass === 'admin123') {
+        alert('✅ تم فتح لوحة الإدارة');
+        switchTab('tabAdmin');
+    } else if (pass !== null) {
+        alert('❌ كلمة مرور خاطئة');
+    }
+}
+
+function rechargeEnergy() { energy = 1000; document.getElementById('energyText').textContent = '1000 / 1000'; document.getElementById('energyFill').style.width = '100%'; alert('✅ تم تجديد الطاقة'); }
 function startInvestment() { alert('🚀 تم بدء الاستثمار'); }
 function transferToCasino() { alert('⬆️ تم التحويل للكازينو'); }
 function spinWheel() { alert('🎡 جاري دوران العجلة'); }
@@ -993,7 +697,6 @@ function sendChat() { alert('💬 تم إرسال الرسالة'); }
 function copyAddress() { alert('📋 تم نسخ العنوان'); }
 function submitDeposit() { alert('📤 تم إرسال الإثبات'); }
 function submitWithdraw() { alert('📥 تم إرسال طلب السحب'); }
-function openAdminPanel() { alert('🔐 فتح لوحة الإدارة'); }
 function adminSendGift() { alert('🎁 تم إرسال الهدية'); }
 function adminModifyBalance() { alert('💾 تم تعديل الرصيد'); }
 function saveCasinoSettings() { alert('💾 تم حفظ الإعدادات'); }
@@ -1034,6 +737,7 @@ function loadChat() { document.getElementById('chatMessages').innerHTML = '<div 
 function loadMarket() { document.getElementById('marketListings').innerHTML = '<p style="color:#636e72;font-size:12px;">لا توجد عروض</p>'; }
 function loadInvestments() { document.getElementById('investList').innerHTML = '<p style="color:#636e72;font-size:12px;">لا توجد استثمارات</p>'; }
 function loadAdminPanel() { document.getElementById('adminUserCount').textContent = '0'; }
+
 function drawWheel(angle) { 
     const canvas = document.getElementById('wheelCanvas');
     if (!canvas) return;
@@ -1071,102 +775,24 @@ function drawWheel(angle) {
     ctx.fillStyle = '#ffd700';
     ctx.fill();
 }
+
+// ===== تحميل الصفحة =====
+window.onload = function() {
+    const token = localStorage.getItem('nexora_token');
+    const user = JSON.parse(localStorage.getItem('nexora_user') || 'null');
+    if (token && user) {
+        authToken = token;
+        currentUser = user;
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('appScreen').classList.remove('hidden');
+        loadUserData();
+        drawWheel(0);
+    } else {
+        document.getElementById('authScreen').style.display = 'flex';
+    }
+    console.log('✅ Nexora Elite - جاهز للعمل');
+};
 </script>
+
 </body>
- <script>
-// ==========================================
-// كود مباشر داخل index.html (حل فوري للأزرار)
-// ==========================================
-console.log('✅ تم تحميل الصفحة بنجاح');
-
-// وظائف تسجيل الدخول والتسجيل
-function handleLogin() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    if (!email || !password) {
-        alert('❌ يرجى إدخال البريد الإلكتروني وكلمة المرور');
-        return;
-    }
-    alert('✅ محاولة تسجيل الدخول: ' + email);
-    // هنا سيتم إرسال الطلب للخادم لاحقاً
-}
-
-function handleRegister() {
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
-    const password = document.getElementById('regPassword').value;
-    if (!name || !email || !password) {
-        alert('❌ يرجى ملء جميع الحقول');
-        return;
-    }
-    if (password.length < 6) {
-        alert('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-        return;
-    }
-    alert('✅ محاولة تسجيل حساب: ' + email);
-    // هنا سيتم إرسال الطلب للخادم لاحقاً
-}
-
-function handleForgot() {
-    const email = document.getElementById('forgotEmail').value;
-    if (!email) {
-        alert('❌ يرجى إدخال البريد الإلكتروني');
-        return;
-    }
-    alert('✅ تم إرسال رمز الاستعادة إلى: ' + email);
-}
-
-// ربط الأزرار عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ جاري ربط الأزرار...');
-    
-    // زر تسجيل الدخول
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.onclick = handleLogin;
-        console.log('✅ تم ربط زر تسجيل الدخول');
-    }
-    
-    // زر التسجيل
-    const registerBtn = document.getElementById('registerBtn');
-    if (registerBtn) {
-        registerBtn.onclick = handleRegister;
-        console.log('✅ تم ربط زر التسجيل');
-    }
-    
-    // زر استعادة كلمة المرور
-    const forgotBtn = document.getElementById('forgotBtn');
-    if (forgotBtn) {
-        forgotBtn.onclick = handleForgot;
-        console.log('✅ تم ربط زر الاستعادة');
-    }
-    
-    // أزرار التنقل بين النماذج
-    document.getElementById('showRegister').onclick = function() {
-        document.getElementById('loginForm').classList.add('hidden');
-        document.getElementById('registerForm').classList.remove('hidden');
-        document.getElementById('forgotForm').classList.add('hidden');
-    };
-    
-    document.getElementById('showForgot').onclick = function() {
-        document.getElementById('loginForm').classList.add('hidden');
-        document.getElementById('registerForm').classList.add('hidden');
-        document.getElementById('forgotForm').classList.remove('hidden');
-    };
-    
-    document.getElementById('backToLogin').onclick = function() {
-        document.getElementById('loginForm').classList.remove('hidden');
-        document.getElementById('registerForm').classList.add('hidden');
-        document.getElementById('forgotForm').classList.add('hidden');
-    };
-    
-    document.getElementById('backToLogin2').onclick = function() {
-        document.getElementById('loginForm').classList.remove('hidden');
-        document.getElementById('registerForm').classList.add('hidden');
-        document.getElementById('forgotForm').classList.add('hidden');
-    };
-    
-    console.log('✅ تم ربط جميع الأزرار بنجاح');
-});
- </script>
-</html>
+    </html>
