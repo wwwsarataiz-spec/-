@@ -1,5 +1,5 @@
 // ==========================================
-// server.js - الخادم الرئيسي (بدون مجلدات)
+// server.js - الخادم الرئيسي
 // ==========================================
 
 require('dotenv').config();
@@ -51,23 +51,22 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ===== تقديم الملفات الثابتة من الجذر (حيث يوجد index.html) =====
+// ===== تقديم الملفات الثابتة من الجذر =====
 app.use(express.static(__dirname));
 
 // ==========================================
-// استيراد المسارات (من الجذر مباشرة، بدون مجلدات)
+// استيراد المسارات (من مجلد routes)
 // ==========================================
 try {
-  // جميع الملفات في الجذر، لذا نستوردها مباشرة
-  const authRoutes = require('./auth');
-  const userRoutes = require('./user');
-  const miningRoutes = require('./mining');
-  const casinoRoutes = require('./casino');
-  const tokenRoutes = require('./tokens');
-  const marketRoutes = require('./market');
-  const chatRoutes = require('./chat');
-  const walletRoutes = require('./wallet');
-  const adminRoutes = require('./admin');
+  const authRoutes = require('./routes/auth');
+  const userRoutes = require('./routes/user');
+  const miningRoutes = require('./routes/mining');
+  const casinoRoutes = require('./routes/casino');
+  const tokenRoutes = require('./routes/tokens');
+  const marketRoutes = require('./routes/market');
+  const chatRoutes = require('./routes/chat');
+  const walletRoutes = require('./routes/wallet');
+  const adminRoutes = require('./routes/admin');
 
   app.use('/api/auth', authRoutes);
   app.use('/api/user', userRoutes);
@@ -82,11 +81,10 @@ try {
   console.log('✅ تم تحميل جميع المسارات بنجاح');
 } catch (err) {
   console.error('❌ خطأ في تحميل المسارات:', err.message);
-  console.error('❌ تأكد من وجود جميع ملفات routes في الجذر');
 }
 
 // ==========================================
-// الصفحة الرئيسية (من الجذر)
+// الصفحة الرئيسية
 // ==========================================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
