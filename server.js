@@ -9,6 +9,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,10 +19,7 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح'))
-  .catch(err => {
-    console.error('❌ فشل الاتصال بقاعدة البيانات:', err.message);
-    // لا نوقف الخادم بل نستمر لكن مع رسالة خطأ
-  });
+  .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err.message));
 
 // ==========================================
 // دروع الأمان
@@ -53,13 +51,24 @@ app.use('/api/', limiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 // ==========================================
-// استيراد المسارات (باستخدام المسارات النسبية الصحيحة)
+// الملفات الثابتة (مع مسار مرن)
+// ==========================================
+// محاولة استخدام مجلد public
+const publicPath = path.join(__dirname, 'public');
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+  console.log('✅ مجلد public موجود');
+} else {
+  console.log('⚠️ مجلد public غير موجود، سيتم استخدام المسار الافتراضي');
+  app.use(express.static(path.join(__dirname, '../public')));
+}
+
+// ==========================================
+// استيراد المسارات
 // ==========================================
 try {
-  // المسارات النسبية (بدون / في البداية)
   const authRoutes = require('./routes/auth');
   const userRoutes = require('./routes/user');
   const miningRoutes = require('./routes/mining');
@@ -83,15 +92,39 @@ try {
   console.log('✅ تم تحميل جميع المسارات بنجاح');
 } catch (err) {
   console.error('❌ خطأ في تحميل المسارات:', err.message);
-  console.error('❌ تأكد من وجود جميع الملفات في مجلد routes');
-  // لا نوقف الخادم بل نستمر
 }
 
 // ==========================================
 // الصفحة الرئيسية
 // ==========================================
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  // محاولة إيجاد index.html في عدة أماكن
+  const possiblePaths = [
+    path.join(__dirname, 'public', 'index.html'),
+    path.join(__dirname, '../public', 'index.html'),
+    path.join(__dirname, 'index.html')
+  ];
+
+  for (const filePath of possiblePaths) {
+    if (fs.existsSync(filePath)) {
+      console.log(`✅ تم العثور على index.html في: ${filePath}`);
+      return res.sendFile(filePath);
+    }
+  }
+
+  // إذا لم يتم العثور على الملف
+  console.error('❌ لم يتم العثور على index.html');
+  res.status(404).send(`
+    <html>
+      <head><title>Nexora Elite</title></head>
+      <body style="font-family: sans-serif; text-align: center; padding: 50px; background: #0a0a0f; color: #fff;">
+        <h1 style="color: #ffd700;">🏆 Nexora Elite</h1>
+        <p>الخادم يعمل بنجاح ✅</p>
+        <p style="color: #636e72;">لم يتم العثور على ملف index.html</p>
+        <p style="color: #636e72; font-size: 12px;">يرجى التأكد من وجود الملف في مجلد public</p>
+      </body>
+    </html>
+  `);
 });
 
 // ==========================================
