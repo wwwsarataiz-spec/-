@@ -3,221 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>واجهة التعدين الذكي</title>
+    <title>Nexora Elite</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* تصميم أساسي فاخر (أسود وذهبي) */
-        :root {
-            --bg-color: #0b0c10;
-            --container-bg: #1f2833;
-            --gold: #c5a059;
-            --gold-hover: #e5c158;
-            --text-color: #ffffff;
-            --text-muted: #c5a059aa;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0a0a0f;
+            color: #e9e9f3;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
+            padding: 20px;
         }
-
-        .app-container {
-            width: 100%;
+        .box {
+            background: #1a1a24;
+            padding: 30px;
+            border-radius: 16px;
             max-width: 400px;
-            height: 100vh;
-            background-color: var(--container-bg);
-            padding: 30px 20px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 0 20px rgba(197, 160, 89, 0.1);
-        }
-
-        .screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
             width: 100%;
+            border: 1px solid rgba(255,215,0,0.1);
         }
-
-        .screen.active {
-            display: flex;
-        }
-
-        h2 {
-            color: var(--gold);
-            margin-bottom: 25px;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        /* تصميم الحقول والأزرار */
-        .input-group {
+        .box h2 { color: #ffd700; text-align: center; margin-bottom: 5px; }
+        .box p { color: #636e72; text-align: center; margin-bottom: 20px; }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 13px; color: #b2bec3; margin-bottom: 4px; }
+        .input-field {
             width: 100%;
-            margin-bottom: 15px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            background-color: #0b0c10;
-            border: 1px solid #45f3ff00;
-            border-bottom: 2px solid var(--gold);
-            color: #fff;
-            font-size: 16px;
-            box-sizing: border-box;
-            border-radius: 4px;
+            padding: 10px;
+            background: #0d0d14;
+            border: 1px solid #2d2d3a;
+            border-radius: 10px;
+            color: #e9e9f3;
+            font-size: 14px;
             outline: none;
-            transition: 0.3s;
-            text-align: right;
         }
-
-        input:focus {
-            border-bottom-color: var(--gold-hover);
-            box-shadow: 0 5px 15px rgba(197, 160, 89, 0.1);
-        }
-
-        button {
+        .input-field:focus { border-color: #ffd700; }
+        .btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(45deg, var(--gold), #e5c158);
             border: none;
-            color: #0b0c10;
-            font-size: 18px;
+            border-radius: 10px;
             font-weight: bold;
-            border-radius: 25px;
+            font-size: 15px;
             cursor: pointer;
-            margin-top: 15px;
-            transition: 0.3s ease;
+            margin-top: 6px;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(197, 160, 89, 0.3);
-        }
-
-        /* واجهة التعدين */
-        .mining-circle {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #1f2833 0%, #0b0c10 100%);
-            border: 4px dashed var(--gold);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-            position: relative;
-            animation: rotate 20s linear infinite;
-        }
-
-        .mining-circle::before {
-            content: '🪙';
-            font-size: 60px;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .balance-display {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ffffff;
-            margin-top: 10px;
-        }
-
-        .balance-label {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .status-badge {
-            background-color: rgba(197, 160, 89, 0.1);
-            color: var(--gold);
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            border: 1px solid var(--gold);
-        }
-
-        /* الحركات الأنيميشن */
-        @keyframes rotate {
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
+        .btn-gold { background: #b8860b; color: #fff; }
+        .btn-gold:hover { background: #daa520; }
+        .btn-outline { background: transparent; border: 2px solid #b8860b; color: #ffd700; margin-top: 8px; }
+        .btn-outline:hover { background: rgba(184,134,11,0.1); }
+        .link { color: #ffd700; cursor: pointer; font-size: 13px; }
+        .link:hover { text-decoration: underline; }
+        .hidden { display: none !important; }
+        .message { padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center; display: none; }
+        .message.success { background: rgba(0,184,148,0.15); color: #00b894; display: block; }
+        .message.error { background: rgba(214,48,49,0.15); color: #ff6b6b; display: block; }
+        .flex { display: flex; justify-content: space-between; margin-top: 12px; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <div id="loginScreen" class="screen active">
-            <h2>تسجيل الدخول للمنصة</h2>
-            <div class="input-group">
-                <input type="text" id="username" placeholder="اسم المستخدم" required>
-            </div>
-            <div class="input-group">
-                <input type="email" id="email" placeholder="البريد الإلكتروني" required>
-            </div>
-            <button onclick="handleLogin()">دخول</button>
-        </div>
+<div class="box" id="appBox">
+    <h2>🏆 Nexora Elite</h2>
+    <p>منصة التعدين والكازينو</p>
+    <div id="msg" class="message"></div>
 
-        <div id="miningScreen" class="screen">
-            <div class="status-badge">جاري التعدين بنجاح السيرفر نشط</div>
-            
-            <div class="mining-circle"></div>
-            
-            <div class="balance-label">رصيدك الحالي</div>
-            <div class="balance-display"><span id="balance">0.0000</span></div>
-            
-            <div style="color: var(--gold); margin-top: 10px;" id="welcomeMessage"></div>
+    <!-- نموذج تسجيل الدخول -->
+    <div id="loginForm">
+        <div class="input-group">
+            <label>البريد الإلكتروني أو اسم المستخدم</label>
+            <input type="text" id="loginEmail" class="input-field" placeholder="example@mail.com">
         </div>
-
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="loginPassword" class="input-field" placeholder="••••••••">
+        </div>
+        <button class="btn btn-gold" id="loginBtn">تسجيل الدخول</button>
+        <div class="flex">
+            <span class="link" id="showRegister">إنشاء حساب</span>
+            <span class="link" id="showForgot">نسيت كلمة السر؟</span>
+        </div>
     </div>
 
-    <script>
-        // منطق الواجهة والعداد
-        let balance = 0.0000;
-        let miningInterval;
+    <!-- نموذج التسجيل -->
+    <div id="registerForm" class="hidden">
+        <div class="input-group">
+            <label>الاسم الكامل</label>
+            <input type="text" id="regName" class="input-field" placeholder="محمد أحمد">
+        </div>
+        <div class="input-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="regEmail" class="input-field" placeholder="example@mail.com">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="regPassword" class="input-field" placeholder="••••••••">
+        </div>
+        <button class="btn btn-gold" id="registerBtn">إنشاء حساب</button>
+        <button class="btn btn-outline" id="backToLogin">← العودة</button>
+    </div>
 
-        function handleLogin() {
-            const username = document.getElementById('username').value.trim();
-            const email = document.getElementById('email').value.trim();
+    <!-- نموذج استعادة -->
+    <div id="forgotForm" class="hidden">
+        <div class="input-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="forgotEmail" class="input-field" placeholder="example@mail.com">
+        </div>
+        <button class="btn btn-gold" id="forgotBtn">إرسال رمز الاستعادة</button>
+        <button class="btn btn-outline" id="backToLogin2">← العودة</button>
+    </div>
+</div>
 
-            if (username === "" || email === "") {
-                alert("يرجى ملء جميع الحقول!");
-                return;
-            }
+<script>
+// ==========================================
+// الكود مباشرة داخل الصفحة (يعمل فوراً)
+// ==========================================
 
-            // إخفاء شاشة الدخول وإظهار شاشة التعدين
-            document.getElementById('loginScreen').classList.remove('active');
-            document.getElementById('miningScreen').classList.add('active');
-            
-            // تخصيص رسالة الترحيب باسم المستخدم
-            document.getElementById('welcomeMessage').innerText = `مرحباً، ${username}`;
+// دوال التنقل بين النماذج
+document.getElementById('showRegister').onclick = function() {
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('registerForm').classList.remove('hidden');
+    document.getElementById('forgotForm').classList.add('hidden');
+};
 
-            // بدء التعدين التلقائي (محاكاة زيادة الرصيد في الخلفية)
-            startMining();
-        }
+document.getElementById('showForgot').onclick = function() {
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('registerForm').classList.add('hidden');
+    document.getElementById('forgotForm').classList.remove('hidden');
+};
 
-        function startMining() {
-            // زيادة الرصيد بشكل تلقائي كل ثانية لمحاكاة التعدين السحابي السيرفر
-            miningInterval = setInterval(() => {
-                balance += 0.0015; 
-                document.getElementById('balance').innerText = balance.toFixed(4);
-            }, 1000);
-        }
-    </script>
+document.getElementById('backToLogin').onclick = function() {
+    document.getElementById('loginForm').classList.remove('hidden');
+    document.getElementById('registerForm').classList.add('hidden');
+    document.getElementById('forgotForm').classList.add('hidden');
+};
+
+document.getElementById('backToLogin2').onclick = function() {
+    document.getElementById('loginForm').classList.remove('hidden');
+    document.getElementById('registerForm').classList.add('hidden');
+    document.getElementById('forgotForm').classList.add('hidden');
+};
+
+// ===== زر تسجيل الدخول =====
+document.getElementById('loginBtn').onclick = function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+        alert('❌ يرجى إدخال البريد الإلكتروني وكلمة المرور');
+        return;
+    }
+
+    // محاكاة تسجيل الدخول
+    alert('✅ تم تسجيل الدخول بنجاح (محاكاة)\nالبريد: ' + email);
+};
+
+// ===== زر إنشاء حساب =====
+document.getElementById('registerBtn').onclick = function() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+
+    if (!name || !email || !password) {
+        alert('❌ يرجى ملء جميع الحقول');
+        return;
+    }
+    if (password.length < 6) {
+        alert('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+        return;
+    }
+
+    alert('✅ تم إنشاء الحساب بنجاح (محاكاة)\nالاسم: ' + name + '\nالبريد: ' + email);
+};
+
+// ===== زر استعادة كلمة المرور =====
+document.getElementById('forgotBtn').onclick = function() {
+    const email = document.getElementById('forgotEmail').value.trim();
+
+    if (!email) {
+        alert('❌ يرجى إدخال البريد الإلكتروني');
+        return;
+    }
+
+    alert('✅ تم إرسال رمز الاستعادة إلى: ' + email);
+};
+
+console.log('✅ Nexora Elite - جاهز للعمل');
+</script>
+
 </body>
 </html>
