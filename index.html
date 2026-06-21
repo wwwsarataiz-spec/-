@@ -745,5 +745,156 @@ window.onload = function() {
     console.log('✅ Nexora Elite - جاهز للعمل');
 };
 </script>
+<script>
+// ==========================================
+// إعادة ربط الأزرار (حل قوي)
+// ==========================================
+
+// دالة ربط الأزرار (تُستدعى مرتين: عند التحميل وبعد 1 ثانية)
+function bindButtons() {
+    try {
+        // أزرار الدخول
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+            loginBtn.onclick = async function() {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                if (!email || !password) {
+                    alert('❌ يرجى إدخال البريد الإلكتروني وكلمة المرور');
+                    return;
+                }
+                try {
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('✅ تم تسجيل الدخول بنجاح!');
+                        localStorage.setItem('nexora_token', data.token);
+                        localStorage.setItem('nexora_user', JSON.stringify(data.user));
+                        document.getElementById('authScreen').style.display = 'none';
+                        document.getElementById('appScreen').classList.remove('hidden');
+                    } else {
+                        alert(data.message || '❌ بيانات غير صحيحة');
+                    }
+                } catch (err) {
+                    alert('❌ خطأ في الاتصال بالخادم: ' + err.message);
+                }
+            };
+        }
+
+        const registerBtn = document.getElementById('registerBtn');
+        if (registerBtn) {
+            registerBtn.onclick = async function() {
+                const username = document.getElementById('regName').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value;
+                if (!username || !email || !password) {
+                    alert('❌ جميع الحقول مطلوبة');
+                    return;
+                }
+                if (password.length < 6) {
+                    alert('❌ كلمة المرور 6 أحرف على الأقل');
+                    return;
+                }
+                try {
+                    const res = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, password, phone: '', telegram: '', referralCode: '' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('✅ تم إنشاء الحساب بنجاح!');
+                        localStorage.setItem('nexora_token', data.token);
+                        localStorage.setItem('nexora_user', JSON.stringify(data.user));
+                        document.getElementById('authScreen').style.display = 'none';
+                        document.getElementById('appScreen').classList.remove('hidden');
+                    } else {
+                        alert(data.message || '❌ فشل التسجيل');
+                    }
+                } catch (err) {
+                    alert('❌ خطأ في الاتصال بالخادم: ' + err.message);
+                }
+            };
+        }
+
+        const forgotBtn = document.getElementById('forgotBtn');
+        if (forgotBtn) {
+            forgotBtn.onclick = async function() {
+                const email = document.getElementById('forgotEmail').value.trim();
+                if (!email) {
+                    alert('❌ أدخل بريدك الإلكتروني');
+                    return;
+                }
+                try {
+                    const res = await fetch('/api/auth/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('✅ تم إرسال رمز الاستعادة');
+                    } else {
+                        alert(data.message || '❌ فشل الإرسال');
+                    }
+                } catch (err) {
+                    alert('❌ خطأ في الاتصال بالخادم: ' + err.message);
+                }
+            };
+        }
+
+        // أزرار التنقل بين النماذج
+        const showRegister = document.getElementById('showRegister');
+        if (showRegister) {
+            showRegister.onclick = function() {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+                document.getElementById('forgotForm').classList.add('hidden');
+            };
+        }
+
+        const showForgot = document.getElementById('showForgot');
+        if (showForgot) {
+            showForgot.onclick = function() {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('forgotForm').classList.remove('hidden');
+            };
+        }
+
+        const backToLogin = document.getElementById('backToLogin');
+        if (backToLogin) {
+            backToLogin.onclick = function() {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('forgotForm').classList.add('hidden');
+            };
+        }
+
+        const backToLogin2 = document.getElementById('backToLogin2');
+        if (backToLogin2) {
+            backToLogin2.onclick = function() {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('forgotForm').classList.add('hidden');
+            };
+        }
+
+        console.log('✅ تم ربط جميع الأزرار بنجاح (مرة أخرى)');
+    } catch (e) {
+        console.error('❌ خطأ في ربط الأزرار:', e);
+    }
+}
+
+// تنفيذ الربط فوراً
+bindButtons();
+
+// إعادة الربط بعد 1 ثانية (في حال تأخر تحميل DOM)
+setTimeout(bindButtons, 1000);
+</script>
 </body>
                     </html>
