@@ -1,5 +1,5 @@
 // ==========================================
-// server.js - الخادم الرئيسي
+// server.js - الخادم الرئيسي (بدون مجلد public)
 // ==========================================
 
 require('dotenv').config();
@@ -40,7 +40,6 @@ app.use(cors({
   credentials: true
 }));
 
-// الحد من الطلبات
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -50,7 +49,9 @@ app.use('/api/', limiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// ===== تقديم الملفات الثابتة من الجذر (بدون مجلد public) =====
+app.use(express.static(__dirname));
 
 // ==========================================
 // استيراد المسارات
@@ -82,10 +83,10 @@ try {
 }
 
 // ==========================================
-// الصفحة الرئيسية
+// الصفحة الرئيسية (من الجذر)
 // ==========================================
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ==========================================
