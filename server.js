@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-// ===== استيراد المسارات (من الجذر مباشرة، بدون مجلدات) =====
+// ===== استيراد المسارات (من الجذر) =====
 app.use('/api/auth', require('./auth'));
 app.use('/api/user', require('./user'));
 app.use('/api/mining', require('./mining'));
