@@ -16,15 +16,12 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 // الاتصال بقاعدة البيانات
 // ==========================================
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح'))
-.catch(err => {
-  console.error('❌ فشل الاتصال بقاعدة البيانات:', err.message);
-  process.exit(1); // إيقاف الخادم إذا فشل الاتصال
-});
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح'))
+  .catch(err => {
+    console.error('❌ فشل الاتصال بقاعدة البيانات:', err.message);
+    // لا نوقف الخادم بل نستمر لكن مع رسالة خطأ
+  });
 
 // ==========================================
 // دروع الأمان
@@ -59,9 +56,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ==========================================
-// استيراد المسارات (باستخدام المسارات الصحيحة)
+// استيراد المسارات (باستخدام المسارات النسبية الصحيحة)
 // ==========================================
 try {
+  // المسارات النسبية (بدون / في البداية)
   const authRoutes = require('./routes/auth');
   const userRoutes = require('./routes/user');
   const miningRoutes = require('./routes/mining');
@@ -81,9 +79,12 @@ try {
   app.use('/api/chat', chatRoutes);
   app.use('/api/wallet', walletRoutes);
   app.use('/api/admin', adminRoutes);
+
+  console.log('✅ تم تحميل جميع المسارات بنجاح');
 } catch (err) {
   console.error('❌ خطأ في تحميل المسارات:', err.message);
-  process.exit(1);
+  console.error('❌ تأكد من وجود جميع الملفات في مجلد routes');
+  // لا نوقف الخادم بل نستمر
 }
 
 // ==========================================
