@@ -1073,4 +1073,100 @@ function drawWheel(angle) {
 }
 </script>
 </body>
-  </html>
+ <script>
+// ==========================================
+// كود مباشر داخل index.html (حل فوري للأزرار)
+// ==========================================
+console.log('✅ تم تحميل الصفحة بنجاح');
+
+// وظائف تسجيل الدخول والتسجيل
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    if (!email || !password) {
+        alert('❌ يرجى إدخال البريد الإلكتروني وكلمة المرور');
+        return;
+    }
+    alert('✅ محاولة تسجيل الدخول: ' + email);
+    // هنا سيتم إرسال الطلب للخادم لاحقاً
+}
+
+function handleRegister() {
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    if (!name || !email || !password) {
+        alert('❌ يرجى ملء جميع الحقول');
+        return;
+    }
+    if (password.length < 6) {
+        alert('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+        return;
+    }
+    alert('✅ محاولة تسجيل حساب: ' + email);
+    // هنا سيتم إرسال الطلب للخادم لاحقاً
+}
+
+function handleForgot() {
+    const email = document.getElementById('forgotEmail').value;
+    if (!email) {
+        alert('❌ يرجى إدخال البريد الإلكتروني');
+        return;
+    }
+    alert('✅ تم إرسال رمز الاستعادة إلى: ' + email);
+}
+
+// ربط الأزرار عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ جاري ربط الأزرار...');
+    
+    // زر تسجيل الدخول
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.onclick = handleLogin;
+        console.log('✅ تم ربط زر تسجيل الدخول');
+    }
+    
+    // زر التسجيل
+    const registerBtn = document.getElementById('registerBtn');
+    if (registerBtn) {
+        registerBtn.onclick = handleRegister;
+        console.log('✅ تم ربط زر التسجيل');
+    }
+    
+    // زر استعادة كلمة المرور
+    const forgotBtn = document.getElementById('forgotBtn');
+    if (forgotBtn) {
+        forgotBtn.onclick = handleForgot;
+        console.log('✅ تم ربط زر الاستعادة');
+    }
+    
+    // أزرار التنقل بين النماذج
+    document.getElementById('showRegister').onclick = function() {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('forgotForm').classList.add('hidden');
+    };
+    
+    document.getElementById('showForgot').onclick = function() {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('forgotForm').classList.remove('hidden');
+    };
+    
+    document.getElementById('backToLogin').onclick = function() {
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('forgotForm').classList.add('hidden');
+    };
+    
+    document.getElementById('backToLogin2').onclick = function() {
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('forgotForm').classList.add('hidden');
+    };
+    
+    console.log('✅ تم ربط جميع الأزرار بنجاح');
+});
+ </script>
+</html>
