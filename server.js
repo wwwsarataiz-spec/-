@@ -18,10 +18,7 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح'))
-  .catch(err => {
-    console.error('❌ فشل الاتصال بقاعدة البيانات:', err.message);
-    // لا نوقف الخادم، فقط نعرض الخطأ
-  });
+  .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err.message));
 
 // ==========================================
 // دروع الأمان
@@ -56,7 +53,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ==========================================
-// استيراد المسارات (باستخدام المسارات النسبية)
+// استيراد المسارات
 // ==========================================
 try {
   const authRoutes = require('./routes/auth');
@@ -82,18 +79,17 @@ try {
   console.log('✅ تم تحميل جميع المسارات بنجاح');
 } catch (err) {
   console.error('❌ خطأ في تحميل المسارات:', err.message);
-  console.error('❌ تأكد من وجود جميع الملفات في مجلد routes');
 }
 
 // ==========================================
-// الصفحة الرئيسية
+// الصفحة الرئيسية - إرسال index.html
 // ==========================================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ==========================================
-// معالجة الأخطاء العامة
+// معالجة الأخطاء
 // ==========================================
 app.use((err, req, res, next) => {
   console.error('❌ خطأ في الخادم:', err);
