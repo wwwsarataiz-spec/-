@@ -1,5 +1,5 @@
 // ==========================================
-// server.js - الخادم الرئيسي (بدون مجلد public)
+// server.js - الخادم الرئيسي (بدون مجلدات)
 // ==========================================
 
 require('dotenv').config();
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 // الاتصال بقاعدة البيانات
 // ==========================================
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/nexora')
   .then(() => console.log('✅ تم الاتصال بقاعدة البيانات بنجاح'))
   .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err.message));
 
@@ -40,6 +40,7 @@ app.use(cors({
   credentials: true
 }));
 
+// الحد من الطلبات
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -50,22 +51,23 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ===== تقديم الملفات الثابتة من الجذر (بدون مجلد public) =====
+// ===== تقديم الملفات الثابتة من الجذر (حيث يوجد index.html) =====
 app.use(express.static(__dirname));
 
 // ==========================================
-// استيراد المسارات
+// استيراد المسارات (من الجذر مباشرة، بدون مجلدات)
 // ==========================================
 try {
-  const authRoutes = require('./routes/auth');
-  const userRoutes = require('./routes/user');
-  const miningRoutes = require('./routes/mining');
-  const casinoRoutes = require('./routes/casino');
-  const tokenRoutes = require('./routes/tokens');
-  const marketRoutes = require('./routes/market');
-  const chatRoutes = require('./routes/chat');
-  const walletRoutes = require('./routes/wallet');
-  const adminRoutes = require('./routes/admin');
+  // جميع الملفات في الجذر، لذا نستوردها مباشرة
+  const authRoutes = require('./auth');
+  const userRoutes = require('./user');
+  const miningRoutes = require('./mining');
+  const casinoRoutes = require('./casino');
+  const tokenRoutes = require('./tokens');
+  const marketRoutes = require('./market');
+  const chatRoutes = require('./chat');
+  const walletRoutes = require('./wallet');
+  const adminRoutes = require('./admin');
 
   app.use('/api/auth', authRoutes);
   app.use('/api/user', userRoutes);
@@ -80,6 +82,7 @@ try {
   console.log('✅ تم تحميل جميع المسارات بنجاح');
 } catch (err) {
   console.error('❌ خطأ في تحميل المسارات:', err.message);
+  console.error('❌ تأكد من وجود جميع ملفات routes في الجذر');
 }
 
 // ==========================================
