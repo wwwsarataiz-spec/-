@@ -1,1 +1,219 @@
+// ==========================================
+// routes/auth.js - تسجيل ودخول واستعادة
+// ==========================================
 
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { User } = require('../models/User');
+const router = express.Router();
+
+// توليد JWT
+function generateToken(user) {
+  return jwt.sign(
+    { id: user._id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+}
+
+// ==========================================
+// 1. التسجيل
+// ==========================================
+router.post('/register', async (req, res) => {
+  try {
+    const { username, email, password, phone, telegram, referralCode } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ success: false, message: 'جميع الحقول المطلوبة' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'كلمة المرور 6 أحرف على الأقل' });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(409).json({ success: false, message: 'البريد مسجل بالفعل' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newReferralCode = email.substring(0, 4) + Math.random().toString(36).substring(2, 6);
+
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword,
+      phone: phone || 'غير محدد',
+      telegram: telegram || 'غير محدد',
+      referralCode: newReferralCode,
+      referredBy: referralCode || null,
+      freeSpins: 2,
+      role: 'user'
+    });
+
+    await user.save();
+
+    // تحديث إحالات المُحيل
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode });
+      if (referrer) {
+        if (!referrer.referrals) referrer.referrals = [];
+        referrer.referrals.push(email);
+        await referrer.save();
+      }
+    }
+
+    const token = generateToken(user);
+    res.status(201).json({
+      success: true,
+      message: '✅ تم إنشاء الحساب',
+      token,
+      user: { id: user._id, username: user.username, email: user.email, role: user.role }
+    });
+
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({ success: false, message: 'خطأ في التسجيل' });
+  }
+});
+
+// ==========================================
+// 2. تسجيل الدخول
+// ==========================================
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'البريد وكلمة المرور مطلوبة' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'بيانات غير صحيحة' });
+    }
+
+    if (user.banned) {
+      return res.status(403).json({ success: false, message: '🚫 الحساب محظور' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'بيانات غير صحيحة' });
+    }
+
+    const token = generateToken(user);
+    res.json({
+      success: true,
+      message: '✅ تم تسجيل الدخول',
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        balance: user.balance,
+        casinoBalance: user.casinoBalance,
+        giftPoints: user.giftPoints,
+        freeSpins: user.freeSpins
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ success: false, message: 'خطأ في تسجيل الدخول' });
+  }
+});
+
+// ==========================================
+// 3. استعادة كلمة المرور
+// ==========================================
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'البريد غير موجود' });
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.verificationCode = resetCode;
+    user.codeExpiry = new Date(Date.now() + 30 * 60 * 1000);
+    await user.save();
+
+    console.log(`🔑 رمز الاستعادة لـ ${email}: ${resetCode}`);
+
+    res.json({
+      success: true,
+      message: '✅ تم إرسال رمز الاستعادة',
+      resetCode // للتجربة فقط
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ success: false, message: 'خطأ في إرسال الرمز' });
+  }
+});
+
+// ==========================================
+// 4. إعادة تعيين كلمة المرور
+// ==========================================
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user || user.verificationCode !== code || user.codeExpiry < new Date()) {
+      return res.status(400).json({ success: false, message: 'رمز غير صالح' });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.verificationCode = null;
+    user.codeExpiry = null;
+    await user.save();
+
+    res.json({ success: true, message: '✅ تم تغيير كلمة المرور' });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ success: false, message: 'خطأ في تغيير كلمة المرور' });
+  }
+});
+
+// ==========================================
+// 5. التحقق من التوكن
+// ==========================================
+router.get('/verify', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'غير مصرح' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        balance: user.balance,
+        casinoBalance: user.casinoBalance,
+        giftPoints: user.giftPoints,
+        freeSpins: user.freeSpins
+      }
+    });
+
+  } catch (error) {
+    console.error('Verify error:', error);
+    res.status(401).json({ success: false, message: 'توكن غير صالح' });
+  }
+});
+
+module.exports = router;
