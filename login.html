@@ -3,62 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Premium - الدخول والتسجيل</title>
+    <title>Nexora - بوابة الدخول</title>
     <style>
-        :root { --bg:#0c0914; --card:#151124; --gold:#d4af37; --purple:#6c5ce7; --text:#f1ebd9; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; justify-content: center; }
-        .auth-container { width: 100%; max-width: 400px; background: var(--card); border: 1px solid rgba(212,175,55,0.2); border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { color: var(--gold); text-align: center; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; text-align: right; }
-        label { display: block; font-size: 13px; color: var(--gold); margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; background: #201a34; border: 1px solid #3d3161; border-radius: 8px; color: #fff; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--purple), #4834d4); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .switch-mode { text-align: center; margin-top: 15px; font-size: 13px; color: #a39bb4; cursor: pointer; }
+        :root { --bg: #0c0914; --card: #151124; --gold: #d4af37; --purple: #6c5ce7; }
+        body { background: var(--bg); color: #f1ebd9; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { width: 90%; max-width: 400px; background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid rgba(212,175,55,0.2); text-align: right; }
+        h2 { color: var(--gold); text-align: center; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #1e1735; border: 1px solid #3d3161; color: #fff; border-radius: 8px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--purple), #4834d4); border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .link { text-align: center; font-size: 13px; color: #a39bb4; margin-top: 15px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <h2 id="authTitle">إنشاء حساب جديد</h2>
-        <form id="authForm">
-            <div class="form-group" id="fullNameGroup">
-                <label>الاسم الثلاثي:</label>
-                <input type="text" id="fullName" placeholder="أدخل اسمك الثلاثي">
-            </div>
-            <div class="form-group">
-                <label>البريد الإلكتروني:</label>
-                <input type="email" id="email" required placeholder="name@example.com">
-            </div>
-            <div class="form-group" id="phoneGroup">
-                <label>رقم الهاتف:</label>
-                <input type="tel" id="phone" placeholder="77xxxxxxx">
-            </div>
-            <div class="form-group">
-                <label>كلمة المرور:</label>
-                <input type="password" id="password" required placeholder="••••••••">
-            </div>
-            <button type="submit" class="btn" id="submitBtn">تسجيل الحساب</button>
+    <div class="box">
+        <h2 id="title">إنشاء حساب جديد</h2>
+        <form id="form">
+            <input type="text" id="name" placeholder="الاسم الثلاثي كاملاً" required>
+            <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+            <input type="tel" id="phone" placeholder="رقم الهاتف مع مفتاح الدولة" required>
+            <input type="password" id="pass" placeholder="كلمة المرور" required>
+            <button type="submit" class="btn" id="btnText">تسجيل حساب جديد</button>
         </form>
-        <div class="switch-mode" onclick="toggleMode()" id="toggleText">لديك حساب بالفعل؟ تسجيل الدخول</div>
-        <div class="switch-mode" style="color:var(--gold); margin-top:10px;" onclick="forgotPassword()">نسيت كلمة المرور؟ استعادة الحساب</div>
+        <div class="link" onclick="toggleMode()" id="switchText">لديك حساب؟ تسجيل الدخول</div>
+        <div class="link" style="color: var(--gold);" onclick="forgot()">نسيت كلمة المرور؟ استعادة الحساب</div>
     </div>
-
     <script>
         let isLogin = false;
         function toggleMode() {
             isLogin = !isLogin;
-            document.getElementById('authTitle').innerText = isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
-            document.getElementById('fullNameGroup').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('phoneGroup').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('submitBtn').innerText = isLogin ? 'دخول' : 'تسجيل الحساب';
-            document.getElementById('toggleText').innerText = isLogin ? 'ليس لديك حساب؟ إنشاء حساب' : 'لديك حساب بالفعل؟ تسجيل الدخول';
+            document.getElementById('title').innerText = isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
+            document.getElementById('name').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('phone').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('btnText').innerText = isLogin ? 'دخول' : 'تسجيل حساب جديد';
+            document.getElementById('switchText').innerText = isLogin ? 'إنشاء حساب جديد' : 'لديك حساب؟ تسجيل الدخول';
         }
-        function forgotPassword() {
-            const email = prompt("أدخل بريدك الإلكتروني لإرسال رابط استعادة الحساب:");
-            if(email) alert("تم إرسال تعليمات إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح.");
+        function forgot() {
+            let mail = prompt("أدخل بريدك الإلكتروني لإرسال كود الاستعادة:");
+            if(mail) alert("تم إرسال كود استعادة الحساب للبريد الإلكتروني بنجاح.");
         }
-        document.getElementById('authForm').addEventListener('submit', (e) => {
+        document.getElementById('form').addEventListener('submit', (e) => {
             e.preventDefault();
-            window.location.href = 'index.html'; // توجيه تجريبي للوحة الرئيسية
+            window.location.href = '/dashboard';
         });
     </script>
 </body>
