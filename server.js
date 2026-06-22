@@ -5,15 +5,14 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
 
-// الاتصال بقاعدة بيانات MongoDB Atlas
+// الاتصال المباشر بقاعدة البيانات
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI)
     .then(() => console.log('Connected to MongoDB Atlas Successfully! ✅'))
     .catch(err => console.error('Database connection error ❌:', err));
 
-// نموذج بيانات المستخدمين
+// هيكل بيانات المستخدمين
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     email: { type: String, unique: true, required: true },
@@ -24,27 +23,33 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// التوجيهات الأساسية للملفات
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+// توجيهات المسارات لمنع التداخل مع الكازينو القديم
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
 
-// مسار تسجيل حساب جديد وتخزينه في المونجو
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// خدمة ملفات التنسيق والصور بشكل فرعي لضمان عدم الكاش
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+// واجهات الـ API للتوثيق
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { fullName, email, phone, password } = req.body;
         const userExists = await User.findOne({ email });
-        if (userExists) {
-            return res.status(400).json({ success: false, message: "البريد الإلكتروني مسجل بالفعل" });
-        }
+        if (userExists) return res.status(400).json({ success: false, message: "المستخدم مسجل بالفعل!" });
+        
         const newUser = new User({ fullName, email, phone, password });
         await newUser.save();
-        res.status(201).json({ success: true, message: "تم التسجيل بنجاح" });
+        res.status(201).json({ success: true });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// مسار تسجيل الدخول والتحقق الفعلي
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -52,7 +57,7 @@ app.post('/api/auth/login', async (req, res) => {
         if (user) {
             res.json({ success: true, user });
         } else {
-            res.status(401).json({ success: false, message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
+            res.status(401).json({ success: false, message: "بيانات الدخول غير صحيحة!" });
         }
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
