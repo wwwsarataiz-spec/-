@@ -24,21 +24,19 @@
         .balance-box { text-align: center; }
         .balance { font-size: 32px; font-weight: bold; margin: 10px 0; color: #fff; }
         
-        /* أزرار العمليات المالية */
+        /* روابط الأقسام المتكاملة كقائمة تنقل علوية وسفلية */
+        .nav-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        .nav-item { background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; color: var(--text-main); text-decoration: none; font-size: 13px; font-weight: bold; transition: 0.3s; }
+        .nav-item:hover { border-color: var(--gold-primary); background: #1e1735; }
+
         .action-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 14px; text-align: center; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 14px; text-align: center; text-decoration: none; }
         .btn-deposit { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
         .btn-withdraw { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
         
-        /* كروت خطط التعدين والسرعة */
         .plan-title { font-weight: bold; color: var(--gold-primary); margin-bottom: 5px; }
         .plan-info { color: var(--text-muted); font-size: 13px; margin-bottom: 10px; }
         .btn-upgrade { background-color: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary); width: 100%; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-upgrade:hover { background-color: var(--gold-primary); color: #000; }
-
-        /* قسم الكازينو / ألعاب المخاطرة */
-        .casino-box { background: linear-gradient(145deg, var(--bg-card), #1e133a); border: 1px solid var(--purple-accent); text-align: center; }
-        .btn-game { background: linear-gradient(135deg, var(--purple-accent), #4834d4); color: white; width: 100%; margin-top: 12px; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
     </style>
 </head>
 <body>
@@ -49,67 +47,48 @@
             <p style="color: var(--text-muted); font-size: 13px;">نظام التعدين السحابي وإدارة الأصول</p>
         </div>
 
-        <!-- 1. لوحة الرصيد وعداد التعدين الحي -->
+        <div class="nav-menu">
+            <a href="casino.html" class="nav-item">🎰 صالة الكازينو</a>
+            <a href="token-factory.html" class="nav-item">🛠️ مصنع العملات</a>
+            <a href="admin.html" class="nav-item">👑 لوحة الإدارة والبوت</a>
+            <a href="wallet.html" class="nav-item">💼 إدارة المحفظة</a>
+        </div>
+
         <div class="card balance-box">
             <p style="color: var(--text-muted);">إجمالي الرصيد الاستثماري</p>
-            <div class="balance" id="userBalance">0.000000 <span style="font-size: 16px; color: var(--gold-primary);">USDT</span></div>
+            <div class="balance" id="userBalance">0.000660 <span style="font-size: 16px; color: var(--gold-primary);">USDT</span></div>
             <p style="font-size: 12px; color: #2ecc71;">⚡ محرك التعدين نشط ويعمل تلقائياً</p>
         </div>
 
-        <!-- 2. أزرار الإيداع والسحب المباشرة -->
         <div class="action-group">
-            <button class="btn btn-deposit" onclick="handleDeposit()">📥 إيداع أموال</button>
-            <button class="btn btn-withdraw" onclick="handleWithdraw()">📤 سحب الأرباح</button>
+            <a href="wallet.html" class="btn btn-deposit">📥 إيداع أموال</a>
+            <a href="wallet.html" class="btn btn-withdraw">📤 سحب الأرباح</a>
         </div>
 
-        <!-- 3. صالة ألعاب المخاطرة والكازينو -->
-        <div class="card casino-box">
-            <h3 class="gold-text">🎰 صالة الألعاب الملكية (Risk Game)</h3>
-            <p style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">ضاعف أرباح التعدين الخاصة بك فوراً أو خاطر بها</p>
-            <button class="btn btn-game" onclick="openCasino()">🎮 دخول صالة الحظ</button>
-        </div>
-
-        <!-- 4. خطط ترقية التعدين (السرعات) -->
         <h3 class="gold-text" style="text-align: right; margin: 20px 0 10px 0; font-size: 16px;">🚀 ترقية خطط التعدين السحابي:</h3>
         
         <div class="card">
             <div class="plan-title">باقة المبتدئين (VIP 1)</div>
             <div class="plan-info">السرعة: +1.50 MH/s | العائد اليومي: 0.50 USDT</div>
-            <button class="btn_upgrade" onclick="upgradePlan(1, 10)">تفعيل الخطة (10 USDT)</button>
+            <button class="btn-upgrade" onclick="upgradePlan(1, 10)">تفعيل الخطة (10 USDT)</button>
         </div>
 
         <div class="card">
             <div class="plan-title">الباقة المتقدمة (VIP 2)</div>
             <div class="plan-info">السرعة: +5.00 MH/s | العائد اليومي: 2.50 USDT</div>
-            <button class="btn_upgrade" onclick="upgradePlan(2, 50)">تفعيل الخطة (50 USDT)</button>
+            <button class="btn-upgrade" onclick="upgradePlan(2, 50)">تفعيل الخطة (50 USDT)</button>
         </div>
     </div>
 
     <script>
-        // محاكي عداد التعدين الحي لزيادة الأرقام تلقائياً أمام المستخدم
-        let currentBalance = 0.000000;
+        let currentBalance = 0.000660;
         setInterval(() => {
             currentBalance += 0.000012;
             document.getElementById('userBalance').innerHTML = currentBalance.toFixed(6) + ' <span style="font-size: 16px; color: #d4af37;">USDT</span>';
         }, 1000);
 
-        function handleDeposit() {
-            alert("📥 للإيداع وتفعيل باقات التعدين السحابي، يرجى التواصل المباشر مع الإدارة للحصول على عنوان المحفظة.");
-        }
-
-        function handleWithdraw() {
-            const amount = prompt("أدخل الكمية التي تريد سحبها (الحد الأدنى 10 USDT):");
-            if (amount) {
-                alert(`📤 تم تقديم طلب سحب بقيمة ${amount} USDT بنجاح. جاري المراجعة من قِبل مسؤول النظام.`);
-            }
-        }
-
-        function openCasino() {
-            alert("🎰 مرحباً بك في لعبة الحظ والمخاطرة! ميزة مضاعفة الرصيد ستكون متاحة بالكامل بعد تحديث حسابك.");
-        }
-
         function upgradePlan(level, cost) {
-            alert(`🚀 جاري التحقق من وجود رصيد كافٍ لتفعيل VIP ${level} بتكلفة ${cost} USDT.`);
+            alert(`🚀 جاري التحقق عبر السيرفر لتفعيل VIP ${level} بتكلفة ${cost} USDT.`);
         }
     </script>
 </body>
