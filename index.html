@@ -16,7 +16,6 @@
             --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        /* ===== إعادة ضبط عامة ===== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -35,10 +34,10 @@
         }
 
         .container {
-            max-width: 480px;
+            max-width: 960px;   /* توسيع العرض ليتسع لعمودين */
             width: 100%;
             margin: 0 auto;
-            padding: 0 4px;
+            padding: 0 6px;
         }
 
         .gold-text {
@@ -47,6 +46,23 @@
             margin-bottom: 4px;
         }
 
+        /* ===== شبكة الأقسام الرئيسية (عمودين) ===== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        /* في الجوال تصبح عموداً واحداً */
+        @media (max-width: 700px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        /* ===== أزرار التنقل ===== */
         .nav-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -77,49 +93,44 @@
             background: var(--card);
             border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: var(--radius);
-            padding: 16px;
+            padding: 14px;
             margin-bottom: 14px;
             text-align: right;
         }
 
         .balance {
-            font-size: clamp(28px, 8vw, 36px);
+            font-size: clamp(26px, 6vw, 34px);
             font-weight: 700;
             color: #fff;
             text-align: center;
-            margin: 8px 0;
+            margin: 6px 0;
             word-break: break-word;
         }
-
         .balance small {
             color: var(--gold);
-            font-size: clamp(12px, 3vw, 16px);
+            font-size: clamp(11px, 2.5vw, 15px);
         }
 
         .btn-group {
             display: flex;
             gap: 8px;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+            margin-bottom: 10px;
         }
-
         .btn {
             flex: 1;
-            padding: 12px 8px;
+            padding: 10px 6px;
             border-radius: 8px;
             border: none;
             font-weight: 700;
             cursor: pointer;
             color: white;
-            font-size: clamp(12px, 2.5vw, 14px);
-            min-width: 80px;
+            font-size: clamp(11px, 2vw, 14px);
+            min-width: 70px;
             text-align: center;
             transition: 0.2s;
         }
-
-        .btn:active {
-            transform: scale(0.96);
-        }
+        .btn:active { transform: scale(0.96); }
 
         .btn-up {
             background: transparent;
@@ -130,15 +141,13 @@
             border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: 6px;
             transition: 0.2s;
-            font-size: clamp(12px, 2.5vw, 14px);
+            font-size: clamp(11px, 2vw, 14px);
         }
+        .btn-up:active { transform: scale(0.96); }
 
-        .btn-up:active {
-            transform: scale(0.96);
-        }
-
+        /* ===== النوافذ المنبثقة ===== */
         .modal {
             display: none;
             position: fixed;
@@ -146,14 +155,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.92);
+            background: rgba(0,0,0,0.92);
             justify-content: center;
             align-items: center;
             z-index: 1000;
             padding: 10px;
             overflow-y: auto;
         }
-
         .modal-content {
             background: var(--card);
             width: 100%;
@@ -161,13 +169,12 @@
             padding: 20px 16px;
             border-radius: var(--radius);
             border: 1px solid var(--gold);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 20px rgba(212,175,55,0.15);
             max-height: 95vh;
             overflow-y: auto;
             margin: 10px auto;
             text-align: right;
         }
-
         .close-btn {
             background: var(--purple);
             color: white;
@@ -181,152 +188,120 @@
             font-size: clamp(13px, 3vw, 15px);
             transition: 0.2s;
         }
+        .close-btn:active { transform: scale(0.96); }
 
-        .close-btn:active {
-            transform: scale(0.96);
-        }
-
-        input,
-        select {
+        input, select {
             width: 100%;
-            padding: 12px 10px;
-            margin: 8px 0;
+            padding: 10px 8px;
+            margin: 6px 0;
             background: #1e1735;
             border: 1px solid #3d3161;
             color: white;
             border-radius: 8px;
-            font-size: clamp(13px, 3vw, 15px);
+            font-size: clamp(12px, 2.5vw, 14px);
             box-sizing: border-box;
             direction: rtl;
         }
-
-        input::placeholder {
-            color: #8a7fa0;
-        }
-
-        input:focus,
-        select:focus {
+        input::placeholder { color: #8a7fa0; }
+        input:focus, select:focus {
             outline: none;
             border-color: var(--gold);
         }
 
+        /* ===== الألعاب ===== */
         .game-container {
-            margin: 15px 0;
-            padding: 12px;
+            margin: 10px 0;
+            padding: 10px;
             background: #0f0b1a;
             border-radius: var(--radius);
-            border: 1px solid rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212,175,55,0.15);
         }
-
         .game-title {
             color: var(--gold);
-            font-size: clamp(15px, 4vw, 18px);
+            font-size: clamp(14px, 3vw, 17px);
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
-
         .game-desc {
-            font-size: clamp(11px, 2.5vw, 13px);
+            font-size: clamp(10px, 2vw, 12px);
             color: #a39bb4;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
-
         .wheel {
-            width: 90px;
-            height: 90px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             border: 3px solid var(--gold);
-            margin: 12px auto;
+            margin: 8px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 24px;
             background: #1e1735;
-            transition: transform 1s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            transition: transform 1s cubic-bezier(0.17,0.67,0.12,0.99);
         }
-
         .game-btn {
             background: var(--gold);
             color: #000;
             border: none;
-            padding: 10px 16px;
+            padding: 8px 12px;
             border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
-            font-size: clamp(13px, 3vw, 15px);
+            font-size: clamp(12px, 2.5vw, 14px);
             width: 100%;
-            margin-top: 6px;
+            margin-top: 4px;
             transition: 0.2s;
         }
-
-        .game-btn:active {
-            transform: scale(0.96);
-        }
-
+        .game-btn:active { transform: scale(0.96); }
         .game-result {
-            margin-top: 8px;
+            margin-top: 6px;
             font-weight: 700;
-            font-size: clamp(13px, 3vw, 15px);
-            min-height: 24px;
+            font-size: clamp(12px, 2.5vw, 14px);
+            min-height: 20px;
             text-align: center;
         }
-
         .mini-btn {
             background: transparent;
             border: 1px solid #3d3161;
             color: #fff;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: clamp(11px, 2.5vw, 13px);
+            font-size: clamp(10px, 2vw, 12px);
             transition: 0.2s;
-            margin: 4px 2px;
+            margin: 2px;
         }
-
-        .mini-btn:hover {
-            border-color: var(--gold);
-        }
-
+        .mini-btn:hover { border-color: var(--gold); }
         .bet-row {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
             flex-wrap: wrap;
-            margin: 8px 0;
+            margin: 4px 0;
         }
-
-        .bet-row input {
-            flex: 2;
-            min-width: 80px;
-        }
-
-        .bet-row .mini-btn {
-            flex: 1;
-            min-width: 60px;
-        }
+        .bet-row input { flex: 2; min-width: 60px; }
+        .bet-row .mini-btn { flex: 1; min-width: 50px; }
 
         /* ===== الكراش ===== */
         .crash-multiplier {
-            font-size: clamp(24px, 6vw, 32px);
+            font-size: clamp(22px, 5vw, 28px);
             font-weight: 900;
             color: #2ecc71;
             text-align: center;
-            margin-bottom: 4px;
-            transition: color 0.3s;
+            margin-bottom: 2px;
         }
-
         .crash-bar-bg {
             width: 100%;
-            height: 6px;
+            height: 5px;
             background: #2d2d3a;
             border-radius: 4px;
-            margin: 6px 0;
+            margin: 4px 0;
             overflow: hidden;
         }
-
         .crash-bar-fill {
             height: 100%;
             width: 0%;
@@ -338,621 +313,437 @@
         /* ===== رفع الصورة ===== */
         .file-upload-label {
             color: #a39bb4;
-            font-size: 13px;
+            font-size: 12px;
             display: block;
-            margin-top: 8px;
-        }
-
-        .logo-preview {
             margin-top: 6px;
-            text-align: center;
         }
-
+        .logo-preview { margin-top: 4px; text-align: center; }
         .logo-preview img {
-            max-width: 80px;
-            max-height: 80px;
+            max-width: 60px;
+            max-height: 60px;
             border-radius: 8px;
             border: 2px solid var(--gold);
         }
 
+        /* ===== شبكة الألعاب (2x2) ===== */
+        .games-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        @media (max-width: 600px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+
         .section-title {
-            font-size: clamp(18px, 5vw, 24px);
-            margin: 24px 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            font-size: clamp(16px, 4vw, 22px);
+            margin: 16px 0 8px 0;
+            padding-bottom: 6px;
+            border-bottom: 2px solid rgba(212,175,55,0.3);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
+        /* ===== التوافق مع الجوالات الصغيرة ===== */
         @media (max-width: 360px) {
-            .nav-grid { gap: 5px; }
-            .nav-btn { padding: 10px 4px; font-size: 11px; }
-            .card { padding: 12px; }
-            .modal-content { padding: 14px 10px; }
-            .btn { padding: 10px 6px; font-size: 11px; min-width: 60px; }
+            .nav-grid { gap: 4px; }
+            .nav-btn { padding: 8px 4px; font-size: 10px; }
+            .card { padding: 10px; }
+            .btn { padding: 8px 4px; font-size: 10px; min-width: 50px; }
         }
-
         @media (max-width: 280px) {
             .nav-grid { grid-template-columns: 1fr; }
             .btn-group { flex-direction: column; }
         }
-
-        .modal-content::-webkit-scrollbar {
-            width: 4px;
-        }
-        .modal-content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .modal-content::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 10px;
-        }
     </style>
 </head>
 <body>
+<div class="container">
 
-    <div class="container">
-        <!-- ============================================================ -->
-        <!-- القسم 1: الرأس والعلامة التجارية -->
-        <!-- ============================================================ -->
-        <h1 class="gold-text" style="margin-top:16px; font-size: clamp(22px, 6vw, 30px);">NEXORA PREMIUM</h1>
-        <p style="color: #a39bb4; font-size: clamp(11px, 2.5vw, 14px);">نظام التعدين وإدارة الأصول المتقدم</p>
+    <!-- ===== الرأس ===== -->
+    <h1 class="gold-text" style="margin-top:12px; font-size: clamp(22px, 6vw, 30px);">NEXORA PREMIUM</h1>
+    <p style="color: #a39bb4; font-size: clamp(11px, 2.5vw, 14px);">نظام التعدين وإدارة الأصول المتقدم</p>
 
-        <!-- ============================================================ -->
-        <!-- أزرار التنقل السريع (التمرير للأقسام + النوافذ المنبثقة) -->
-        <!-- ============================================================ -->
-        <div class="nav-grid">
-            <button class="nav-btn" onclick="document.getElementById('games-section').scrollIntoView({behavior:'smooth'})">🎰 صالة الكازينو</button>
-            <button class="nav-btn" onclick="openModal('tokenModal')">🛠️ مصنع العملات</button>
-            <button class="nav-btn" onclick="document.getElementById('balance-section').scrollIntoView({behavior:'smooth'})">💼 إدارة المحفظة</button>
-            <button class="nav-btn" onclick="openModal('adminModal')">👑 لوحة الإدارة</button>
-        </div>
+    <!-- ===== أزرار التنقل ===== -->
+    <div class="nav-grid">
+        <button class="nav-btn" onclick="document.getElementById('games-section').scrollIntoView({behavior:'smooth'})">🎰 صالة الكازينو</button>
+        <button class="nav-btn" onclick="openModal('tokenModal')">🛠️ مصنع العملات</button>
+        <button class="nav-btn" onclick="document.getElementById('balance-section').scrollIntoView({behavior:'smooth'})">💼 إدارة المحفظة</button>
+        <button class="nav-btn" onclick="openModal('adminModal')">👑 لوحة الإدارة</button>
+    </div>
 
-        <!-- ============================================================ -->
-        <!-- القسم 2: الرصيد والمحفظة (تم نقله من النافذة المنبثقة) -->
-        <!-- ============================================================ -->
+    <!-- ===== شبكة الأقسام الرئيسية (عمودين) ===== -->
+    <div class="dashboard-grid">
+
+        <!-- ===== القسم الأيمن: الرصيد والمحفظة ===== -->
         <div id="balance-section">
             <h2 class="gold-text section-title">💼 قسم الرصيد والمحفظة</h2>
-            
-            <div class="card" style="text-align: center;">
-                <p style="color: #a39bb4; font-size: clamp(12px, 2.5vw, 14px);">إجمالي الرصيد الاستثماري الحالي</p>
+            <div class="card" style="text-align:center;">
+                <p style="color:#a39bb4; font-size:clamp(11px,2vw,13px);">إجمالي الرصيد الاستثماري الحالي</p>
                 <div class="balance" id="liveBalance">0.000660 <small>USDT</small></div>
-                <p style="font-size: clamp(10px, 2vw, 12px); color: #2ecc71;">⚡ محرك التعدين نشط ويعمل بسلاسة</p>
+                <p style="font-size:clamp(9px,1.8vw,11px); color:#2ecc71;">⚡ محرك التعدين نشط</p>
             </div>
-
             <div class="btn-group">
-                <button class="btn" style="background: #2ecc71;" onclick="document.getElementById('deposit-section').scrollIntoView({behavior:'smooth'})">📥 إيداع أموال</button>
-                <button class="btn" style="background: #e74c3c;" onclick="document.getElementById('withdraw-section').scrollIntoView({behavior:'smooth'})">📤 سحب الأرباح</button>
+                <button class="btn" style="background:#2ecc71;" onclick="document.getElementById('deposit-section').scrollIntoView({behavior:'smooth'})">📥 إيداع</button>
+                <button class="btn" style="background:#e74c3c;" onclick="document.getElementById('withdraw-section').scrollIntoView({behavior:'smooth'})">📤 سحب</button>
             </div>
-
-            <!-- حقل الإيداع (من النافذة المنبثقة القديمة) -->
             <div id="deposit-section" class="card">
-                <h4 style="color: var(--gold); font-size: clamp(15px, 3.5vw, 18px);">📥 الإيداع</h4>
-                <p style="font-size: clamp(12px, 2.5vw, 14px); margin-top:4px; color:#2ecc71; font-weight:700;">عنوان الإيداع المعتمد لشبكة (TRC-20):</p>
+                <h4 style="color:var(--gold); font-size:clamp(14px,3vw,16px);">📥 الإيداع</h4>
+                <p style="font-size:clamp(11px,2vw,13px); color:#2ecc71; font-weight:700;">عنوان الإيداع (TRC-20):</p>
                 <input type="text" id="walletAddress" value="TYv7Ruxxxxxxxxxxxxxxxxxxx" readonly style="text-align:center; color:var(--gold); font-weight:bold;">
             </div>
-
-            <!-- حقل السحب (من النافذة المنبثقة القديمة) -->
             <div id="withdraw-section" class="card">
-                <h4 style="color: var(--gold); font-size: clamp(15px, 3.5vw, 18px);">📤 تقديم طلب سحب الأرباح</h4>
-                <input type="text" id="withdrawAddress" placeholder="أدخل عنوان محفظة السحب الخاصة بك">
-                <input type="number" id="withdrawAmount" placeholder="الكمية (الحد الأدنى 10 USDT)" min="10">
-                <button class="close-btn" style="background:#e74c3c; margin-top:8px;" onclick="submitWithdraw()">تأكيد عملية السحب</button>
+                <h4 style="color:var(--gold); font-size:clamp(14px,3vw,16px);">📤 طلب سحب</h4>
+                <input type="text" id="withdrawAddress" placeholder="عنوان محفظة السحب">
+                <input type="number" id="withdrawAmount" placeholder="الكمية (الحد 10 USDT)" min="10">
+                <button class="close-btn" style="background:#e74c3c; margin-top:6px;" onclick="submitWithdraw()">تأكيد السحب</button>
             </div>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- القسم 3: الألعاب (الكازينو) - تم نقله بالكامل من النافذة المنبثقة -->
-        <!-- ============================================================ -->
+        <!-- ===== القسم الأيسر: الألعاب ===== -->
         <div id="games-section">
             <h2 class="gold-text section-title">🎰 قسم الألعاب (الكازينو)</h2>
-            <p style="font-size: clamp(11px, 2.5vw, 13px); color:#a39bb4; margin-bottom:12px;">اختر لعبتك، واربح مع خوارزميات ذكية</p>
+            <p style="font-size:clamp(10px,2vw,12px); color:#a39bb4; margin-bottom:8px;">اختر لعبتك، واربح مع خوارزميات ذكية</p>
 
-            <!-- لعبة الهامش -->
-            <div class="game-container">
-                <div class="game-title">📊 لعبة الهامش (النسبة)</div>
-                <div class="game-desc">اختر نسبة الفوز من 1% إلى 100%، واربح نسبتها من رهانك.</div>
-                <div class="bet-row">
-                    <input type="number" id="marginBet" placeholder="الرهان (0.3+)" value="0.3" step="0.1">
-                    <input type="number" id="marginPercent" placeholder="النسبة (1-100)" value="50" min="1" max="100">
+            <div class="games-grid">
+                <!-- لعبة الهامش -->
+                <div class="game-container">
+                    <div class="game-title">📊 الهامش</div>
+                    <div class="game-desc">نسبة الفوز 1-100%</div>
+                    <div class="bet-row">
+                        <input type="number" id="marginBet" placeholder="رهان" value="0.3" step="0.1">
+                        <input type="number" id="marginPercent" placeholder="%" value="50" min="1" max="100">
+                    </div>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin:4px 0;">
+                        <button class="mini-btn" style="background:#2ecc71; color:#000;" onclick="setMarginRisk('low')">🟢 منخفض</button>
+                        <button class="mini-btn" style="background:#f1c40f; color:#000;" onclick="setMarginRisk('medium')">🟡 متوسط</button>
+                        <button class="mini-btn" style="background:#e74c3c; color:#fff;" onclick="setMarginRisk('high')">🔴 مرتفع</button>
+                    </div>
+                    <button class="game-btn" onclick="playMargin()">🎲 اقلب</button>
+                    <div id="marginResult" class="game-result"></div>
                 </div>
-                <div style="display:flex; gap:6px; margin:8px 0; flex-wrap:wrap;">
-                    <button class="mini-btn" style="flex:1; background:#2ecc71; color:#000; font-weight:700;" onclick="setMarginRisk('low')">🟢 منخفض</button>
-                    <button class="mini-btn" style="flex:1; background:#f1c40f; color:#000; font-weight:700;" onclick="setMarginRisk('medium')">🟡 متوسط</button>
-                    <button class="mini-btn" style="flex:1; background:#e74c3c; color:#fff; font-weight:700;" onclick="setMarginRisk('high')">🔴 مرتفع</button>
-                </div>
-                <button class="game-btn" onclick="playMargin()">🎲 اقلب الحظ</button>
-                <div id="marginResult" class="game-result"></div>
-                <div style="font-size: clamp(10px, 2vw, 12px); color:#636e72; margin-top:4px; text-align:center;">House Edge: 5% لصالح الكازينو</div>
-            </div>
 
-            <!-- عجلة الحظ -->
-            <div class="game-container">
-                <div class="game-title">🎡 عجلة الحظ</div>
-                <div class="game-desc">دور العجلة واربح مضاعفات رهانك.</div>
-                <div class="wheel" id="wh">🎲</div>
-                <div class="bet-row">
-                    <input type="number" id="wheelBet" placeholder="الرهان (0.3+)" value="0.3" step="0.1">
+                <!-- عجلة الحظ -->
+                <div class="game-container">
+                    <div class="game-title">🎡 عجلة</div>
+                    <div class="game-desc">مضاعفات تصل 10x</div>
+                    <div class="wheel" id="wh">🎲</div>
+                    <div class="bet-row">
+                        <input type="number" id="wheelBet" placeholder="رهان" value="0.3" step="0.1">
+                    </div>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin:4px 0;">
+                        <button class="mini-btn" style="background:#2ecc71; color:#000;" onclick="setWheelRisk('low')">🟢 منخفض</button>
+                        <button class="mini-btn" style="background:#f1c40f; color:#000;" onclick="setWheelRisk('medium')">🟡 متوسط</button>
+                        <button class="mini-btn" style="background:#e74c3c; color:#fff;" onclick="setWheelRisk('high')">🔴 مرتفع</button>
+                    </div>
+                    <button class="game-btn" onclick="spinWheel()">🎡 لف</button>
+                    <div id="wheelResult" class="game-result"></div>
                 </div>
-                <div style="display:flex; gap:6px; margin:8px 0; flex-wrap:wrap;">
-                    <button class="mini-btn" style="flex:1; background:#2ecc71; color:#000; font-weight:700;" onclick="setWheelRisk('low')">🟢 منخفض</button>
-                    <button class="mini-btn" style="flex:1; background:#f1c40f; color:#000; font-weight:700;" onclick="setWheelRisk('medium')">🟡 متوسط</button>
-                    <button class="mini-btn" style="flex:1; background:#e74c3c; color:#fff; font-weight:700;" onclick="setWheelRisk('high')">🔴 مرتفع</button>
-                </div>
-                <button class="game-btn" onclick="spinWheel()">🎡 لف العجلة</button>
-                <div id="wheelResult" class="game-result"></div>
-            </div>
 
-            <!-- النرد -->
-            <div class="game-container">
-                <div class="game-title">🎲 النرد الرقمي</div>
-                <div class="game-desc">خمن الرقم أو زوجي/فردي، واربح مضاعفات تصل إلى 6x.</div>
-                <div class="bet-row">
-                    <input type="number" id="diceBet" placeholder="الرهان (0.3+)" value="0.3" step="0.1">
-                    <select id="diceGuess" style="flex:1; min-width:80px;">
-                        <option value="1">1</option><option value="2">2</option>
-                        <option value="3">3</option><option value="4">4</option>
-                        <option value="5">5</option><option value="6">6</option>
-                        <option value="even">زوجي</option><option value="odd">فردي</option>
-                    </select>
+                <!-- النرد -->
+                <div class="game-container">
+                    <div class="game-title">🎲 النرد</div>
+                    <div class="game-desc">خمن الرقم أو زوجي/فردي</div>
+                    <div class="bet-row">
+                        <input type="number" id="diceBet" placeholder="رهان" value="0.3" step="0.1">
+                        <select id="diceGuess" style="flex:1; min-width:50px;">
+                            <option value="1">1</option><option value="2">2</option>
+                            <option value="3">3</option><option value="4">4</option>
+                            <option value="5">5</option><option value="6">6</option>
+                            <option value="even">زوجي</option><option value="odd">فردي</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin:4px 0;">
+                        <button class="mini-btn" style="background:#2ecc71; color:#000;" onclick="setDiceRisk('low')">🟢 منخفض</button>
+                        <button class="mini-btn" style="background:#f1c40f; color:#000;" onclick="setDiceRisk('medium')">🟡 متوسط</button>
+                        <button class="mini-btn" style="background:#e74c3c; color:#fff;" onclick="setDiceRisk('high')">🔴 مرتفع</button>
+                    </div>
+                    <button class="game-btn" onclick="rollDice()">🎲 رمي</button>
+                    <div id="diceResult" class="game-result"></div>
                 </div>
-                <div style="display:flex; gap:6px; margin:8px 0; flex-wrap:wrap;">
-                    <button class="mini-btn" style="flex:1; background:#2ecc71; color:#000; font-weight:700;" onclick="setDiceRisk('low')">🟢 منخفض</button>
-                    <button class="mini-btn" style="flex:1; background:#f1c40f; color:#000; font-weight:700;" onclick="setDiceRisk('medium')">🟡 متوسط</button>
-                    <button class="mini-btn" style="flex:1; background:#e74c3c; color:#fff; font-weight:700;" onclick="setDiceRisk('high')">🔴 مرتفع</button>
-                </div>
-                <button class="game-btn" onclick="rollDice()">🎲 رمي النرد</button>
-                <div id="diceResult" class="game-result"></div>
-            </div>
 
-            <!-- الكراش -->
-            <div class="game-container">
-                <div class="game-title">🐔 لعبة الكراش (الدجاجة)</div>
-                <div class="game-desc">اربح مضاعفات تتصاعد كل ثانية، لكن انسحب قبل الانهيار!</div>
-                <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
-                <div class="crash-bar-bg">
-                    <div class="crash-bar-fill" id="crashProgress"></div>
+                <!-- الكراش -->
+                <div class="game-container">
+                    <div class="game-title">🐔 الكراش</div>
+                    <div class="game-desc">انسحب قبل الانهيار</div>
+                    <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
+                    <div class="crash-bar-bg"><div class="crash-bar-fill" id="crashProgress"></div></div>
+                    <div class="bet-row">
+                        <input type="number" id="crashBet" placeholder="رهان" value="0.3" step="0.1">
+                    </div>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; margin:4px 0;">
+                        <button class="mini-btn" style="background:#2ecc71; color:#000;" onclick="setCrashRisk('low')">🟢 منخفض</button>
+                        <button class="mini-btn" style="background:#f1c40f; color:#000;" onclick="setCrashRisk('medium')">🟡 متوسط</button>
+                        <button class="mini-btn" style="background:#e74c3c; color:#fff;" onclick="setCrashRisk('high')">🔴 مرتفع</button>
+                    </div>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                        <button class="mini-btn" style="flex:1; background:var(--gold); color:#000;" onclick="startCrash()">🚀 بدء</button>
+                        <button class="mini-btn" style="flex:1; background:#2ecc71; color:#000;" id="cashoutBtn" onclick="cashoutCrash()" disabled>💰 سحب</button>
+                    </div>
+                    <div id="crashResult" class="game-result"></div>
                 </div>
-                <div class="bet-row">
-                    <input type="number" id="crashBet" placeholder="الرهان (0.3+)" value="0.3" step="0.1">
-                </div>
-                <div style="display:flex; gap:6px; margin:8px 0; flex-wrap:wrap;">
-                    <button class="mini-btn" style="flex:1; background:#2ecc71; color:#000; font-weight:700;" onclick="setCrashRisk('low')">🟢 منخفض</button>
-                    <button class="mini-btn" style="flex:1; background:#f1c40f; color:#000; font-weight:700;" onclick="setCrashRisk('medium')">🟡 متوسط</button>
-                    <button class="mini-btn" style="flex:1; background:#e74c3c; color:#fff; font-weight:700;" onclick="setCrashRisk('high')">🔴 مرتفع</button>
-                </div>
-                <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button class="mini-btn" style="flex:1; background:var(--gold); color:#000; font-weight:700;" onclick="startCrash()">🚀 بدء</button>
-                    <button class="mini-btn" style="flex:1; background:#2ecc71; color:#000; font-weight:700;" id="cashoutBtn" onclick="cashoutCrash()" disabled>💰 سحب</button>
-                </div>
-                <div id="crashResult" class="game-result"></div>
-            </div>
-        </div>
+            </div> <!-- نهاية شبكة الألعاب -->
+        </div> <!-- نهاية قسم الألعاب -->
 
-        <!-- ============================================================ -->
-        <!-- القسم 4: خطط الترقية -->
-        <!-- ============================================================ -->
-        <h2 class="gold-text section-title" style="margin-top:30px;">🚀 خطط الترقية السحابية</h2>
-        <div class="card">
-            <div style="font-weight:700; color:var(--gold); font-size: clamp(14px, 3vw, 17px);">باقة المبتدئين (VIP 1)</div>
-            <div style="font-size: clamp(11px, 2.5vw, 13px); color:#a39bb4; margin-bottom:4px;">السرعة: +1.50 MH/s | العائد اليومي: 0.50 USDT</div>
-            <button class="btn-up" onclick="alert('جاري مراجعة الرصيد لتفعيل الخطة...')">تفعيل الباقة (10 USDT)</button>
-        </div>
+    </div> <!-- نهاية شبكة الأقسام الرئيسية -->
+
+    <!-- ===== خطط الترقية ===== -->
+    <h2 class="gold-text section-title" style="margin-top:20px;">🚀 خطط الترقية السحابية</h2>
+    <div class="card">
+        <div style="font-weight:700; color:var(--gold); font-size:clamp(14px,3vw,17px);">باقة المبتدئين (VIP 1)</div>
+        <div style="font-size:clamp(11px,2vw,13px); color:#a39bb4;">السرعة: +1.50 MH/s | العائد: 0.50 USDT/يوم</div>
+        <button class="btn-up" onclick="alert('جاري مراجعة الرصيد...')">تفعيل الباقة (10 USDT)</button>
     </div>
 
-    <!-- ================================================================ -->
-    <!-- ====== نافذة مصنع العملات (منبثقة) ====== -->
-    <!-- ================================================================ -->
-    <div id="tokenModal" class="modal">
-        <div class="modal-content">
-            <h3 class="gold-text" style="font-size: clamp(18px, 5vw, 24px);">🛠️ مصنع سك العملات</h3>
-            <input type="text" id="tokenName" placeholder="اسم العملة (Token Name)">
-            <input type="text" id="tokenSymbol" placeholder="رمز العملة (Symbol)">
-            <input type="number" id="tokenSupply" placeholder="إجمالي المعروض (Total Supply)">
+</div> <!-- نهاية container -->
 
-            <label class="file-upload-label">شعار العملة (اختياري):</label>
-            <input type="file" id="tokenLogo" accept="image/*" style="padding:6px;">
-            <div class="logo-preview" id="logoPreview"></div>
-
-            <select id="tokenNetwork">
-                <option>TRON (TRC-20)</option>
-                <option>Binance Smart Chain (BEP-20)</option>
-                <option>Ethereum (ERC-20)</option>
-            </select>
-
-            <button class="close-btn" style="background:var(--gold); color:#000;" onclick="submitToken()">إرسال طلب السك</button>
-            <button class="close-btn" onclick="closeModal('tokenModal')">إغلاق النافذة</button>
-        </div>
+<!-- ===== نافذة مصنع العملات ===== -->
+<div id="tokenModal" class="modal">
+    <div class="modal-content">
+        <h3 class="gold-text" style="font-size:clamp(18px,5vw,24px);">🛠️ مصنع سك العملات</h3>
+        <input type="text" id="tokenName" placeholder="اسم العملة">
+        <input type="text" id="tokenSymbol" placeholder="الرمز">
+        <input type="number" id="tokenSupply" placeholder="إجمالي المعروض">
+        <label class="file-upload-label">شعار العملة (اختياري):</label>
+        <input type="file" id="tokenLogo" accept="image/*" style="padding:6px;">
+        <div class="logo-preview" id="logoPreview"></div>
+        <select id="tokenNetwork">
+            <option>TRON (TRC-20)</option>
+            <option>Binance Smart Chain (BEP-20)</option>
+            <option>Ethereum (ERC-20)</option>
+        </select>
+        <button class="close-btn" style="background:var(--gold); color:#000;" onclick="submitToken()">إرسال طلب السك</button>
+        <button class="close-btn" onclick="closeModal('tokenModal')">إغلاق</button>
     </div>
+</div>
 
-    <!-- ================================================================ -->
-    <!-- ====== نافذة الإدارة (منبثقة) ====== -->
-    <!-- ================================================================ -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <h3 class="gold-text" style="font-size: clamp(18px, 5vw, 24px);">👑 لوحة التحكم الإدارية</h3>
-            <p style="font-size: clamp(11px, 2.5vw, 13px); color:#a39bb4; margin-bottom:8px;">تعديل إعدادات البوت والرسائل:</p>
-            <input type="text" id="botWelcomeMsg" value="مرحباً بك في نظام نكسورا الفخم لخدمات التعدين">
-            <button class="close-btn" style="background:#6c5ce7;" onclick="updateBotSettings()">حفظ إعدادات البوت</button>
-            <hr style="border-color:#3d3161; margin:12px 0;">
-            <h4 style="color:var(--gold); font-size: clamp(14px, 3vw, 17px);">📋 طلبات الإيداع المعلقة:</h4>
-            <div style="font-size: clamp(11px, 2.5vw, 13px); background:#1e1735; padding:10px; border-radius:8px; margin-top:6px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
-                <span>أحمد العبسي (100 USDT)</span>
-                <button style="background:#2ecc71; color:white; border:none; padding:4px 12px; border-radius:4px; cursor:pointer; font-weight:700;" onclick="approveDeposit()">موافق</button>
-            </div>
-            <button class="close-btn" onclick="closeModal('adminModal')">إغلاق النافذة</button>
+<!-- ===== نافذة الإدارة ===== -->
+<div id="adminModal" class="modal">
+    <div class="modal-content">
+        <h3 class="gold-text" style="font-size:clamp(18px,5vw,24px);">👑 لوحة الإدارة</h3>
+        <p style="font-size:clamp(11px,2vw,13px); color:#a39bb4;">تعديل إعدادات البوت:</p>
+        <input type="text" id="botWelcomeMsg" value="مرحباً بك في نظام نكسورا الفخم">
+        <button class="close-btn" style="background:#6c5ce7;" onclick="updateBotSettings()">حفظ الإعدادات</button>
+        <hr style="border-color:#3d3161; margin:10px 0;">
+        <h4 style="color:var(--gold); font-size:clamp(14px,3vw,17px);">📋 طلبات الإيداع المعلقة:</h4>
+        <div style="font-size:clamp(11px,2vw,13px); background:#1e1735; padding:8px; border-radius:8px; margin-top:4px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+            <span>أحمد العبسي (100 USDT)</span>
+            <button style="background:#2ecc71; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:700;" onclick="approveDeposit()">موافق</button>
         </div>
+        <button class="close-btn" onclick="closeModal('adminModal')">إغلاق</button>
     </div>
+</div>
 
-    <script>
-        // ================================================================
-        // المحرك الحي (التعدين التلقائي)
-        // ================================================================
-        let currentBalance = 0.000660;
-        let miningInterval = setInterval(() => {
-            currentBalance += 0.000015;
+<script>
+    // ============================================================
+    // التعدين التلقائي
+    // ============================================================
+    let currentBalance = 0.000660;
+    setInterval(() => {
+        currentBalance += 0.000015;
+        document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+    }, 1000);
+
+    // ============================================================
+    // فتح وإغلاق النوافذ المنبثقة
+    // ============================================================
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    });
+
+    // ============================================================
+    // متغيرات المخاطرة
+    // ============================================================
+    let marginRisk = 'medium', wheelRisk = 'medium', diceRisk = 'medium', crashRisk = 'medium';
+    function setMarginRisk(l) { marginRisk = l; }
+    function setWheelRisk(l) { wheelRisk = l; }
+    function setDiceRisk(l) { diceRisk = l; }
+    function setCrashRisk(l) { crashRisk = l; }
+
+    // ============================================================
+    // 1. الهامش
+    // ============================================================
+    function playMargin() {
+        const bet = parseFloat(document.getElementById('marginBet').value);
+        const percent = parseInt(document.getElementById('marginPercent').value);
+        const resultEl = document.getElementById('marginResult');
+        if (!bet || bet < 0.3) { resultEl.textContent = '⚠️ الحد 0.3'; resultEl.style.color = '#f39c12'; return; }
+        if (isNaN(percent) || percent < 1 || percent > 100) { resultEl.textContent = '⚠️ 1-100'; resultEl.style.color = '#f39c12'; return; }
+        let riskFactor = { low:0.7, medium:0.9, high:1.2 }[marginRisk] || 1;
+        let winChance = Math.min((percent/100)*0.95 * riskFactor, 0.99);
+        if (percent <= 10) winChance = Math.min(winChance*1.5, 0.85);
+        else if (percent > 30) winChance *= 0.6;
+        const isWin = Math.random() < winChance;
+        let profit = isWin ? bet*(percent/100) : -bet;
+        resultEl.textContent = isWin ? `🎉 فوز! ربحت ${profit.toFixed(4)} USDT` : `💔 خسارة! خسرت ${bet.toFixed(4)} USDT`;
+        resultEl.style.color = isWin ? '#2ecc71' : '#e74c3c';
+        currentBalance = Math.max(0, currentBalance + profit);
+        document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+    }
+
+    // ============================================================
+    // 2. عجلة الحظ
+    // ============================================================
+    function spinWheel() {
+        const bet = parseFloat(document.getElementById('wheelBet').value);
+        const resultEl = document.getElementById('wheelResult');
+        const wheel = document.getElementById('wh');
+        if (!bet || bet < 0.3) { resultEl.textContent = '⚠️ الحد 0.3'; resultEl.style.color = '#f39c12'; return; }
+        const multipliers = [0,1,1.5,2,3,5,7,10];
+        let weights = { low:[40,30,18,8,3,1,0,0], medium:[30,25,20,12,6,4,2,1], high:[10,15,20,18,15,12,6,4] }[wheelRisk] || [30,25,20,12,6,4,2,1];
+        let r = Math.random() * weights.reduce((a,b)=>a+b,0);
+        let idx = 0;
+        for (let i=0; i<weights.length; i++) { r -= weights[i]; if (r <= 0) { idx = i; break; } }
+        const mult = multipliers[idx];
+        const isWin = mult > 0;
+        let profit = isWin ? bet*mult : -bet;
+        wheel.style.transform = 'rotate(' + (720 + Math.random()*720) + 'deg)';
+        setTimeout(() => {
+            wheel.style.transform = 'rotate(0deg)';
+            resultEl.textContent = isWin ? `🎉 فوز! ×${mult} | ربحت ${profit.toFixed(4)} USDT` : `😢 خسارة!`;
+            resultEl.style.color = isWin ? '#2ecc71' : '#e74c3c';
+            currentBalance = Math.max(0, currentBalance + profit);
             document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
         }, 1000);
+    }
 
-        // ================================================================
-        // فتح وإغلاق النوافذ المنبثقة (للمصنع والإدارة فقط)
-        // ================================================================
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+    // ============================================================
+    // 3. النرد
+    // ============================================================
+    function rollDice() {
+        const bet = parseFloat(document.getElementById('diceBet').value);
+        const guess = document.getElementById('diceGuess').value;
+        const resultEl = document.getElementById('diceResult');
+        if (!bet || bet < 0.3) { resultEl.textContent = '⚠️ الحد 0.3'; resultEl.style.color = '#f39c12'; return; }
+        const roll = Math.floor(Math.random()*6)+1;
+        let isWin = false, baseMultiplier = 0;
+        if (guess === 'even' && roll%2===0) { isWin=true; baseMultiplier=2; }
+        else if (guess === 'odd' && roll%2!==0) { isWin=true; baseMultiplier=2; }
+        else if (parseInt(guess) === roll) { isWin=true; baseMultiplier=6; }
+        let riskMult = { low:0.7, medium:0.95, high:1.3 }[diceRisk] || 1;
+        let finalMult = Math.round((baseMultiplier * 0.95 * riskMult) * 10) / 10;
+        let profit = isWin ? bet*finalMult : -bet;
+        resultEl.textContent = isWin ? `🎉 فوز! الرقم: ${roll} | ×${finalMult} | ربحت ${profit.toFixed(4)} USDT` : `😢 خسارة! الرقم: ${roll}`;
+        resultEl.style.color = isWin ? '#2ecc71' : '#e74c3c';
+        currentBalance = Math.max(0, currentBalance + profit);
+        document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+    }
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            });
-        });
-
-        // ================================================================
-        // متغيرات المخاطرة
-        // ================================================================
-        let marginRisk = 'medium';
-        let wheelRisk = 'medium';
-        let diceRisk = 'medium';
-        let crashRisk = 'medium';
-
-        function setMarginRisk(level) { marginRisk = level; }
-        function setWheelRisk(level) { wheelRisk = level; }
-        function setDiceRisk(level) { diceRisk = level; }
-        function setCrashRisk(level) { crashRisk = level; }
-
-        // ================================================================
-        // 1. لعبة الهامش (1xBet style)
-        // ================================================================
-        function playMargin() {
-            const bet = parseFloat(document.getElementById('marginBet').value);
-            const percent = parseInt(document.getElementById('marginPercent').value);
-            const resultEl = document.getElementById('marginResult');
-
-            if (!bet || bet < 0.3) {
-                resultEl.textContent = '⚠️ الحد الأدنى 0.3 USDT';
-                resultEl.style.color = '#f39c12';
-                return;
-            }
-            if (isNaN(percent) || percent < 1 || percent > 100) {
-                resultEl.textContent = '⚠️ النسبة بين 1 و 100';
-                resultEl.style.color = '#f39c12';
-                return;
-            }
-
-            let riskFactor = 1;
-            if (marginRisk === 'low') riskFactor = 0.7;
-            else if (marginRisk === 'medium') riskFactor = 0.9;
-            else if (marginRisk === 'high') riskFactor = 1.2;
-
-            const baseWinChance = (percent / 100) * 0.95;
-            let winChance = Math.min(baseWinChance * riskFactor, 0.99);
-
-            if (percent <= 10) winChance = Math.min(winChance * 1.5, 0.85);
-            else if (percent > 30) winChance = winChance * 0.6;
-
-            const rand = Math.random();
-            const isWin = rand < winChance;
-            let profit = 0;
-
-            if (isWin) {
-                profit = bet * (percent / 100);
-                resultEl.textContent = `🎉 فوز! ربحت ${profit.toFixed(4)} USDT (نسبة: ${percent}%)`;
-                resultEl.style.color = '#2ecc71';
-            } else {
-                profit = -bet;
-                resultEl.textContent = `💔 خسارة! خسرت ${bet.toFixed(4)} USDT`;
-                resultEl.style.color = '#e74c3c';
-            }
-
-            currentBalance = Math.max(0, currentBalance + profit);
-            document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
-        }
-
-        // ================================================================
-        // 2. عجلة الحظ (1xBet style)
-        // ================================================================
-        function spinWheel() {
-            const bet = parseFloat(document.getElementById('wheelBet').value);
-            const resultEl = document.getElementById('wheelResult');
-            const wheel = document.getElementById('wh');
-
-            if (!bet || bet < 0.3) {
-                resultEl.textContent = '⚠️ الحد الأدنى 0.3 USDT';
-                resultEl.style.color = '#f39c12';
-                return;
-            }
-
-            const multipliers = [0, 1, 1.5, 2, 3, 5, 7, 10];
-            let weights = [30, 25, 20, 12, 6, 4, 2, 1];
-
-            if (wheelRisk === 'low') {
-                weights = [40, 30, 18, 8, 3, 1, 0, 0];
-            } else if (wheelRisk === 'medium') {
-                weights = [30, 25, 20, 12, 6, 4, 2, 1];
-            } else if (wheelRisk === 'high') {
-                weights = [10, 15, 20, 18, 15, 12, 6, 4];
-            }
-
-            const total = weights.reduce((a, b) => a + b, 0);
-            let r = Math.random() * total;
-            let idx = 0;
-            for (let i = 0; i < weights.length; i++) {
-                r -= weights[i];
-                if (r <= 0) { idx = i; break; }
-            }
-
-            const mult = multipliers[idx];
-            const isWin = mult > 0;
-            let profit = 0;
-
-            wheel.style.transform = 'rotate(' + (720 + Math.random() * 720) + 'deg)';
-            setTimeout(() => {
-                wheel.style.transform = 'rotate(0deg)';
-                if (isWin) {
-                    profit = bet * mult;
-                    resultEl.textContent = `🎉 فوز! مضاعف ×${mult} | ربحت ${profit.toFixed(4)} USDT`;
-                    resultEl.style.color = '#2ecc71';
-                } else {
-                    profit = -bet;
-                    resultEl.textContent = `😢 خسارة! حظاً أوفر`;
-                    resultEl.style.color = '#e74c3c';
-                }
-                currentBalance = Math.max(0, currentBalance + profit);
+    // ============================================================
+    // 4. الكراش
+    // ============================================================
+    let crashActive = false, crashMultiplier = 1.00, crashIntervalId = null, crashBetAmount = 0, crashCashedOut = false;
+    function startCrash() {
+        const bet = parseFloat(document.getElementById('crashBet').value);
+        const resultEl = document.getElementById('crashResult');
+        if (crashActive) { resultEl.textContent = '⚠️ جولة نشطة'; resultEl.style.color = '#f39c12'; return; }
+        if (!bet || bet < 0.3) { resultEl.textContent = '⚠️ الحد 0.3'; resultEl.style.color = '#f39c12'; return; }
+        crashBetAmount = bet; crashMultiplier = 1.00; crashActive = true; crashCashedOut = false;
+        document.getElementById('crashMultiplier').textContent = '1.00x';
+        document.getElementById('crashProgress').style.width = '0%';
+        document.getElementById('crashResult').textContent = '';
+        document.getElementById('cashoutBtn').disabled = false;
+        let crashPoint = { low:1.1+Math.random()*1.5, medium:1.5+Math.random()*3, high:2.5+Math.random()*5 }[crashRisk] || 2;
+        if (crashIntervalId) clearInterval(crashIntervalId);
+        crashIntervalId = setInterval(() => {
+            crashMultiplier += 0.02 + Math.random()*0.03;
+            crashMultiplier = Math.round(crashMultiplier*100)/100;
+            document.getElementById('crashMultiplier').textContent = crashMultiplier.toFixed(2) + 'x';
+            document.getElementById('crashProgress').style.width = Math.min((crashMultiplier/10)*100, 100) + '%';
+            if (crashMultiplier >= crashPoint && !crashCashedOut) {
+                clearInterval(crashIntervalId); crashActive = false;
+                document.getElementById('cashoutBtn').disabled = true;
+                currentBalance = Math.max(0, currentBalance - crashBetAmount);
                 document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
-            }, 1200);
+                document.getElementById('crashResult').textContent = `💥 انهارت عند ${crashMultiplier.toFixed(2)}x | خسرت ${crashBetAmount.toFixed(4)} USDT`;
+                document.getElementById('crashResult').style.color = '#e74c3c';
+            }
+        }, 100);
+    }
+    function cashoutCrash() {
+        if (!crashActive || crashCashedOut) return;
+        crashCashedOut = true; clearInterval(crashIntervalId); crashActive = false;
+        document.getElementById('cashoutBtn').disabled = true;
+        const win = crashBetAmount * crashMultiplier;
+        currentBalance = Math.max(0, currentBalance + win);
+        document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+        document.getElementById('crashResult').textContent = `🎉 سحبت عند ${crashMultiplier.toFixed(2)}x | ربحت ${win.toFixed(4)} USDT`;
+        document.getElementById('crashResult').style.color = '#2ecc71';
+    }
+
+    // ============================================================
+    // 5. مصنع العملات
+    // ============================================================
+    function submitToken() {
+        const name = document.getElementById('tokenName').value.trim();
+        const symbol = document.getElementById('tokenSymbol').value.trim();
+        const supply = document.getElementById('tokenSupply').value;
+        if (!name || !symbol || !supply) { alert('⚠️ املأ جميع الحقول'); return; }
+        if (isNaN(supply) || parseInt(supply) <= 0) { alert('⚠️ رقم صحيح للمعروض'); return; }
+        if (!confirm('⚠️ تكلفة الإنشاء 10$، هل تتابع؟')) return;
+        if (currentBalance < 10) { alert('❌ رصيدك أقل من 10 USDT'); return; }
+        currentBalance = Math.max(0, currentBalance - 10);
+        document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+        alert('✅ تم استلام الطلب، ستنطلق العملة خلال 12 ساعة.');
+        document.getElementById('tokenName').value = '';
+        document.getElementById('tokenSymbol').value = '';
+        document.getElementById('tokenSupply').value = '';
+        document.getElementById('tokenLogo').value = '';
+        document.getElementById('logoPreview').innerHTML = '';
+    }
+    document.getElementById('tokenLogo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('logoPreview').innerHTML = `<img src="${event.target.result}" style="max-width:60px; max-height:60px; border-radius:8px; border:2px solid var(--gold);">`;
+            };
+            reader.readAsDataURL(file);
         }
+    });
 
-        // ================================================================
-        // 3. النرد (1xBet style)
-        // ================================================================
-        function rollDice() {
-            const bet = parseFloat(document.getElementById('diceBet').value);
-            const guess = document.getElementById('diceGuess').value;
-            const resultEl = document.getElementById('diceResult');
+    // ============================================================
+    // 6. السحب
+    // ============================================================
+    function submitWithdraw() {
+        const address = document.getElementById('withdrawAddress').value.trim();
+        const amount = parseFloat(document.getElementById('withdrawAmount').value);
+        if (!address || address.length < 10) { alert('⚠️ عنوان صحيح'); return; }
+        if (!amount || amount < 10) { alert('⚠️ الحد الأدنى 10 USDT'); return; }
+        if (currentBalance < amount) { alert('⚠️ رصيد غير كاف'); return; }
+        currentBalance = Math.max(0, currentBalance - amount);
+        document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+        alert(`✅ تم تقديم طلب سحب ${amount.toFixed(2)} USDT إلى ${address}`);
+        document.getElementById('withdrawAddress').value = '';
+        document.getElementById('withdrawAmount').value = '';
+    }
 
-            if (!bet || bet < 0.3) {
-                resultEl.textContent = '⚠️ الحد الأدنى 0.3 USDT';
-                resultEl.style.color = '#f39c12';
-                return;
-            }
-
-            const roll = Math.floor(Math.random() * 6) + 1;
-            let isWin = false;
-            let baseMultiplier = 0;
-
-            if (guess === 'even' && roll % 2 === 0) { isWin = true;
-                baseMultiplier = 2; } else if (guess === 'odd' && roll % 2 !== 0) { isWin = true;
-                baseMultiplier = 2; } else if (parseInt(guess) === roll) { isWin = true;
-                baseMultiplier = 6; }
-
-            let riskMultiplier = 1;
-            if (diceRisk === 'low') riskMultiplier = 0.7;
-            else if (diceRisk === 'medium') riskMultiplier = 0.95;
-            else if (diceRisk === 'high') riskMultiplier = 1.3;
-
-            let finalMultiplier = baseMultiplier * 0.95 * riskMultiplier;
-            finalMultiplier = Math.round(finalMultiplier * 10) / 10;
-
-            let profit = 0;
-            if (isWin) {
-                profit = bet * finalMultiplier;
-                resultEl.textContent = `🎉 فوز! الرقم: ${roll} | مضاعف: ${finalMultiplier}x | ربحت ${profit.toFixed(4)} USDT`;
-                resultEl.style.color = '#2ecc71';
-            } else {
-                profit = -bet;
-                resultEl.textContent = `😢 خسارة! الرقم: ${roll}`;
-                resultEl.style.color = '#e74c3c';
-            }
-
-            currentBalance = Math.max(0, currentBalance + profit);
-            document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
-        }
-
-        // ================================================================
-        // 4. الكراش (1xBet style)
-        // ================================================================
-        let crashActive = false;
-        let crashMultiplier = 1.00;
-        let crashIntervalId = null;
-        let crashBetAmount = 0;
-        let crashCashedOut = false;
-
-        function startCrash() {
-            const bet = parseFloat(document.getElementById('crashBet').value);
-            const resultEl = document.getElementById('crashResult');
-
-            if (crashActive) {
-                resultEl.textContent = '⚠️ جولة نشطة حالياً';
-                resultEl.style.color = '#f39c12';
-                return;
-            }
-            if (!bet || bet < 0.3) {
-                resultEl.textContent = '⚠️ الحد الأدنى 0.3 USDT';
-                resultEl.style.color = '#f39c12';
-                return;
-            }
-
-            crashBetAmount = bet;
-            crashMultiplier = 1.00;
-            crashActive = true;
-            crashCashedOut = false;
-            document.getElementById('crashMultiplier').textContent = '1.00x';
-            document.getElementById('crashProgress').style.width = '0%';
-            document.getElementById('crashResult').textContent = '';
-            document.getElementById('cashoutBtn').disabled = false;
-
-            let crashPoint = 0;
-            if (crashRisk === 'low') {
-                crashPoint = 1.1 + Math.random() * 1.5;
-            } else if (crashRisk === 'medium') {
-                crashPoint = 1.5 + Math.random() * 3;
-            } else if (crashRisk === 'high') {
-                crashPoint = 2.5 + Math.random() * 5;
-            }
-
-            if (crashIntervalId) clearInterval(crashIntervalId);
-            crashIntervalId = setInterval(() => {
-                crashMultiplier += 0.02 + (Math.random() * 0.03);
-                crashMultiplier = Math.round(crashMultiplier * 100) / 100;
-                document.getElementById('crashMultiplier').textContent = crashMultiplier.toFixed(2) + 'x';
-                const progress = Math.min((crashMultiplier / 10) * 100, 100);
-                document.getElementById('crashProgress').style.width = progress + '%';
-
-                if (crashMultiplier >= crashPoint && !crashCashedOut) {
-                    clearInterval(crashIntervalId);
-                    crashActive = false;
-                    document.getElementById('cashoutBtn').disabled = true;
-                    const loss = -crashBetAmount;
-                    currentBalance = Math.max(0, currentBalance + loss);
-                    document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
-                    document.getElementById('crashResult').textContent = `💥 انهارت عند ${crashMultiplier.toFixed(2)}x | خسرت ${crashBetAmount.toFixed(4)} USDT`;
-                    document.getElementById('crashResult').style.color = '#e74c3c';
-                }
-            }, 100);
-        }
-
-        function cashoutCrash() {
-            if (!crashActive || crashCashedOut) return;
-            crashCashedOut = true;
-            clearInterval(crashIntervalId);
-            crashActive = false;
-            document.getElementById('cashoutBtn').disabled = true;
-
-            const win = crashBetAmount * crashMultiplier;
-            currentBalance = Math.max(0, currentBalance + win);
-            document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
-            document.getElementById('crashResult').textContent = `🎉 سحبت عند ${crashMultiplier.toFixed(2)}x | ربحت ${win.toFixed(4)} USDT`;
-            document.getElementById('crashResult').style.color = '#2ecc71';
-        }
-
-        // ================================================================
-        // 5. مصنع العملات (مع رسوم 10$، تأكيد، فحص رصيد، إشعارات)
-        // ================================================================
-        function submitToken() {
-            const name = document.getElementById('tokenName').value.trim();
-            const symbol = document.getElementById('tokenSymbol').value.trim();
-            const supply = document.getElementById('tokenSupply').value;
-            const network = document.getElementById('tokenNetwork').value;
-            const logoFile = document.getElementById('tokenLogo').files[0];
-
-            if (!name || !symbol || !supply) {
-                alert('⚠️ يرجى ملء جميع الحقول الأساسية');
-                return;
-            }
-            if (isNaN(supply) || parseInt(supply) <= 0) {
-                alert('⚠️ أدخل رقماً صحيحاً للمعروض');
-                return;
-            }
-
-            if (!confirm('⚠️ تنبيه: تكلفة إنشاء العملة هي 10$.\nهل أنت متأكد من رغبتك في المتابعة؟')) {
-                return;
-            }
-
-            if (currentBalance < 10) {
-                alert('❌ رصيدك غير كافٍ! تحتاج 10 USDT على الأقل.');
-                return;
-            }
-
-            currentBalance = Math.max(0, currentBalance - 10);
-            document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
-
-            console.log(`📢 طلب عملة جديد:\nالاسم: ${name}\nالرمز: ${symbol}\nالمعروض: ${supply}\nالشبكة: ${network}\nالشعار: ${logoFile ? logoFile.name : 'غير مرفوع'}\nالمبلغ المخصوم: 10 USDT`);
-
-            alert('✅ تم استلام طلبك بنجاح!\nسوف تنطلق عملتك في محفظة Binance خلال 12 ساعة.\nيرجى انتظار عنوان العقد لتتمكن من التحكم بعملتك.');
-
-            document.getElementById('tokenName').value = '';
-            document.getElementById('tokenSymbol').value = '';
-            document.getElementById('tokenSupply').value = '';
-            document.getElementById('tokenLogo').value = '';
-            document.getElementById('logoPreview').innerHTML = '';
-        }
-
-        // معاينة الصورة
-        document.getElementById('tokenLogo').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('logoPreview').innerHTML =
-                        `<img src="${event.target.result}" style="max-width:80px; max-height:80px; border-radius:8px; border:2px solid var(--gold);">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // ================================================================
-        // 6. المحفظة - السحب
-        // ================================================================
-        function submitWithdraw() {
-            const address = document.getElementById('withdrawAddress').value.trim();
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-
-            if (!address || address.length < 10) {
-                alert('⚠️ أدخل عنوان محفظة صحيح');
-                return;
-            }
-            if (!amount || amount < 10) {
-                alert('⚠️ الحد الأدنى للسحب 10 USDT');
-                return;
-            }
-            if (currentBalance < amount) {
-                alert('⚠️ رصيد غير كافٍ');
-                return;
-            }
-
-            currentBalance = Math.max(0, currentBalance - amount);
-            document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
-            alert(`✅ تم تقديم طلب سحب مبلغ ${amount.toFixed(2)} USDT إلى العنوان:\n${address}\nسيتم المعالجة خلال 24 ساعة.`);
-            document.getElementById('withdrawAddress').value = '';
-            document.getElementById('withdrawAmount').value = '';
-        }
-
-        // ================================================================
-        // 7. الإدارة
-        // ================================================================
-        function updateBotSettings() {
-            const msg = document.getElementById('botWelcomeMsg').value.trim();
-            if (!msg) {
-                alert('⚠️ أدخل رسالة ترحيبية');
-                return;
-            }
-            alert(`✅ تم تحديث رسالة البوت:\n"${msg}"`);
-        }
-
-        function approveDeposit() {
-            alert('✅ تم قبول الإيداع وتحديث الحساب!');
-        }
-    </script>
-
+    // ============================================================
+    // 7. الإدارة
+    // ============================================================
+    function updateBotSettings() {
+        const msg = document.getElementById('botWelcomeMsg').value.trim();
+        if (!msg) { alert('⚠️ أدخل رسالة'); return; }
+        alert(`✅ تم تحديث الرسالة: "${msg}"`);
+    }
+    function approveDeposit() { alert('✅ تم قبول الإيداع'); }
+</script>
 </body>
-</html>
+                        </html>
