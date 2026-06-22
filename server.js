@@ -103,4 +103,63 @@ app.post('/api/deposit', async (req, res) => {
     }
 });
 
+// 4. مسار معالجة طلبات سحب الأموال الحقيقية والآمنة
+app.post('/api/withdraw', async (req, res) => {
+    const { telegramId, amount, address } = req.body;
+    try {
+        const user = await User.findOne({ telegramId });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "⚠️ خطأ: الحساب غير مسجل بالنظام." });
+        }
+        if (user.status !== 'active') {
+            return res.status(403).json({ success: false, message: "❌ سحب مرفوض: حسابك مجمد حالياً، راجع الإدارة." });
+        }
+        if (amount < 10) {
+            return res.status(400).json({ success: false, message: "⚠️ الحد الأدنى للسحب هو 10 دولار." });
+        }
+        if (user.balance < amount) {
+            return res.status(400).json({ success: false, message: "❌ خطأ: رصيدك الحالي غير كافٍ لإتمام العملية." });
+        }
+
+        // خصم المبلغ وتسجيل المعاملة معلقة
+        user.balance -= amount;
+        await user.save();
+
+        const withdrawalTx = new Transaction({
+            telegramId,
+            type: 'withdraw',
+            amount,
+            asset: 'USDT_TRC20',
+            status: 'pending'
+        });
+        await withdrawalTx.save();
+
+        res.json({ 
+            success: true, 
+            message: `✅ تم تسجيل طلب السحب بنجاح!\nالمبلغ: $${amount}\nسيتم التحويل بعد تدقيق الإدارة.`,
+            newBalance: user.balance
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "💥 خطأ داخلي أثناء معالجة السحب." });
+    }
+});
+
+// 5. مسار تحديث الرصيد عند اللعب في الكازينو (فوز أو خسارة)
+app.post('/api/casino/play', async (req, res) => {
+    const { telegramId, cost, winAmount } = req.body;
+    try {
+        const user = await User.findOne({ telegramId });
+        if (!user) return res.status(404).json({ success: false, message: "المستخدم غير موجود" });
+        if (user.balance < cost) return res.status(400).json({ success: false, message: "عذراً رصيدك لا يكفي لتكلفة هذه اللعبة!" });
+
+        // خصم التكلفة وإضافة الأرباح المكتسبة
+        user.balance = user.balance - cost + winAmount;
+        await user.save();
+
+        res.json({ success: true, newBalance: user.balance });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
 app.listen(PORT, () => console.log(`Backend Server running on port ${PORT}`));
