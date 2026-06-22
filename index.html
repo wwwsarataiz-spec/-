@@ -3,92 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Premium - اللوحة المتكاملة</title>
+    <title>Nexora Premium</title>
     <style>
-        :root {
-            --bg-main: #0c0914;
-            --bg-card: #151124;
-            --gold-primary: #d4af37;
-            --purple-accent: #6c5ce7;
-            --text-main: #f1ebd9;
-            --text-muted: #a39bb4;
-            --border-color: rgba(212, 175, 55, 0.2);
-        }
+        :root { --bg: #0c0914; --card: #151124; --gold: #d4af37; --purple: #6c5ce7; --text: #f1ebd9; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-main); padding: 15px; text-align: center; }
+        body { background: var(--bg); color: var(--text); padding: 15px; text-align: center; }
         .container { max-width: 450px; margin: 0 auto; }
-        .header { margin-bottom: 20px; }
-        .gold-text { color: var(--gold-primary); text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        .gold-text { color: var(--gold); text-shadow: 0 0 10px rgba(212,175,55,0.3); margin-bottom: 5px; }
         
-        .card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: right; }
-        .balance-box { text-align: center; }
-        .balance { font-size: 32px; font-weight: bold; margin: 10px 0; color: #fff; }
-        
-        /* روابط الأقسام المتكاملة كقائمة تنقل علوية وسفلية */
-        .nav-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .nav-item { background: var(--bg-card); border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; color: var(--text-main); text-decoration: none; font-size: 13px; font-weight: bold; transition: 0.3s; }
-        .nav-item:hover { border-color: var(--gold-primary); background: #1e1735; }
+        .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; }
+        .nav-btn { background: var(--card); border: 1px solid rgba(212,175,55,0.2); padding: 12px; border-radius: 10px; color: #fff; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .nav-btn:hover { border-color: var(--gold); }
 
-        .action-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 14px; text-align: center; text-decoration: none; }
-        .btn-deposit { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
-        .btn-withdraw { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+        .card { background: var(--card); border: 1px solid rgba(212,175,55,0.2); border-radius: 15px; padding: 20px; margin-bottom: 15px; text-align: right; }
+        .balance { font-size: 32px; font-weight: bold; color: #fff; text-align: center; margin: 10px 0; }
         
-        .plan-title { font-weight: bold; color: var(--gold-primary); margin-bottom: 5px; }
-        .plan-info { color: var(--text-muted); font-size: 13px; margin-bottom: 10px; }
-        .btn-upgrade { background-color: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary); width: 100%; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; text-align: center; text-decoration: none; }
+        .btn-up { background: transparent; border: 1px solid var(--gold); color: var(--gold); width: 100%; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* نوافذ الأقسام المتكاملة المخفية */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: var(--card); width: 90%; max-width: 400px; padding: 20px; border-radius: 15px; border: 1px solid var(--gold); text-align: right; }
+        .close-btn { background: var(--purple); color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; margin-top: 15px; font-weight: bold; cursor: pointer; }
+        input, select { width: 100%; padding: 10px; margin: 8px 0; background: #1e1735; border: 1px solid #3d3161; color: white; border-radius: 6px; box-sizing: border-box; }
+        .wheel { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--gold); margin: 15px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; background: #1e1735; transition: transform 1.5s; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header">
-            <h1 class="gold-text">NEXORA PREMIUM</h1>
-            <p style="color: var(--text-muted); font-size: 13px;">نظام التعدين السحابي وإدارة الأصول</p>
+        <h1 class="gold-text" style="margin-top:15px;">NEXORA PREMIUM</h1>
+        <p style="color: #a39bb4; font-size: 13px;">نظام التعدين وإدارة الأصول المتقدم</p>
+
+        <div class="nav-grid">
+            <button class="nav-btn" onclick="openModal('casinoModal')">🎰 صالة الكازينو</button>
+            <button class="nav-btn" onclick="openModal('tokenModal')">🛠️ مصنع العملات</button>
+            <button class="nav-btn" onclick="openModal('walletModal')">💼 إدارة المحفظة</button>
+            <button class="nav-btn" onclick="openModal('adminModal')">👑 لوحة الإدارة والبوت</button>
         </div>
 
-        <div class="nav-menu">
-            <a href="casino.html" class="nav-item">🎰 صالة الكازينو</a>
-            <a href="token-factory.html" class="nav-item">🛠️ مصنع العملات</a>
-            <a href="admin.html" class="nav-item">👑 لوحة الإدارة والبوت</a>
-            <a href="wallet.html" class="nav-item">💼 إدارة المحفظة</a>
-        </div>
-
-        <div class="card balance-box">
-            <p style="color: var(--text-muted);">إجمالي الرصيد الاستثماري</p>
-            <div class="balance" id="userBalance">0.000660 <span style="font-size: 16px; color: var(--gold-primary);">USDT</span></div>
+        <div class="card" style="text-align: center;">
+            <p style="color: #a39bb4;">إجمالي الرصيد الاستثماري</p>
+            <div class="balance" id="liveBalance">0.000660 <span style="color: var(--gold); font-size:16px;">USDT</span></div>
             <p style="font-size: 12px; color: #2ecc71;">⚡ محرك التعدين نشط ويعمل تلقائياً</p>
         </div>
 
-        <div class="action-group">
-            <a href="wallet.html" class="btn btn-deposit">📥 إيداع أموال</a>
-            <a href="wallet.html" class="btn btn-withdraw">📤 سحب الأرباح</a>
+        <div class="btn-group" style="margin-bottom: 20px;">
+            <button class="btn" style="background: #2ecc71;" onclick="openModal('walletModal')">📥 إيداع أموال</button>
+            <button class="btn" style="background: #e74c3c;" onclick="openModal('walletModal')">📤 سحب الأرباح</button>
         </div>
 
-        <h3 class="gold-text" style="text-align: right; margin: 20px 0 10px 0; font-size: 16px;">🚀 ترقية خطط التعدين السحابي:</h3>
-        
+        <h3 class="gold-text" style="text-align: right; font-size: 15px; margin-bottom: 10px;">🚀 باقات التعدين المتاحة:</h3>
         <div class="card">
-            <div class="plan-title">باقة المبتدئين (VIP 1)</div>
-            <div class="plan-info">السرعة: +1.50 MH/s | العائد اليومي: 0.50 USDT</div>
-            <button class="btn-upgrade" onclick="upgradePlan(1, 10)">تفعيل الخطة (10 USDT)</button>
+            <div style="font-weight:bold; color:var(--gold);">باقة المبتدئين (VIP 1)</div>
+            <div style="font-size:12px; color:#a39bb4; margin-bottom:5px;">السرعة: +1.50 MH/s | العائد اليومي: 0.50 USDT</div>
+            <button class="btn-up" onclick="alert('جاري معالجة طلب الترقية...')">تفعيل الخطة (10 USDT)</button>
         </div>
+    </div>
 
-        <div class="card">
-            <div class="plan-title">الباقة المتقدمة (VIP 2)</div>
-            <div class="plan-info">السرعة: +5.00 MH/s | العائد اليومي: 2.50 USDT</div>
-            <button class="btn-upgrade" onclick="upgradePlan(2, 50)">تفعيل الخطة (50 USDT)</button>
+    <div id="casinoModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <h3 class="gold-text">🎰 صالة ألعاب المخاطرة (Risk Game)</h3>
+            <p style="font-size:12px; color:#a39bb4;">ضاعف رصيدك الحالي بنسبة نجاح عادلة 50%.</p>
+            <div class="wheel" id="wh">🎲</div>
+            <input type="number" id="betAmount" placeholder="مبلغ الرهان USDT">
+            <button class="close-btn" style="background:#2ecc71;" onclick="playRisk()">ابدأ الرهان الآن</button>
+            <button class="close-btn" onclick="closeModal('casinoModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="tokenModal" class="modal">
+        <div class="modal-content">
+            <h3 class="gold-text">🛠️ مصنع العملات المخصصة للعملاء</h3>
+            <input type="text" placeholder="اسم العملة (Token Name)">
+            <input type="text" placeholder="رمز العملة (Symbol)">
+            <input type="number" placeholder="إجمالي المعروض (Total Supply)">
+            <select><option>TRON (TRC-20)</option><option>Binance (BEP-20)</option></select>
+            <button class="close-btn" style="background:var(--gold); color:black;" onclick="alert('تم إرسال مواصفات العملة للإدارة لسك العقد الذكي.')">إرسال الطلب لتوثيق العملة</button>
+            <button class="close-btn" onclick="closeModal('tokenModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="walletModal" class="modal">
+        <div class="modal-content">
+            <h3 class="gold-text">💼 المحفظة المتكاملة والإيداع</h3>
+            <p style="font-size:13px; margin-top:10px; color:#2ecc71;">عنوان الإيداع المعتمد (TRC-20):</p>
+            <input type="text" value="TYv7Ruxxxxxxxxxxxxxxxxxxx" readonly style="text-align:center; color:var(--gold);">
+            <hr style="border-color:#3d3161; margin:10px 0;">
+            <h4 style="color:var(--gold)">طلب سحب السحوبات</h4>
+            <input type="text" placeholder="عنوان محفظتك">
+            <input type="number" placeholder="الكمية المراد سحبها">
+            <button class="close-btn" style="background:#e74c3c;" onclick="alert('تم حفظ طلب السحب وجاري مراجعته من الإدارة.')">تأكيد سحب الأموال</button>
+            <button class="close-btn" onclick="closeModal('walletModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <h3 class="gold-text">👑 تحكم الإدارة وبوت التيليجرام</h3>
+            <p style="font-size:12px; color:#a39bb4; margin-bottom:10px;">تعديل رسائل وإعدادات البوت العام:</p>
+            <input type="text" value="مرحباً بك في نظام نكسورا الفخم لخدمات التعدين">
+            <button class="close-btn" style="background:#6c5ce7;" onclick="alert('تم تحديث الرسائل الترحيبية للبوت بنجاح.')">حفظ إعدادات البوت</button>
+            <hr style="border-color:#3d3161; margin:15px 0;">
+            <h4 style="color:var(--gold)">التحكم بالمستخدمين والموافقات:</h4>
+            <div style="font-size:12px; background:#1e1735; padding:8px; border-radius:6px; margin-top:5px;">
+                طلب معلق: أحمد العبسي (100 USDT) 
+                <button style="background:#2ecc71; color:white; border:none; padding:3px; margin-right:5px; cursor:pointer;" onclick="alert('تم القبول')">موافق</button>
+            </div>
+            <button class="close-btn" onclick="closeModal('adminModal')">إغلاق</button>
         </div>
     </div>
 
     <script>
-        let currentBalance = 0.000660;
+        // عداد التعدين الحي
+        let bal = 0.000660;
         setInterval(() => {
-            currentBalance += 0.000012;
-            document.getElementById('userBalance').innerHTML = currentBalance.toFixed(6) + ' <span style="font-size: 16px; color: #d4af37;">USDT</span>';
+            bal += 0.000015;
+            document.getElementById('liveBalance').innerHTML = bal.toFixed(6) + ' <span style="color: var(--gold); font-size:16px;">USDT</span>';
         }, 1000);
 
-        function upgradePlan(level, cost) {
-            alert(`🚀 جاري التحقق عبر السيرفر لتفعيل VIP ${level} بتكلفة ${cost} USDT.`);
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function playRisk() {
+            let amt = document.getElementById('betAmount').value;
+            if(!amt || amt <= 0) return alert("أدخل مبلغ صحيح");
+            document.getElementById('wh').style.transform = "rotate(1080deg)";
+            setTimeout(() => {
+                document.getElementById('wh').style.transform = "rotate(0deg)";
+                alert(Math.random() > 0.5 ? "🎉 مبروك! فزت بضعف المبلغ الـمُخاطر به." : "❌ للأسف خسرت الرهان الحالي.");
+            }, 1500);
         }
     </script>
 </body>
