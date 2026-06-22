@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora - صالة ألعاب المخاطرة</title>
+    <style>
+        :root { --bg:#0c0914; --card:#151124; --gold:#d4af37; --purple:#6c5ce7; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; text-align: center; }
+        .container { max-width: 450px; margin: 0 auto; }
+        .casino-wheel { width: 150px; height: 150px; border-radius: 50%; border: 5px solid var(--gold); margin: 30px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; background: linear-gradient(45deg, var(--purple), #151124); transition: transform 2s ease-in-out; }
+        .btn-spin { padding: 12px 30px; background: var(--gold); color: black; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        input { padding: 10px; width: 80%; background: #201a34; border: 1px solid var(--purple); border-radius: 6px; color: white; text-align: center; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="color:var(--gold);">🎰 صالة الحظ والمخاطرة (Risk Game)</h2>
+        <p style="color:#a39bb4; font-size:13px;">خاطر برصيدك لتضاعفه أو تخسر الرهان بنسبة عادلة 50/50</p>
+
+        <div class="casino-wheel" id="wheel">🎁</div>
+
+        <input type="number" id="betAmount" placeholder="أدخل مبلغ الرهان بالـ USDT">
+        <br>
+        <button class="btn-spin" onclick="playRiskGame()">اضغط للمخاطرة وبدء اللعب</button>
+    </div>
+
+    <script>
+        function playRiskGame() {
+            const amount = parseFloat(document.getElementById('betAmount').value);
+            if(!amount || amount <= 0) return alert("يرجى إدخال مبلغ رهان صحيح!");
+            
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = "rotate(1440deg)";
+            
+            setTimeout(() => {
+                const win = Math.random() > 0.5;
+                wheel.style.transform = "rotate(0deg)";
+                if(win) {
+                    wheel.innerText = "🎉";
+                    alert(`مبروك! لقد فزت وضاعفت رصيدك، تم إضافة ${amount * 2} USDT إلى حسابك.`);
+                } else {
+                    wheel.innerText = "❌";
+                    alert(`للأسف، خسرت الرهان. حاول مجدداً في المرة القادمة!`);
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
