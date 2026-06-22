@@ -90,7 +90,77 @@ app.get('/api/user/:id', async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
+// --- مسارات لوحة الإدارة والتحكم الملكي (Admin APIs) ---
 
+// 1. جلب جميع طلبات السحب والإيداع المعلقة للمراجعة
+app.get('/api/admin/transactions', async (req, res) => {
+    try {
+        const txs = await Transaction.find({ status: 'pending' }).sort({ createdAt: -1 });
+        res.json({ success: true, transactions: txs });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "خطأ في جلب المعاملات" });
+    }
+});
+
+// 2. الموافقة أو الرفض لطلبات الشحن والسحب
+app.post('/api/admin/transaction/action', async (req, res) => {
+    const { txId, action } = req.body; // action: 'approved' or 'rejected'
+    try {
+        const tx = await Transaction.findById(txId);
+        if (!tx) return res.status(404).json({ success: false, message: "المعاملة غير موجودة" });
+
+        tx.status = action;
+        await tx.save();
+
+        // إذا كان طلب إيداع وتمت الموافقة، نقوم بإضافة الرصيد لحساب المستخدم تلقائياً
+        if (tx.type === 'deposit' && action === 'approved') {
+            const user = await User.findOne({ telegramId: tx.telegramId });
+            if (user) {
+                user.balance += tx.amount;
+                await user.save();
+            }
+        }
+        // ملاحظة: في حال السحب، تم خصم الرصيد مسبقاً من المستخدم لحماية السيولة، وإذا رُفض الطلب يعاد له رصيده
+        if (tx.type === 'withdraw' && action === 'rejected') {
+            const user = await User.findOne({ telegramId: tx.telegramId });
+            if (user) {
+                user.balance += tx.amount;
+                await user.save();
+            }
+        }
+
+        res.json({ success: true, message: `تم تحديث حالة المعاملة بنجاح إلى: ${action}` });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+// 3. جلب قائمة بجميع المستخدمين للتحكم بحساباتهم
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.json({ success: true, users });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+// 4. تعديل حالة المستخدم (تفعيل، تجميد، حظر) أو تعديل رصيده
+app.post('/api/admin/user/action', async (req, res) => {
+    const { telegramId, status, newBalance } = req.body;
+    try {
+        const user = await User.findOne({ telegramId });
+        if (!user) return res.status(404).json({ success: false, message: "المستخدم غير موجود" });
+
+        if (status) user.status = status;
+        if (newBalance !== undefined) user.balance = parseFloat(newBalance);
+        
+        await user.save();
+        res.json({ success: true, message: "تم تحديث بيانات المستخدم بنجاح الملكي!" });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
 // 3. مسار تقديم طلب إيداع (المحفظة)
 app.post('/api/deposit', async (req, res) => {
     const { telegramId, amount, asset } = req.body;
