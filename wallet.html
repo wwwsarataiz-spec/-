@@ -3,309 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Wallet & Gateways</title>
+    <title>Nexora - المحفظة المالية</title>
     <style>
-        :root {
-            --bg-main: #0c0914;
-            --bg-card: #151124;
-            --gold-primary: #d4af37;
-            --gold-light: #f3e5ab;
-            --yellow-accent: #ffdf00;
-            --text-main: #f1ebd9;
-            --text-muted: #a39bb4;
-            --input-bg: #1d1833;
-            --border-color: rgba(212, 175, 55, 0.25);
-            --danger-red: #ff3333;
-            --success-green: #00cc66;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            padding: 15px;
-            min-height: 100vh;
-            padding-bottom: 80px !important; /* مساحة لشريط التنقل */
-        }
-
-        .wallet-header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        .wallet-header h1 {
-            color: var(--gold-primary);
-            font-size: 22px;
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, var(--bg-card), #1e183a);
-            border: 1px solid var(--gold-primary);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-
-        .balance-card h2 {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-
-        .balance-amount {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--yellow-accent);
-        }
-
-        .gateway-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
-            color: #0c0914;
-            border: none;
-        }
-
-        .gateway-section {
-            display: none;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-        }
-
-        .gateway-section.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--gold-primary);
-            margin-bottom: 6px;
-        }
-
-        .form-input {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .form-input:focus {
-            border-color: var(--yellow-accent);
-        }
-
-        .action-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
-            color: #0c0914;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .info-box {
-            background-color: rgba(214, 175, 55, 0.05);
-            border: 1px dashed var(--gold-primary);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            color: var(--gold-light);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        /* أنماط شريط التنقل السفلي */
-        .premium-navbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 65px;
-            background-color: #151124;
-            border-top: 1px solid rgba(212, 175, 55, 0.3);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 9999;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #a39bb4;
-            transition: all 0.3s ease;
-            flex: 1;
-        }
-
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
-        .nav-text { font-size: 11px; font-weight: bold; }
-        .nav-item.active { color: #ffdf00; transform: translateY(-2px); }
+        :root { --bg:#0c0914; --card:#151124; --gold:#d4af37; --text:#f1ebd9; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; text-align: center; }
+        .container { max-width: 450px; margin: 0 auto; }
+        .card { background: var(--card); border: 1px solid rgba(212,175,55,0.2); border-radius: 15px; padding: 20px; margin-bottom: 15px; text-align: right; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-deposit { background: #2ecc71; color: white; }
+        .btn-withdraw { background: #e74c3c; color: white; }
+        input { width: 100%; padding: 10px; margin-top: 5px; background: #201a34; border: 1px solid #3d3161; border-radius: 6px; color: white; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h2 style="color:var(--gold); margin-bottom:20px;">💼 المحفظة المركزية</h2>
+        
+        <div class="card" style="text-align: center;">
+            <p>الرصيد المتاح للسحب</p>
+            <h1 style="color:#fff; margin:10px 0;">0.00 <span style="color:var(--gold);">USDT</span></h1>
+        </div>
 
-    <div class="wallet-header">
-        <h1>المركز المالي والمحفظة الملكية</h1>
+        <div class="card">
+            <h3>📥 قسم الإيداع الآمن</h3>
+            <p style="font-size:12px; color:#a39bb4;">قم بتحويل المبلغ إلى المحفظة المعتمدة أدناه وارفع الإثبات:</p>
+            <input type="text" value="TYv7Ruxxxxxxxxxxxxxxxxxxx" readonly style="color:var(--gold); text-align:center;">
+            <label style="margin-top:10px; display:block; font-size:12px;">أدخل المبلغ المودع:</label>
+            <input type="number" placeholder="مثال: 50">
+            <button class="btn btn-deposit" onclick="alert('تم إرسال طلب الإيداع للإدارة للتحقق والموافقة.')">تأكيد الإيداع وارسال الإشعار</button>
+        </div>
+
+        <div class="card">
+            <h3>📤 طلب سحب الأرباح</h3>
+            <label>عنوان محفظتك (TRC-20):</label>
+            <input type="text" placeholder="T...">
+            <label>الكمية المراد سحبها:</label>
+            <input type="number" placeholder="الحد الأدنى 10 USDT">
+            <button class="btn btn-withdraw" onclick="alert('تم تسجيل طلب السحب. سيتم التحويل بعد مراجعة الإدارة.')">تقديم طلب السحب</button>
+        </div>
     </div>
-
-    <div class="balance-card">
-        <h2>رصيدك المتوفر حالياً للسحب والاستثمار</h2>
-        <div class="balance-amount">$<span id="walletBalance">100.00</span></div>
-    </div>
-
-    <div class="gateway-tabs">
-        <button class="tab-btn active" onclick="switchGateway('deposit')">📥 شحن الرصيد (إيداع)</button>
-        <button class="tab-btn" onclick="switchGateway('withdraw')">📤 سحب الأرباح</button>
-    </div>
-
-    <div id="depositSection" class="gateway-section active">
-        <div class="info-box">
-            قم بتحويل المبلغ المطلوب إلى عنوان المحفظة أدناه، ثم قم برفع لقطة شاشة (Screenshot) واضحة لإيصال التحويل لتقوم الإدارة بمراجعته وإضافة الرصيد لحسابك.
-        </div>
-        <div class="form-group">
-            <label>عنوان محفظة المنصة الرسمي (USDT TRC20):</label>
-            <input type="text" class="form-input" value="TYG9xxXxxYOURxxWALLETxxTRC20xxxx" readonly style="color: var(--yellow-accent); font-weight: bold; text-align: center;">
-        </div>
-        <div class="form-group">
-            <label>المبلغ المرسل ($):</label>
-            <input type="number" id="depositAmount" class="form-input" placeholder="أدخل المبلغ الذي قمت بتحويله">
-        </div>
-        <div class="form-group">
-            <label>إرفاق صورة إيصال التحويل:</label>
-            <input type="file" id="depositReceipt" class="form-input" accept="image/*">
-        </div>
-        <button class="action-btn" onclick="submitDeposit()">تأكيد وإرسال طلب الشحن</button>
-    </div>
-
-    <div id="withdrawSection" class="gateway-section">
-        <div class="info-box" style="border-color: var(--danger-red); color: var(--text-main);">
-            ⚠️ **تنبيه السحب الآمن:** الحد الأدنى للسحب هو **$10**. تستغرق عملية المراجعة الإدارية وإرسال الأموال إلى محفظتك من 15 دقيقة إلى 4 ساعات كحد أقصى لحمايتك.
-        </div>
-        <div class="form-group">
-            <label>شبكة السحب المعتمدة:</label>
-            <input type="text" class="form-input" value="USDT - TRC20" readonly style="text-align: center; font-weight: bold; color: var(--success-green);">
-        </div>
-        <div class="form-group">
-            <label>عنوان محفظتك الخاصة (المستلمة):</label>
-            <input type="text" id="withdrawAddress" class="form-input" placeholder="الصق عنوان محفظة USDT TRC20 الخاص بك هنا">
-        </div>
-        <div class="form-group">
-            <label>المبلغ المراد سحبه ($):</label>
-            <input type="number" id="withdrawAmount" class="form-input" placeholder="مثال: 50" min="10">
-        </div>
-        <button class="action-btn" style="background: linear-gradient(135deg, #ff5555, var(--danger-red)); color: white;" onclick="submitWithdrawal()">تقديم طلب سحب الأموال</button>
-    </div>
-
-    <div class="premium-navbar">
-        <a href="index.html" class="nav-item" id="nav-mining">
-            <span class="nav-icon">🚀</span>
-            <span class="nav-text">التعدين</span>
-        </a>
-        <a href="games.html" class="nav-item" id="nav-casino">
-            <span class="nav-icon">🎡</span>
-            <span class="nav-text">الكازينو</span>
-        </a>
-        <a href="wallet.html" class="nav-item" id="nav-wallet">
-            <span class="nav-icon">💳</span>
-            <span class="nav-text">المحفظة</span>
-        </a>
-        <a href="admin.html" class="nav-item" id="nav-admin" style="display: none;">
-            <span class="nav-icon">👑</span>
-            <span class="nav-text">الإدارة</span>
-        </a>
-    </div>
-
-    <script>
-        let currentBalance = 100.00; // سيتم تحديثه تلقائياً من السيرفر لاحقاً
-
-        function switchGateway(type) {
-            document.querySelectorAll('.gateway-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if(type === 'deposit') document.getElementById('depositSection').classList.add('active');
-            if(type === 'withdraw') document.getElementById('withdrawSection').classList.add('active');
-        }
-
-        function submitDeposit() {
-            const amount = document.getElementById('depositAmount').value;
-            const file = document.getElementById('depositReceipt').value;
-
-            if(!amount || amount <= 0) { alert("يرجى إدخال مبلغ شحن صالح!"); return; }
-            if(!file) { alert("يرجى إرفاق صورة إيصال التحويل لتأكيد المعاملة!"); return; }
-
-            alert(`تم رفع الطلب بنجاح! جاري إرسال البيانات والاتصال بالـ Backend للمراجعة.`);
-        }
-
-        // خوارزمية فحص وإرسال طلب السحب الفوري للسيرفر
-        function submitWithdrawal() {
-            const address = document.getElementById('withdrawAddress').value;
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-
-            if(!address || address.length < 24) { alert("يرجى كتابة عنوان محفظة TRC20 صحيح وموثوق!"); return; }
-            if(isNaN(amount) || amount < 10) { alert("الحد الأدنى للسحب هو 10 دولار!"); return; }
-            if(amount > currentBalance) { alert("خطأ عجز في السيولة! المبلغ المطلوب يتعدى رصيدك الحالي."); return; }
-
-            // خصم الرصيد مبدئياً وتحويل الطلب للمعالجة الخلفية
-            currentBalance -= amount;
-            document.getElementById('walletBalance').innerText = currentBalance.toFixed(2);
-            
-            alert(`نجاح! تم تسجيل طلب سحب بمبلغ $${amount} وتحويله إلى قائمة التدقيق الإدارية المعلقة.`);
-        }
-
-        // كود تفعيل إضاءة الزر الحالي للمحفظة وإظهار الإدارة للمسؤول
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("nav-wallet").classList.add("active");
-            
-            const isAdmin = true; // يتم التحقق منها عبر خادم السيرفر المقفل
-            if(isAdmin) {
-                document.getElementById("nav-admin").style.display = "flex";
-            }
-        });
-    </script>
 </body>
 </html>
