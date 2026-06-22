@@ -3,132 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora - لوحة التحكم الملكية للمدير</title>
+    <title>لوحة التحكم الإدارية الملكية</title>
     <style>
-        :root {
-            --bg-main: #0c0914;
-            --bg-card: #151124;
-            --gold-primary: #d4af37;
-            --yellow-accent: #ffdf00;
-            --text-main: #f1ebd9;
-            --text-muted: #a39bb4;
-            --border-color: rgba(212, 175, 55, 0.25);
-            --success-green: #00cc66;
-            --danger-red: #ff3333;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-main); padding: 15px; padding-bottom: 80px !important; }
-        
-        .admin-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .admin-header h1 { color: var(--gold-primary); font-size: 22px; }
-
-        .section-title { font-size: 15px; color: var(--yellow-accent); margin: 20px 0 10px 0; border-right: 3px solid var(--gold-primary); padding-right: 8px; }
-        
-        .admin-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        
-        .tx-info, .user-info { font-size: 13px; line-height: 1.6; margin-bottom: 10px; }
-        .highlight { color: var(--yellow-accent); font-weight: bold; }
-        
-        .btn-group { display: flex; gap: 10px; }
-        .action-btn { flex: 1; border: none; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; color: #0c0914; }
-        .btn-approve { background-color: var(--success-green); color: white; }
-        .btn-reject { background-color: var(--danger-red); color: white; }
-        .btn-action { background-color: var(--gold-primary); }
-
-        /* أنماط شريط التنقل السفلي الفخم */
-        .premium-navbar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: #151124; border-top: 1px solid rgba(212, 175, 55, 0.3); display: flex; justify-content: space-around; align-items: center; z-index: 9999; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #a39bb4; transition: all 0.3s ease; flex: 1; }
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
-        .nav-text { font-size: 11px; font-weight: bold; }
-        .nav-item.active { color: #ffdf00; transform: translateY(-2px); }
+        body { background: #07050c; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .admin-box { max-width: 600px; margin: 0 auto; background: #151124; border: 1px solid #d4af37; border-radius: 12px; padding: 20px; }
+        h2 { color: #d4af37; text-align: center; }
+        .request-item { background: #201a34; padding: 12px; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-approve { background: #2ecc71; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-reject { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
+    <div class="admin-box">
+        <h2>👑 لوحة الإدارة العليا (Nexora Control)</h2>
+        <p style="text-align:center; font-size:12px; color:#a39bb4;">إدارة العمليات المعلقة وتعديل سرعات المستخدمين</p>
+        
+        <h3 style="margin-top:20px; color:#d4af37;">📥 طلبات الإيداع المعلقة:</h3>
+        <div class="request-item">
+            <div>المستخدم: أحمد العبسي | المبلغ: 100 USDT</div>
+            <div>
+                <button class="btn-approve" onclick="alert('تم تأكيد الإيداع وإضافة الرصيد')">مواقفة</button>
+                <button class="btn-reject" onclick="alert('تم الرفض')">رفض</button>
+            </div>
+        </div>
 
-    <div class="admin-header">
-        <h1>👑 لوحة التحكم الإدارية المطلقة</h1>
+        <h3 style="margin-top:20px; color:#d4af37;">⚙️ التحكم في إعدادات بوت التيليجرام:</h3>
+        <div style="margin-top:10px;">
+            <label style="font-size:13px;">رسالة الترحيب الخاصة بالـ Bot:</label>
+            <input type="text" value="مرحباً بك في بوت نكسورا المطور للتعدين" style="width:100%; padding:8px; background:#201a34; border:1px solid #3d3161; color:white; border-radius:6px; margin-top:5px;">
+            <button style="margin-top:10px; padding:8px; background:#6c5ce7; color:white; border:none; border-radius:6px; width:100%; font-weight:bold; cursor:pointer;" onclick="alert('تم تحديث إعدادات البوت تلقائياً')">حفظ تحديثات البوت</button>
+        </div>
     </div>
-
-    <div class="section-title">📥 طلبات الشحن والسحب المعلقة (قيد الانتظار)</div>
-    <div id="transactionsList">
-        <p style="text-align: center; color: var(--text-muted); font-size: 12px;">جاري تحميل المعاملات الحية...</p>
-    </div>
-
-    <div class="section-title">👥 إدارة الأعضاء والأرصدة</div>
-    <div id="usersList">
-        <p style="text-align: center; color: var(--text-muted); font-size: 12px;">جاري تحميل قائمة الأعضاء...</p>
-    </div>
-
-    <div class="premium-navbar">
-        <a href="index.html" class="nav-item" id="nav-mining">
-            <span class="nav-icon">🚀</span>
-            <span class="nav-text">التعدين</span>
-        </a>
-        <a href="games.html" class="nav-item" id="nav-casino">
-            <span class="nav-icon">🎡</span>
-            <span class="nav-text">الكازينو</span>
-        </a>
-        <a href="wallet.html" class="nav-item" id="nav-wallet">
-            <span class="nav-icon">💳</span>
-            <span class="nav-text">المحفظة</span>
-        </a>
-        <a href="admin.html" class="nav-item" id="nav-admin">
-            <span class="nav-icon">👑</span>
-            <span class="nav-text">الإدارة</span>
-        </a>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("nav-admin").classList.add("active");
-            loadAdminData();
-        });
-
-        // محاكاة جلب البيانات وربط الأزرار الفورية بالسيرفر
-        function loadAdminData() {
-            // 1. عينة لطلبات المعاملات المعلقة
-            const txContainer = document.getElementById('transactionsList');
-            txContainer.innerHTML = `
-                <div class="admin-card">
-                    <div class="tx-info">
-                        👤 المعرّف: <span class="highlight">559281044</span><br>
-                        💰 نوع الطلب: <span class="highlight" style="color:var(--success-green);">إيداع (شحن)</span><br>
-                        💵 المبلغ المطلوب: <span class="highlight">$20.00</span><br>
-                        📅 الوقت: 2026-06-22
-                    </div>
-                    <div class="btn-group">
-                        <button class="action-btn btn-approve" onclick="manageTx('sampleId1', 'approved')">✅ موافقة (إضافة الرصيد)</button>
-                        <button class="action-btn btn-reject" onclick="manageTx('sampleId1', 'rejected')">❌ رفض</button>
-                    </div>
-                </div>
-            `;
-
-            // 2. عينة لإدارة الأعضاء وحظرهم
-            const usersContainer = document.getElementById('usersList');
-            usersContainer.innerHTML = `
-                <div class="admin-card">
-                    <div class="user-info">
-                        🏅 الاسم: <span class="highlight">أحمد المستثمر</span><br>
-                        🆔 التليجرام: <span class="highlight">559281044</span><br>
-                        💳 الرصيد الحالي: <span class="highlight">$105.50</span><br>
-                        ⚡ الحالة الحالية: <span class="highlight" style="color:var(--success-green);">نشط</span>
-                    </div>
-                    <div class="btn-group">
-                        <button class="action-btn btn-action" onclick="modifyUser('559281044', 'banned')">🚫 حظر الحساب</button>
-                        <button class="action-btn btn-action" style="background:#ff9900;" onclick="modifyUser('559281044', 'frozen')">❄️ تجميد</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function manageTx(txId, action) {
-            alert(`تم تنفيذ الأمر الملكي بنجاح! تم وضع حالة المعاملة: ${action}`);
-        }
-
-        function modifyUser(tgId, actionType) {
-            alert(`تم تعديل حالة المستخدم ذو المعرف ${tgId} بنجاح كلي إلى: ${actionType}`);
-        }
-    </script>
 </body>
 </html>
