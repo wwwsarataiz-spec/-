@@ -3,195 +3,564 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Elite</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Nexora Premium Portal</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page {
+            size: A4;
+            margin: 15mm 12mm;
+            background-color: #0b0813;
+        }
+        
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #0a0a0f;
-            color: #e9e9f3;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0813;
+            color: #f1ebd9;
+            font-size: 11pt;
+            line-height: 1.4;
         }
-        .box {
-            background: #1a1a24;
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 400px;
-            width: 100%;
-            border: 1px solid rgba(255,215,0,0.1);
+
+        .header {
+            text-align: center;
+            padding: 10px 0 25px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            margin-bottom: 30px;
         }
-        .box h2 { color: #ffd700; text-align: center; margin-bottom: 5px; }
-        .box p { color: #636e72; text-align: center; margin-bottom: 20px; }
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 13px; color: #b2bec3; margin-bottom: 4px; }
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            background: #0d0d14;
-            border: 1px solid #2d2d3a;
-            border-radius: 10px;
-            color: #e9e9f3;
-            font-size: 14px;
-            outline: none;
-        }
-        .input-field:focus { border-color: #ffd700; }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
+
+        .header h1 {
+            color: #d4af37;
+            font-size: 22pt;
+            margin: 0 0 8px 0;
             font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 6px;
+            letter-spacing: 1px;
         }
-        .btn-gold { background: #b8860b; color: #fff; }
-        .btn-gold:hover { background: #daa520; }
-        .btn-outline { background: transparent; border: 2px solid #b8860b; color: #ffd700; margin-top: 8px; }
-        .btn-outline:hover { background: rgba(184,134,11,0.1); }
-        .link { color: #ffd700; cursor: pointer; font-size: 13px; }
-        .link:hover { text-decoration: underline; }
-        .hidden { display: none !important; }
-        .message { padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center; display: none; }
-        .message.success { background: rgba(0,184,148,0.15); color: #00b894; display: block; }
-        .message.error { background: rgba(214,48,49,0.15); color: #ff6b6b; display: block; }
-        .flex { display: flex; justify-content: space-between; margin-top: 12px; }
+
+        .header p {
+            color: #a39bb4;
+            font-size: 11pt;
+            margin: 0;
+        }
+
+        .section-title {
+            color: #d4af37;
+            font-size: 14pt;
+            border-left: 4px solid #d4af37;
+            padding-left: 10px;
+            margin: 25px 0 15px 0;
+            font-weight: bold;
+        }
+        
+        html[dir="rtl"] .section-title {
+            border-left: none;
+            border-right: 4px solid #d4af37;
+            padding-left: 0;
+            padding-right: 10px;
+        }
+
+        p.intro {
+            color: #c5bed4;
+            margin-bottom: 20px;
+        }
+
+        .code-container {
+            background-color: #130f22;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 9.5pt;
+            color: #f8f6f0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .note-box {
+            background-color: #1a152e;
+            border-right: 4px solid #9b51e0;
+            padding: 12px 15px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        html[dir="rtl"] .note-box {
+            border-right: none;
+            border-left: 4px solid #9b51e0;
+            border-radius: 6px 0 0 6px;
+        }
+
+        .note-box h4 {
+            margin: 0 0 5px 0;
+            color: #b57cff;
+            font-size: 11pt;
+        }
+
+        .note-box p {
+            margin: 0;
+            color: #c5bed4;
+            font-size: 10pt;
+        }
+
+        .instruction-list {
+            margin: 15px 0;
+            padding-right: 20px;
+        }
+        
+        html[dir="ltr"] .instruction-list {
+            padding-right: 0;
+            padding-left: 20px;
+        }
+
+        .instruction-list li {
+            margin-bottom: 10px;
+            color: #f1ebd9;
+        }
+        
+        .instruction-list strong {
+            color: #e6c65b;
+        }
     </style>
 </head>
 <body>
 
-<div class="box" id="appBox">
-    <h2>🏆 Nexora Elite</h2>
-    <p>منصة التعدين والكازينو</p>
-    <div id="msg" class="message"></div>
-
-    <!-- نموذج تسجيل الدخول -->
-    <div id="loginForm">
-        <div class="input-group">
-            <label>البريد الإلكتروني أو اسم المستخدم</label>
-            <input type="text" id="loginEmail" class="input-field" placeholder="example@mail.com">
-        </div>
-        <div class="input-group">
-            <label>كلمة المرور</label>
-            <input type="password" id="loginPassword" class="input-field" placeholder="••••••••">
-        </div>
-        <button class="btn btn-gold" id="loginBtn">تسجيل الدخول</button>
-        <div class="flex">
-            <span class="link" id="showRegister">إنشاء حساب</span>
-            <span class="link" id="showForgot">نسيت كلمة السر؟</span>
-        </div>
+    <div class="header">
+        <h1>Nexora Premium UI Template</h1>
+        <p>واجهة دخول وتسجيل احترافية لـ Telegram Web App (عربي / English)</p>
     </div>
 
-    <!-- نموذج التسجيل -->
-    <div id="registerForm" class="hidden">
-        <div class="input-group">
-            <label>الاسم الكامل</label>
-            <input type="text" id="regName" class="input-field" placeholder="محمد أحمد">
-        </div>
-        <div class="input-group">
-            <label>البريد الإلكتروني</label>
-            <input type="email" id="regEmail" class="input-field" placeholder="example@mail.com">
-        </div>
-        <div class="input-group">
-            <label>كلمة المرور</label>
-            <input type="password" id="regPassword" class="input-field" placeholder="••••••••">
-        </div>
-        <button class="btn btn-gold" id="registerBtn">إنشاء حساب</button>
-        <button class="btn btn-outline" id="backToLogin">← العودة</button>
+    <p class="intro">
+        هذا هو الكود البرمجي الكامل والموثوق 100% للواجهة الأمامية الفخمة التي طلبتها. تم تصميمه بأسلوب يعتمد على خلفية داكنة مريحة جداً للعين (Deep Violet/Dark Slate) مع لمسات وتفاصيل ذهبية وصفراء ملكية مصقولة لتمنح التطبيق طابعاً فخماً وثميناً. الواجهة تدعم التبديل الفوري بين اللغتين العربية والإنجليزية، وتضم كافة الشاشات المطلوبة (تسجيل الدخول، إنشاء حساب، واستعادة الحساب) في ملف واحد ليسهل عليك تشغيله مباشرة عبر الهاتف.
+    </p>
+
+    <div class="section-title">كود الواجهة الكامل (index.html)</div>
+    
+    <div class="code-container">
+        <pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="ar" dir="rtl"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Premium Authentication Portal&lt;/title&gt;
+    &lt;style&gt;
+        :root {
+            --bg-main: #0c0914;
+            --bg-card: #151124;
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --yellow-accent: #ffdf00;
+            --text-main: #f1ebd9;
+            --text-muted: #a39bb4;
+            --input-bg: #1d1833;
+            --border-color: rgba(212, 175, 55, 0.25);
+            --border-focus: rgba(255, 223, 0, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: block;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .brand-title {
+            display: table-cell;
+            text-align: right;
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--gold-primary);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        html[dir="ltr"] .brand-title {
+            text-align: left;
+        }
+
+        .lang-switch-btn {
+            display: table-cell;
+            text-align: left;
+        }
+
+        html[dir="ltr"] .lang-switch-btn {
+            text-align: right;
+        }
+
+        .lang-btn {
+            background: linear-gradient(135deg, var(--gold-primary), #aa841c);
+            color: #0c0914;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+        }
+
+        .auth-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255,255,255,0.05);
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .form-screen {
+            display: none;
+        }
+
+        .form-screen.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: var(--gold-light);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .screen-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--gold-primary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 8px rgba(255, 223, 0, 0.2);
+            background-color: #211b3b;
+        }
+
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
+            color: #0c0914;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+            transition: transform 0.1s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .links-container {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .links-container a {
+            color: var(--gold-light);
+            text-decoration: none;
+            margin: 0 8px;
+            font-weight: 500;
+        }
+
+        .links-container a:hover {
+            color: var(--yellow-accent);
+            text-decoration: underline;
+        }
+
+        .divider {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;div class="top-bar"&gt;
+        &lt;div class="brand-title" id="brandText"&gt;NEXORA&lt;/div&gt;
+        &lt;div class="lang-switch-btn"&gt;
+            &lt;button class="lang-btn" onclick="toggleLanguage()" id="langBtn"&gt;English&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="auth-container"&gt;
+        
+        &lt;!-- شاشة تسجيل الدخول --&gt;
+        &lt;div id="loginScreen" class="form-screen active"&gt;
+            &lt;h2 id="loginTitle"&gt;تسجيل الدخول&lt;/h2&gt;
+            &lt;p class="screen-desc" id="loginDesc"&gt;أدخل اسمك وكلمة المرور للوصول إلى حسابك.&lt;/p&gt;
+            
+            &lt;form onsubmit="handleLogin(event)"&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="loginName" id="lblLoginName"&gt;الاسم المستعار أو الاسم الثلاثي&lt;/label&gt;
+                    &lt;input type="text" id="loginName" required&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="loginPassword" id="lblLoginPass"&gt;كلمة السر&lt;/label&gt;
+                    &lt;input type="password" id="loginPassword" required&gt;
+                &lt;/div&gt;
+                &lt;button type="submit" class="action-btn" id="btnLogin"&gt;تسجيل الدخول&lt;/button&gt;
+            &lt;/form&gt;
+            
+            &lt;div class="links-container"&gt;
+                &lt;a href="#" onclick="switchScreen('registerScreen')" id="lnkGoRegister"&gt;حساب جديد&lt;/a&gt;
+                &lt;span class="divider"&gt;|&lt;/span&gt;
+                &lt;a href="#" onclick="switchScreen('forgotScreen')" id="lnkGoForgot"&gt;استعادة الحساب&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- شاشة إنشاء حساب جديد --&gt;
+        &lt;div id="registerScreen" class="form-screen"&gt;
+            &lt;h2 id="registerTitle"&gt;إنشاء حساب جديد&lt;/h2&gt;
+            &lt;p class="screen-desc" id="registerDesc"&gt;قم بملء البيانات التالية لتأسيس حسابك الاستثماري الفخم.&lt;/p&gt;
+            
+            &lt;form onsubmit="handleRegister(event)"&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="regFullName" id="lblRegName"&gt;الاسم الثلاثي&lt;/label&gt;
+                    &lt;input type="text" id="regFullName" required&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="regPhone" id="lblRegPhone"&gt;رقم الجوال (مع رمز البلد)&lt;/label&gt;
+                    &lt;input type="tel" id="regPhone" required&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="regEmail" id="lblRegEmail"&gt;البريد الإلكتروني&lt;/label&gt;
+                    &lt;input type="email" id="regEmail" required&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="regPassword" id="lblRegPass"&gt;كلمة السر&lt;/label&gt;
+                    &lt;input type="password" id="regPassword" required&gt;
+                &lt;/div&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="regConfirmPassword" id="lblRegConfirm"&gt;تأكيد كلمة السر&lt;/label&gt;
+                    &lt;input type="password" id="regConfirmPassword" required&gt;
+                &lt;/div&gt;
+                &lt;button type="submit" class="action-btn" id="btnRegister"&gt;تأكيد التسجيل&lt;/button&gt;
+            &lt;/form&gt;
+            
+            &lt;div class="links-container"&gt;
+                &lt;a href="#" onclick="switchScreen('loginScreen')" id="lnkBackLogin1"&gt;لديك حساب بالفعل؟ سجل دخولك&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- شاشة استعادة الحساب --&gt;
+        &lt;div id="forgotScreen" class="form-screen"&gt;
+            &lt;h2 id="forgotTitle"&gt;استعادة الحساب&lt;/h2&gt;
+            &lt;p class="screen-desc" id="forgotDesc"&gt;أدخل بياناتك المسجلة لإرسال رابط أو رمز تعيين كلمة السر.&lt;/p&gt;
+            
+            &lt;form onsubmit="handleForgot(event)"&gt;
+                &lt;div class="input-group"&gt;
+                    &lt;label for="forgotEmail" id="lblForgotEmail"&gt;البريد الإلكتروني أو رقم الهاتف&lt;/label&gt;
+                    &lt;input type="text" id="forgotEmail" required&gt;
+                &lt;/div&gt;
+                &lt;button type="submit" class="action-btn" id="btnForgot"&gt;إرسال تعليمات الاستعادة&lt;/button&gt;
+            &lt;/form&gt;
+            
+            &lt;div class="links-container"&gt;
+                &lt;a href="#" onclick="switchScreen('loginScreen')" id="lnkBackLogin2"&gt;العودة لتسجيل الدخول&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        let currentLang = 'ar';
+
+        const dictionary = {
+            ar: {
+                brand: "NEXORA",
+                langBtn: "English",
+                loginTitle: "تسجيل الدخول",
+                loginDesc: "أدخل اسمك وكلمة المرور للوصول إلى حسابك.",
+                lblLoginName: "الاسم المستعار أو الاسم الثلاثي",
+                lblLoginPass: "كلمة السر",
+                btnLogin: "تسجيل الدخول",
+                lnkGoRegister: "حساب جديد",
+                lnkGoForgot: "استعادة الحساب",
+                
+                registerTitle: "إنشاء حساب جديد",
+                registerDesc: "قم بملء البيانات التالية لتأسيس حسابك الاستثماري الفخم.",
+                lblRegName: "الاسم الثلاثي",
+                lblRegPhone: "رقم الجوال (مع رمز البلد)",
+                lblRegEmail: "البريد الإلكتروني",
+                lblRegPass: "كلمة السر",
+                lblRegConfirm: "تأكيد كلمة السر",
+                btnRegister: "تأكيد التسجيل",
+                lnkBackLogin1: "لديك حساب بالفعل؟ سجل دخولك",
+                
+                forgotTitle: "استعادة الحساب",
+                forgotDesc: "أدخل بياناتك المسجلة لإرسال رابط أو رمز تعيين كلمة السر.",
+                lblForgotEmail: "البريد الإلكتروني أو رقم الهاتف",
+                btnForgot: "إرسال تعليمات الاستعادة",
+                lnkBackLogin2: "العودة لتسجيل الدخول"
+            },
+            en: {
+                brand: "NEXORA",
+                langBtn: "العربية",
+                loginTitle: "Sign In",
+                loginDesc: "Enter your name and password to access your account.",
+                lblLoginName: "Username or Full Name",
+                lblLoginPass: "Password",
+                btnLogin: "Sign In",
+                lnkGoRegister: "New Account",
+                lnkGoForgot: "Recover Account",
+                
+                registerTitle: "Create New Account",
+                registerDesc: "Fill in the details below to establish your premium investment account.",
+                lblRegName: "Full Name (Triple)",
+                lblRegPhone: "Mobile Number (with country code)",
+                lblRegEmail: "Email Address",
+                lblRegPass: "Password",
+                lblRegConfirm: "Confirm Password",
+                btnRegister: "Confirm Registration",
+                lnkBackLogin1: "Already have an account? Sign In",
+                
+                forgotTitle: "Account Recovery",
+                forgotDesc: "Enter your registered details to send password reset instructions.",
+                lblForgotEmail: "Email Address or Phone Number",
+                btnForgot: "Send Recovery Instructions",
+                lnkBackLogin2: "Back to Sign In"
+            }
+        };
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.form-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            
+            // تحديث اتجاه الصفحة واللغة
+            if (currentLang === 'ar') {
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.documentElement.setAttribute('lang', 'ar');
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.documentElement.setAttribute('lang', 'en');
+            }
+
+            // تحديث نصوص الواجهة
+            document.getElementById('langBtn').innerText = dictionary[currentLang].langBtn;
+            document.getElementById('loginTitle').innerText = dictionary[currentLang].loginTitle;
+            document.getElementById('loginDesc').innerText = dictionary[currentLang].loginDesc;
+            document.getElementById('lblLoginName').innerText = dictionary[currentLang].lblLoginName;
+            document.getElementById('lblLoginPass').innerText = dictionary[currentLang].lblLoginPass;
+            document.getElementById('btnLogin').innerText = dictionary[currentLang].btnLogin;
+            document.getElementById('lnkGoRegister').innerText = dictionary[currentLang].lnkGoRegister;
+            document.getElementById('lnkGoForgot').innerText = dictionary[currentLang].lnkGoForgot;
+
+            document.getElementById('registerTitle').innerText = dictionary[currentLang].registerTitle;
+            document.getElementById('registerDesc').innerText = dictionary[currentLang].registerDesc;
+            document.getElementById('lblRegName').innerText = dictionary[currentLang].lblRegName;
+            document.getElementById('lblRegPhone').innerText = dictionary[currentLang].lblRegPhone;
+            document.getElementById('lblRegEmail').innerText = dictionary[currentLang].lblRegEmail;
+            document.getElementById('lblRegPass').innerText = dictionary[currentLang].lblRegPass;
+            document.getElementById('lblRegConfirm').innerText = dictionary[currentLang].lblRegConfirm;
+            document.getElementById('btnRegister').innerText = dictionary[currentLang].btnRegister;
+            document.getElementById('lnkBackLogin1').innerText = dictionary[currentLang].lnkBackLogin1;
+
+            document.getElementById('forgotTitle').innerText = dictionary[currentLang].forgotTitle;
+            document.getElementById('forgotDesc').innerText = dictionary[currentLang].forgotDesc;
+            document.getElementById('lblForgotEmail').innerText = dictionary[currentLang].lblForgotEmail;
+            document.getElementById('btnForgot').innerText = dictionary[currentLang].btnForgot;
+            document.getElementById('lnkBackLogin2').innerText = dictionary[currentLang].lnkBackLogin2;
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('loginName').value;
+            const pass = document.getElementById('loginPassword').value;
+            alert(currentLang === 'ar' ? 'تم إرسال بيانات الدخول مع الاسم: ' + name : 'Login submitted for: ' + name);
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const pass = document.getElementById('regPassword').value;
+            const confirmPass = document.getElementById('regConfirmPassword').value;
+            
+            if (pass !== confirmPass) {
+                alert(currentLang === 'ar' ? 'كلمات السر غير متطابقة!' : 'Passwords do not match!');
+                return;
+            }
+            alert(currentLang === 'ar' ? 'تم إرسال بيانات التسجيل بنجاح' : 'Registration data sent successfully');
+        }
+
+        function handleForgot(e) {
+            e.preventDefault();
+            const contact = document.getElementById('forgotEmail').value;
+            alert(currentLang === 'ar' ? 'تم إرسال تعليمات الاستعادة إلى: ' + contact : 'Recovery instructions sent to: ' + contact);
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
     </div>
 
-    <!-- نموذج استعادة -->
-    <div id="forgotForm" class="hidden">
-        <div class="input-group">
-            <label>البريد الإلكتروني</label>
-            <input type="email" id="forgotEmail" class="input-field" placeholder="example@mail.com">
-        </div>
-        <button class="btn btn-gold" id="forgotBtn">إرسال رمز الاستعادة</button>
-        <button class="btn btn-outline" id="backToLogin2">← العودة</button>
+    <div class="section-title">خطوات التشغيل الفوري عبر الهاتف (بدون حاسوب)</div>
+    <ul class="instruction-list">
+        <li><strong>خطوة 1:</strong> افتح مستودعك الخاص على متصفح الهاتف في موقع <strong>GitHub</strong>.</li>
+        <li><strong>خطوة 2:</strong> قم بإنشاء ملف جديد باسم <code>index.html</code>.</li>
+        <li><strong>خطوة 3:</strong> انسخ الكود البرمجي الموجود في الصندوق البرمجي أعلاه بالكامل والصفه داخل الملف ثم قم بحفظ التعديلات (Commit).</li>
+        <li><strong>خطوة 4:</strong> توجه إلى منصة <strong>Render</strong> المربوطة بمستودعك، وسيتم سحب الملف تلقائياً وتحديث واجهتك على السيرفر لتصبح حية ومتاحة 100%.</li>
+    </ul>
+
+    <div class="note-box">
+        <h4>تنويه بخصوص الفخامة البصرية المريحة</h4>
+        <p>تم اختيار درجة لون الخلفية بعناية فائقة لتكون داكنة مائلة للبنفسجي العميق، مما يبرز الألوان الذهبية والصفراء البراقة للأزرار والحقول دون إرهاق العين أو التسبب في توهج عالي أثناء التصفح من شاشات الهواتف المحمولة.</p>
     </div>
-</div>
-
-<script>
-// ==========================================
-// الكود مباشرة داخل الصفحة (يعمل فوراً)
-// ==========================================
-
-// دوال التنقل بين النماذج
-document.getElementById('showRegister').onclick = function() {
-    document.getElementById('loginForm').classList.add('hidden');
-    document.getElementById('registerForm').classList.remove('hidden');
-    document.getElementById('forgotForm').classList.add('hidden');
-};
-
-document.getElementById('showForgot').onclick = function() {
-    document.getElementById('loginForm').classList.add('hidden');
-    document.getElementById('registerForm').classList.add('hidden');
-    document.getElementById('forgotForm').classList.remove('hidden');
-};
-
-document.getElementById('backToLogin').onclick = function() {
-    document.getElementById('loginForm').classList.remove('hidden');
-    document.getElementById('registerForm').classList.add('hidden');
-    document.getElementById('forgotForm').classList.add('hidden');
-};
-
-document.getElementById('backToLogin2').onclick = function() {
-    document.getElementById('loginForm').classList.remove('hidden');
-    document.getElementById('registerForm').classList.add('hidden');
-    document.getElementById('forgotForm').classList.add('hidden');
-};
-
-// ===== زر تسجيل الدخول =====
-document.getElementById('loginBtn').onclick = function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-
-    if (!email || !password) {
-        alert('❌ يرجى إدخال البريد الإلكتروني وكلمة المرور');
-        return;
-    }
-
-    // محاكاة تسجيل الدخول
-    alert('✅ تم تسجيل الدخول بنجاح (محاكاة)\nالبريد: ' + email);
-};
-
-// ===== زر إنشاء حساب =====
-document.getElementById('registerBtn').onclick = function() {
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value;
-
-    if (!name || !email || !password) {
-        alert('❌ يرجى ملء جميع الحقول');
-        return;
-    }
-    if (password.length < 6) {
-        alert('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-        return;
-    }
-
-    alert('✅ تم إنشاء الحساب بنجاح (محاكاة)\nالاسم: ' + name + '\nالبريد: ' + email);
-};
-
-// ===== زر استعادة كلمة المرور =====
-document.getElementById('forgotBtn').onclick = function() {
-    const email = document.getElementById('forgotEmail').value.trim();
-
-    if (!email) {
-        alert('❌ يرجى إدخال البريد الإلكتروني');
-        return;
-    }
-
-    alert('✅ تم إرسال رمز الاستعادة إلى: ' + email);
-};
-
-console.log('✅ Nexora Elite - جاهز للعمل');
-</script>
 
 </body>
 </html>
