@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora Premium Admin Core</title>
+    <style>
+        :root {
+            --bg-main: #0c0914;
+            --bg-card: #151124;
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --yellow-accent: #ffdf00;
+            --text-main: #f1ebd9;
+            --text-muted: #a39bb4;
+            --input-bg: #1d1833;
+            --border-color: rgba(212, 175, 55, 0.25);
+            --danger-red: #ff3333;
+            --success-green: #00cc66;
+            --freeze-blue: #3399ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 15px;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-header h1 {
+            color: var(--gold-primary);
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
+
+        /* لوحة المؤشرات المالية للمنصة */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--yellow-accent);
+        }
+
+        .section-title {
+            color: var(--gold-light);
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            border-right: 3px solid var(--gold-primary);
+            padding-right: 8px;
+        }
+
+        .admin-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--gold-primary);
+            margin-bottom: 6px;
+        }
+
+        .admin-input, .admin-select {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .admin-input:focus, .admin-select:focus {
+            border-color: var(--yellow-accent);
+        }
+
+        .btn-flex {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            color: #0c0914;
+        }
+
+        .btn-gold { background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary)); }
+        .btn-danger { background: var(--danger-red); color: white; }
+        .btn-freeze { background: var(--freeze-blue); color: white; }
+        .btn-success { background: var(--success-green); color: white; }
+
+        /* جدول التحكم السريع بالمستخدمين */
+        .user-row {
+            background: var(--input-bg);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-right: 4px solid var(--gold-primary);
+            font-size: 13px;
+        }
+
+        .user-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge-active { background-color: rgba(0, 204, 102, 0.2); color: var(--success-green); }
+        .badge-frozen { background-color: rgba(51, 153, 255, 0.2); color: var(--freeze-blue); }
+        .badge-banned { background-color: rgba(255, 51, 51, 0.2); color: var(--danger-red); }
+
+        .receipt-preview-link {
+            color: var(--yellow-accent);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header">
+        <h1>لوحة التحكم والإدارة المطلقة</h1>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>إجمالي الأعضاء</h3>
+            <p id="totalUsers">1,240</p>
+        </div>
+        <div class="stat-card">
+            <h3>خزينة المنصة (USD)</h3>
+            <p id="totalVault">$14,850</p>
+        </div>
+    </div>
+
+    <div class="section-title">📥 طلبات الإيداع والتوثيق المعلقة</div>
+    <div class="admin-box" id="depositRequestsContainer">
+        <div class="user-row" id="requestRow1" style="border-right-color: var(--yellow-accent);">
+            <div class="user-meta">
+                <div><strong>العميل:</strong> أحمد محمد العبسي</div>
+                <div><strong>المبلغ:</strong> $50.00 (USDT)</div>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <span class="receipt-preview-link" onclick="alert('معاينة صورة الإيصال الحقيقية المرفوعة من الهاتف المربوط بقاعدة البيانات المونجو دي بي.')">👁️ انقر هنا لمعاينة إيصال التحويل المرفق</span>
+            </div>
+            <div class="btn-flex">
+                <button class="action-btn btn-success" onclick="approveDeposit('requestRow1', 50)">قبول واعتماد الرصيد</button>
+                <button class="action-btn btn-danger" onclick="rejectDeposit('requestRow1')">رفض الطلب</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">👤 السيطرة والتحكم بملفات المشتركين</div>
+    <div class="admin-box">
+        <div class="input-group">
+            <label for="targetUser">ابحث عن المستخدم (الاسم الثلاثي أو الهاتف):</label>
+            <input type="text" id="targetUser" class="admin-input" placeholder="مثال: خالد وليد القاضي">
+        </div>
+        <div class="btn-flex">
+            <button class="action-btn btn-danger" onclick="changeUserStatus('banned')">حظر العميل</button>
+            <button class="action-btn btn-freeze" onclick="changeUserStatus('frozen')">تجميد الرصيد</button>
+            <button class="action-btn btn-success" onclick="changeUserStatus('active')">إلغاء القيود (نشط)</button>
+        </div>
+    </div>
+
+    <div class="section-title">🎁 نظام الهدايا والأيردروپ (Airdrop)</div>
+    <div class="admin-box">
+        <div class="input-group">
+            <label for="giftScope">نطاق توزيع المكافأة:</label>
+            <select id="giftScope" class="admin-select" onchange="toggleGiftTarget()">
+                <option value="all">كافة مستخدمي البوت (هدية جماعية)</option>
+                <option value="single">مستخدم محدد (بونص مخصص)</option>
+            </select>
+        </div>
+        <div class="input-group" id="singleUserGroup" style="display: none;">
+            <label for="giftUser">اسم المستخدم المستهدف:</label>
+            <input type="text" id="giftUser" class="admin-input" placeholder="اكتب اسم العميل بدقة">
+        </div>
+        <div class="input-group">
+            <label for="giftAmount">قيمة الهدية أو المكافأة ($):</label>
+            <input type="number" id="giftAmount" class="admin-input" placeholder="مثال: 5 دولار" min="0.1">
+        </div>
+        <button class="action-btn btn-gold" style="width: 100%;" onclick="sendGift()">تفعيل وإرسال الهدية فوراً</button>
+    </div>
+
+    <script>
+        let currentVault = 14850;
+
+        function approveDeposit(rowId, amount) {
+            document.getElementById(rowId).remove();
+            currentVault += amount;
+            document.getElementById('totalVault').innerText = "$" + currentVault;
+            alert(`تم قبول العملية بنجاح وضخ بمبلغ $${amount} في حساب العميل وتحديث الخزينة الكلية.`);
+        }
+
+        function rejectDeposit(rowId) {
+            document.getElementById(rowId).remove();
+            alert("تم رفض طلب الإيداع وحذفه من قائمة المراجعة المعلقة بنجاح.");
+        }
+
+        function changeUserStatus(status) {
+            const user = document.getElementById('targetUser').value;
+            if(!user) { alert("يرجى كتابة اسم المستخدم أولاً!"); return; }
+            
+            let msg = "";
+            if(status === 'banned') msg = `تم حظر الحساب [${user}] تماماً ومنعه من فتح تطبيق الويب الخاص بالبوت.`;
+            if(status === 'frozen') msg = `تم تجميد رصيد وأنشطة الحساب [${user}] بنجاح للتحقق من أمان معاملاته.`;
+            if(status === 'active') msg = `تم إلغاء كافة القيود والحظر عن الحساب [${user}] ليعود نشطاً بالكامل.`;
+            
+            alert(msg);
+        }
+
+        function toggleGiftTarget() {
+            const scope = document.getElementById('giftScope').value;
+            document.getElementById('singleUserGroup').style.display = (scope === 'single') ? 'block' : 'none';
+        }
+
+        function sendGift() {
+            const amount = document.getElementById('giftAmount').value;
+            const scope = document.getElementById('giftScope').value;
+            
+            if(!amount || amount <= 0) { alert("يرجى تحديد قيمة صالحة للمكافأة!"); return; }
+            
+            if(scope === 'all') {
+                alert(`نجاح! تم توزيع مكافأة بقيمة $${amount} لجميع المشتركين الـ 1,240 المسجلين في قاعدة البيانات.`);
+            } else {
+                const user = document.getElementById('giftUser').value;
+                if(!user) { alert("يرجى كتابة اسم المستخدم المستهدف!"); return; }
+                alert(`نجاح! تم إرسال مكافأة خاصة بقيمة $${amount} إلى محفظة المستخدم [${user}] بنجاح.`);
+            }
+        }
+    </script>
+</body>
+</html>
