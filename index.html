@@ -355,6 +355,16 @@
             border: 2px solid var(--gold);
         }
 
+        .section-title {
+            font-size: clamp(18px, 5vw, 24px);
+            margin: 24px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         @media (max-width: 360px) {
             .nav-grid { gap: 5px; }
             .nav-btn { padding: 10px 4px; font-size: 11px; }
@@ -383,42 +393,61 @@
 <body>
 
     <div class="container">
+        <!-- ============================================================ -->
+        <!-- القسم 1: الرأس والعلامة التجارية -->
+        <!-- ============================================================ -->
         <h1 class="gold-text" style="margin-top:16px; font-size: clamp(22px, 6vw, 30px);">NEXORA PREMIUM</h1>
         <p style="color: #a39bb4; font-size: clamp(11px, 2.5vw, 14px);">نظام التعدين وإدارة الأصول المتقدم</p>
 
+        <!-- ============================================================ -->
+        <!-- أزرار التنقل السريع (التمرير للأقسام + النوافذ المنبثقة) -->
+        <!-- ============================================================ -->
         <div class="nav-grid">
-            <button class="nav-btn" onclick="openModal('casinoModal')">🎰 صالة الكازينو</button>
+            <button class="nav-btn" onclick="document.getElementById('games-section').scrollIntoView({behavior:'smooth'})">🎰 صالة الكازينو</button>
             <button class="nav-btn" onclick="openModal('tokenModal')">🛠️ مصنع العملات</button>
-            <button class="nav-btn" onclick="openModal('walletModal')">💼 إدارة المحفظة</button>
+            <button class="nav-btn" onclick="document.getElementById('balance-section').scrollIntoView({behavior:'smooth'})">💼 إدارة المحفظة</button>
             <button class="nav-btn" onclick="openModal('adminModal')">👑 لوحة الإدارة</button>
         </div>
 
-        <div class="card" style="text-align: center;">
-            <p style="color: #a39bb4; font-size: clamp(12px, 2.5vw, 14px);">إجمالي الرصيد الاستثماري الحالي</p>
-            <div class="balance" id="liveBalance">0.000660 <small>USDT</small></div>
-            <p style="font-size: clamp(10px, 2vw, 12px); color: #2ecc71;">⚡ محرك التعدين نشط ويعمل بسلاسة</p>
+        <!-- ============================================================ -->
+        <!-- القسم 2: الرصيد والمحفظة (تم نقله من النافذة المنبثقة) -->
+        <!-- ============================================================ -->
+        <div id="balance-section">
+            <h2 class="gold-text section-title">💼 قسم الرصيد والمحفظة</h2>
+            
+            <div class="card" style="text-align: center;">
+                <p style="color: #a39bb4; font-size: clamp(12px, 2.5vw, 14px);">إجمالي الرصيد الاستثماري الحالي</p>
+                <div class="balance" id="liveBalance">0.000660 <small>USDT</small></div>
+                <p style="font-size: clamp(10px, 2vw, 12px); color: #2ecc71;">⚡ محرك التعدين نشط ويعمل بسلاسة</p>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" style="background: #2ecc71;" onclick="document.getElementById('deposit-section').scrollIntoView({behavior:'smooth'})">📥 إيداع أموال</button>
+                <button class="btn" style="background: #e74c3c;" onclick="document.getElementById('withdraw-section').scrollIntoView({behavior:'smooth'})">📤 سحب الأرباح</button>
+            </div>
+
+            <!-- حقل الإيداع (من النافذة المنبثقة القديمة) -->
+            <div id="deposit-section" class="card">
+                <h4 style="color: var(--gold); font-size: clamp(15px, 3.5vw, 18px);">📥 الإيداع</h4>
+                <p style="font-size: clamp(12px, 2.5vw, 14px); margin-top:4px; color:#2ecc71; font-weight:700;">عنوان الإيداع المعتمد لشبكة (TRC-20):</p>
+                <input type="text" id="walletAddress" value="TYv7Ruxxxxxxxxxxxxxxxxxxx" readonly style="text-align:center; color:var(--gold); font-weight:bold;">
+            </div>
+
+            <!-- حقل السحب (من النافذة المنبثقة القديمة) -->
+            <div id="withdraw-section" class="card">
+                <h4 style="color: var(--gold); font-size: clamp(15px, 3.5vw, 18px);">📤 تقديم طلب سحب الأرباح</h4>
+                <input type="text" id="withdrawAddress" placeholder="أدخل عنوان محفظة السحب الخاصة بك">
+                <input type="number" id="withdrawAmount" placeholder="الكمية (الحد الأدنى 10 USDT)" min="10">
+                <button class="close-btn" style="background:#e74c3c; margin-top:8px;" onclick="submitWithdraw()">تأكيد عملية السحب</button>
+            </div>
         </div>
 
-        <div class="btn-group">
-            <button class="btn" style="background: #2ecc71;" onclick="openModal('walletModal')">📥 إيداع أموال</button>
-            <button class="btn" style="background: #e74c3c;" onclick="openModal('walletModal')">📤 سحب الأرباح</button>
-        </div>
-
-        <h3 class="gold-text" style="text-align: right; font-size: clamp(14px, 3.5vw, 17px); margin-bottom: 8px;">🚀 خطط الترقية السحابية:</h3>
-        <div class="card">
-            <div style="font-weight:700; color:var(--gold); font-size: clamp(14px, 3vw, 17px);">باقة المبتدئين (VIP 1)</div>
-            <div style="font-size: clamp(11px, 2.5vw, 13px); color:#a39bb4; margin-bottom:4px;">السرعة: +1.50 MH/s | العائد اليومي: 0.50 USDT</div>
-            <button class="btn-up" onclick="alert('جاري مراجعة الرصيد لتفعيل الخطة...')">تفعيل الباقة (10 USDT)</button>
-        </div>
-    </div>
-
-    <!-- ================================================================ -->
-    <!-- ====== 1. كازينو ====== -->
-    <!-- ================================================================ -->
-    <div id="casinoModal" class="modal">
-        <div class="modal-content">
-            <h3 class="gold-text" style="text-align:center; font-size: clamp(18px, 5vw, 24px);">🎰 صالة الكازينو</h3>
-            <p style="font-size: clamp(11px, 2.5vw, 13px); color:#a39bb4; text-align:center; margin-bottom:12px;">اختر لعبتك، واربح مع خوارزميات ذكية</p>
+        <!-- ============================================================ -->
+        <!-- القسم 3: الألعاب (الكازينو) - تم نقله بالكامل من النافذة المنبثقة -->
+        <!-- ============================================================ -->
+        <div id="games-section">
+            <h2 class="gold-text section-title">🎰 قسم الألعاب (الكازينو)</h2>
+            <p style="font-size: clamp(11px, 2.5vw, 13px); color:#a39bb4; margin-bottom:12px;">اختر لعبتك، واربح مع خوارزميات ذكية</p>
 
             <!-- لعبة الهامش -->
             <div class="game-container">
@@ -499,13 +528,21 @@
                 </div>
                 <div id="crashResult" class="game-result"></div>
             </div>
+        </div>
 
-            <button class="close-btn" onclick="closeModal('casinoModal')">إغلاق النافذة</button>
+        <!-- ============================================================ -->
+        <!-- القسم 4: خطط الترقية -->
+        <!-- ============================================================ -->
+        <h2 class="gold-text section-title" style="margin-top:30px;">🚀 خطط الترقية السحابية</h2>
+        <div class="card">
+            <div style="font-weight:700; color:var(--gold); font-size: clamp(14px, 3vw, 17px);">باقة المبتدئين (VIP 1)</div>
+            <div style="font-size: clamp(11px, 2.5vw, 13px); color:#a39bb4; margin-bottom:4px;">السرعة: +1.50 MH/s | العائد اليومي: 0.50 USDT</div>
+            <button class="btn-up" onclick="alert('جاري مراجعة الرصيد لتفعيل الخطة...')">تفعيل الباقة (10 USDT)</button>
         </div>
     </div>
 
     <!-- ================================================================ -->
-    <!-- ====== 2. مصنع العملات ====== -->
+    <!-- ====== نافذة مصنع العملات (منبثقة) ====== -->
     <!-- ================================================================ -->
     <div id="tokenModal" class="modal">
         <div class="modal-content">
@@ -530,24 +567,7 @@
     </div>
 
     <!-- ================================================================ -->
-    <!-- ====== 3. المحفظة ====== -->
-    <!-- ================================================================ -->
-    <div id="walletModal" class="modal">
-        <div class="modal-content">
-            <h3 class="gold-text" style="font-size: clamp(18px, 5vw, 24px);">💼 إدارة المحفظة والإيداع</h3>
-            <p style="font-size: clamp(12px, 2.5vw, 14px); margin-top:8px; color:#2ecc71; font-weight:700;">عنوان الإيداع المعتمد لشبكة (TRC-20):</p>
-            <input type="text" id="walletAddress" value="TYv7Ruxxxxxxxxxxxxxxxxxxx" readonly style="text-align:center; color:var(--gold); font-weight:bold;">
-            <hr style="border-color:#3d3161; margin:12px 0;">
-            <h4 style="color:var(--gold); font-size: clamp(15px, 3.5vw, 18px);">تقديم طلب سحب الأرباح</h4>
-            <input type="text" id="withdrawAddress" placeholder="أدخل عنوان محفظة السحب الخاصة بك">
-            <input type="number" id="withdrawAmount" placeholder="الكمية (الحد الأدنى 10 USDT)" min="10">
-            <button class="close-btn" style="background:#e74c3c;" onclick="submitWithdraw()">تأكيد عملية السحب</button>
-            <button class="close-btn" onclick="closeModal('walletModal')">إغلاق النافذة</button>
-        </div>
-    </div>
-
-    <!-- ================================================================ -->
-    <!-- ====== 4. الإدارة ====== -->
+    <!-- ====== نافذة الإدارة (منبثقة) ====== -->
     <!-- ================================================================ -->
     <div id="adminModal" class="modal">
         <div class="modal-content">
@@ -576,7 +596,7 @@
         }, 1000);
 
         // ================================================================
-        // فتح وإغلاق النوافذ
+        // فتح وإغلاق النوافذ المنبثقة (للمصنع والإدارة فقط)
         // ================================================================
         function openModal(id) {
             document.getElementById(id).style.display = 'flex';
@@ -935,4 +955,4 @@
     </script>
 
 </body>
-    </html>
+</html>
