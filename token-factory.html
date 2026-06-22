@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora - مصنع العملات الرقمية</title>
+    <style>
+        :root { --bg:#0c0914; --card:#151124; --gold:#d4af37; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .container { max-width: 450px; margin: 0 auto; }
+        .card { background: var(--card); border: 1px solid rgba(212,175,55,0.2); border-radius: 15px; padding: 20px; text-align: right; }
+        input, select { width: 100%; padding: 10px; margin: 8px 0; background: #201a34; border: 1px solid #3d3161; border-radius: 6px; color: white; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background: var(--gold); color: black; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="color:var(--gold); text-align:center; margin-bottom:20px;">🛠️ مصنع العملات الرقمية الذكي</h2>
+        <div class="card">
+            <label>اسم العملة المقترح (Token Name):</label>
+            <input type="text" placeholder="مثال: SmartCoin Gold">
+            
+            <label>رمز العملة (Symbol):</label>
+            <input type="text" placeholder="مثال: SCG">
+            
+            <label>إجمالي المعروض (Total Supply):</label>
+            <input type="number" placeholder="مثال: 21000000">
+            
+            <label>الشبكة المستهدفة (Blockchain):</label>
+            <select>
+                <option>TRON (TRC-20)</option>
+                <option>Binance Smart Chain (BEP-20)</option>
+                <option>Ethereum (ERC-20)</option>
+            </select>
+            
+            <button class="btn" onclick="alert('تم رفع طلب سك العملة الذكية للإدارة لتجهيز العقد الذكي وتقدير رسوم الغاز.')">إرسال طلب إنشاء العملة للتوثيق</button>
+        </div>
+    </div>
+</body>
+</html>
