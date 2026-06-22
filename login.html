@@ -16,34 +16,74 @@
 </head>
 <body>
     <div class="box">
-        <h2 id="title">إنشاء حساب جديد</h2>
+        <h2 id="title">تسجيل الدخول</h2>
         <form id="form">
-            <input type="text" id="name" placeholder="الاسم الثلاثي كاملاً" required>
+            <input type="text" id="name" placeholder="الاسم الثلاثي كاملاً" style="display: none;">
             <input type="email" id="email" placeholder="البريد الإلكتروني" required>
-            <input type="tel" id="phone" placeholder="رقم الهاتف مع مفتاح الدولة" required>
+            <input type="tel" id="phone" placeholder="رقم الهاتف مع مفتاح الدولة" style="display: none;">
             <input type="password" id="pass" placeholder="كلمة المرور" required>
-            <button type="submit" class="btn" id="btnText">تسجيل حساب جديد</button>
+            <button type="submit" class="btn" id="btnText">دخول</button>
         </form>
-        <div class="link" onclick="toggleMode()" id="switchText">لديك حساب؟ تسجيل الدخول</div>
+        <div class="link" onclick="toggleMode()" id="switchText">ليس لديك حساب؟ إنشاء حساب جديد</div>
         <div class="link" style="color: var(--gold);" onclick="forgot()">نسيت كلمة المرور؟ استعادة الحساب</div>
     </div>
     <script>
-        let isLogin = false;
+        let isLogin = true; // الافتراضي هو تسجيل الدخول لمنع الدخول العشوائي للمنصة
+
         function toggleMode() {
             isLogin = !isLogin;
             document.getElementById('title').innerText = isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
             document.getElementById('name').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('name').required = !isLogin;
             document.getElementById('phone').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('phone').required = !isLogin;
             document.getElementById('btnText').innerText = isLogin ? 'دخول' : 'تسجيل حساب جديد';
-            document.getElementById('switchText').innerText = isLogin ? 'إنشاء حساب جديد' : 'لديك حساب؟ تسجيل الدخول';
+            document.getElementById('switchText').innerText = isLogin ? 'ليس لديك حساب؟ إنشاء حساب جديد' : 'لديك حساب؟ تسجيل الدخول';
         }
+
         function forgot() {
             let mail = prompt("أدخل بريدك الإلكتروني لإرسال كود الاستعادة:");
             if(mail) alert("تم إرسال كود استعادة الحساب للبريد الإلكتروني بنجاح.");
         }
-        document.getElementById('form').addEventListener('submit', (e) => {
+
+        document.getElementById('form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            window.location.href = '/dashboard';
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pass').value;
+            
+            if (isLogin) {
+                // عملية تسجيل الدخول والتحقق
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/dashboard';
+                } else {
+                    alert("خطأ: " + data.message);
+                }
+            } else {
+                // عملية إنشاء الحساب الجديد
+                const fullName = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, phone, password })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert("تم إنشاء الحساب بنجاح! يرجى الدخول الآن.");
+                    toggleMode();
+                } else {
+                    alert("فشل التسجيل: " + data.error);
+                }
+            }
         });
     </script>
 </body>
