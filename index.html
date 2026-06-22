@@ -3,312 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Premium Mining Cloud</title>
+    <title>Nexora Premium - التعدين والاستثمار</title>
     <style>
         :root {
             --bg-main: #0c0914;
             --bg-card: #151124;
             --gold-primary: #d4af37;
-            --gold-light: #f3e5ab;
-            --yellow-accent: #ffdf00;
+            --purple-accent: #6c5ce7;
             --text-main: #f1ebd9;
             --text-muted: #a39bb4;
-            --input-bg: #1d1833;
-            --border-color: rgba(212, 175, 55, 0.25);
-            --success-green: #00cc66;
+            --border-color: rgba(212, 175, 55, 0.2);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            padding: 15px;
-            min-height: 100vh;
-        }
-
-        .dashboard-header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .dashboard-header h1 {
-            color: var(--gold-primary);
-            font-size: 24px;
-            letter-spacing: 1px;
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, var(--bg-card), #1e183a);
-            border: 1px solid var(--gold-primary);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-        }
-
-        .balance-card h2 {
-            font-size: 14px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .main-balance {
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--yellow-accent);
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .section-title {
-            color: var(--gold-light);
-            font-size: 18px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .mining-container {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .mining-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            background: var(--input-bg);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-
-        .mining-stats span {
-            color: var(--gold-primary);
-        }
-
-        .action-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
-            color: #0c0914;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-            transition: all 0.2s ease;
-        }
-
-        .action-btn:disabled {
-            background: #2a2442;
-            color: var(--text-muted);
-            border: 1px solid #3d355e;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .calc-box {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            color: var(--gold-primary);
-            margin-bottom: 6px;
-        }
-
-        .input-group input {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-            text-align: center;
-        }
-
-        .input-group input:focus {
-            border-color: var(--yellow-accent);
-        }
-
-        .results-panel {
-            background: var(--input-bg);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 4px solid var(--gold-primary);
-        }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .result-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .highlight-green {
-            color: var(--success-green);
-            font-weight: bold;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); padding: 20px; text-align: center; }
+        .container { max-width: 450px; margin: 0 auto; }
+        .header { margin-bottom: 25px; }
+        .gold-text { color: var(--gold-primary); text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        
+        /* كرت الرصيد والتعدين */
+        .card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .balance { font-size: 32px; font-weight: bold; margin: 10px 0; color: #fff; }
+        
+        /* أزرار العمليات المالية */
+        .action-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-deposit { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
+        .btn-withdraw { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+        
+        /* قسم الكازينو / ألعاب المخاطرة */
+        .casino-box { background: linear-gradient(145deg, var(--bg-card), #1e133a); border: 1px solid var(--purple-accent); }
+        .btn-game { background: linear-gradient(135deg, var(--purple-accent), #4834d4); color: white; width: 100%; margin-top: 15px; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3); }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-header">
-        <h1>NEXORA CLOUD MINING</h1>
-    </div>
-
-    <!-- لوحة الرصيد الإجمالي الحية -->
-    <div class="balance-card">
-        <h2>إجمالي الرصيد المُعدّن (USD)</h2>
-        <div class="main-balance" id="userBalance">0.00000000</div>
-    </div>
-
-    <!-- قسم التعدين السحابي المجاني -->
-    <div class="section-title">⛏️ جلسة التعدين الحرة (24H)</div>
-    <div class="mining-container">
-        <div class="mining-stats">
-            <div>الوضع: <span id="miningStatus">متوقف</span></div>
-            <div>العائد اليومي: <span>0.0050 USD</span></div>
-        </div>
-        <div class="mining-stats" style="margin-top: -10px;">
-            <div>الوقت المتبقي: <span id="timeLeft">24:00:00</span></div>
-        </div>
-        <button class="action-btn" id="startMiningBtn" onclick="startFreeMining()">تفعيل التعدين المجاني</button>
-    </div>
-
-    <!-- قسم الاستثمار والآلة الحاسبة الذكية -->
-    <div class="section-title">📊 حاسبة الاستثمار وهامش الأرباح</div>
-    <div class="calc-box">
-        <div class="input-group">
-            <label for="investAmount">أدخل مبلغ الاستثمار المطلوب (يبدأ من 3$)</label>
-            <input type="number" id="investAmount" value="3" min="3" oninput="calculateInvestment()">
+    <div class="container">
+        <div class="header">
+            <h1 class="gold-text">NEXORA PREMIUM</h1>
+            <p style="color: var(--text-muted); font-size: 13px;">نظام التعدين السحابي وإدارة الأصول</p>
         </div>
 
-        <div class="results-panel">
-            <div class="result-row">
-                <div>نسبة الربح اليومية المخصصة:</div>
-                <div id="calcRate" class="highlight-green">3.00%</div>
-            </div>
-            <div class="result-row">
-                <div>الربح اليومي الصافي:</div>
-                <div id="dailyProfit" style="color: var(--yellow-accent);">0.09 USD</div>
-            </div>
-            <div class="result-row">
-                <div>الربح الشهري المتوقع (30 يوم):</div>
-                <div id="monthlyProfit" style="color: var(--gold-light);">2.70 USD</div>
-            </div>
+        <!-- لوحة التحكم بالرصيد -->
+        <div class="card">
+            <p style="color: var(--text-muted);">إجمالي الرصيد الاستثماري</p>
+            <div class="balance" id="userBalance">0.00 <span style="font-size: 16px; color: var(--gold-primary);">USDT</span></div>
+            <p style="font-size: 12px; color: #2ecc71;">⚡ محرك التعدين نشط ويعمل حالياً</p>
         </div>
-        <button class="action-btn" style="margin-top: 15px; background: linear-gradient(135deg, #00cc66, #00994d); color: white;">شراء خطة التعدين المدفوعة</button>
+
+        <!-- أزرار الإيداع والسحب الدقيقة -->
+        <div class="action-group">
+            <button class="btn btn-deposit" onclick="handleDeposit()">📥 إيداع أموال</button>
+            <button class="btn btn-withdraw" onclick="handleWithdraw()">📤 سحب الأرباح</button>
+        </div>
+
+        <!-- قسم الكازينو وألعاب الحظ (Risk Game) -->
+        <div class="card casino-box">
+            <h3 class="gold-text">🎰 صالة الألعاب الملكية (Risk Game)</h3>
+            <p style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">ضاعف أرباح التعدين الخاصة بك فوراً أو خاطر بها</p>
+            <button class="btn btn-game" onclick="openCasino()">🎮 دخول صالة الحظ</button>
+        </div>
     </div>
 
     <script>
-        let balance = 0.00000000;
-        let isMining = false;
-        let miningInterval;
-        let countdownInterval;
-        
-        // كمية التعدين لكل ثانية للحصول على 0.005 في 24 ساعة بالضبط
-        const rewardPerSecond = 0.005 / 86400; 
-
-        function startFreeMining() {
-            if (isMining) return;
-            
-            isMining = true;
-            document.getElementById('startMiningBtn').disabled = true;
-            document.getElementById('miningStatus').innerText = "يعمل الآن...";
-            document.getElementById('miningStatus').style.color = "var(--success-green)";
-            
-            let totalSeconds = 86400; // 24 ساعة
-
-            // عداد الرصيد الحي (يتحدث كل ثانية)
-            miningInterval = setInterval(() => {
-                balance += rewardPerSecond;
-                document.getElementById('userBalance').innerText = balance.toFixed(8);
-            }, 1000);
-
-            // عداد الوقت المتبقي تنازلياً
-            countdownInterval = setInterval(() => {
-                totalSeconds--;
-                if (totalSeconds <= 0) {
-                    clearInterval(miningInterval);
-                    clearInterval(countdownInterval);
-                    isMining = false;
-                    document.getElementById('startMiningBtn').disabled = false;
-                    document.getElementById('miningStatus').innerText = "منتهي (بحاجة لإعادة تفعيل)";
-                    document.getElementById('miningStatus').style.color = "var(--text-muted)";
-                    document.getElementById('timeLeft').innerText = "24:00:00";
-                } else {
-                    let hrs = Math.floor(totalSeconds / 3600);
-                    let mins = Math.floor((totalSeconds % 3600) / 60);
-                    let secs = totalSeconds % 60;
-                    document.getElementById('timeLeft').innerText = 
-                        (hrs < 10 ? "0" : "") + hrs + ":" + 
-                        (mins < 10 ? "0" : "") + mins + ":" + 
-                        (secs < 10 ? "0" : "") + secs;
-                }
-            }, 1000);
+        function handleDeposit() {
+            alert("📥 للإيداع وتفعيل باقات التعدين VIP، يرجى التواصل المباشر مع الإدارة لإرسال عنوان المحفظة الخاص بك.");
         }
 
-        // خوارزمية احتساب أرباح الهامش الاستثماري بدقة وأمان
-        function calculateInvestment() {
-            const amount = parseFloat(document.getElementById('investAmount').value);
-            
-            if (isNaN(amount) || amount < 3) {
-                document.getElementById('calcRate').innerText = "0.00%";
-                document.getElementById('dailyProfit').innerText = "0.00 USD";
-                document.getElementById('monthlyProfit').innerText = "0.00 USD";
-                return;
+        function handleWithdraw() {
+            const amount = prompt("أدخل الكمية التي تريد سحبها (الحد الأدنى 10 USDT):");
+            if (amount) {
+                alert(`📤 تم تقديم طلب سحب بقيمة ${amount} USDT بنجاح. جاري المراجعة من قِبل مسؤول النظام.`);
             }
+        }
 
-            // النسبة الأساسية 3%
-            let baseRate = 0.03; 
-            
-            // خوارزمية زيادة الهامش التدريجي الصغير جداً للمبالغ الكبيرة لحماية البوت وجذب العميل
-            // لكل 1000 دولار زيادة، يرتفع الهامش بنسبة 0.05% فقط وبحد أقصى مضاف 0.5%
-            if (amount > 100) {
-                let bonus = Math.min(0.005, (amount / 10000)); 
-                baseRate += bonus;
-            }
-
-            const daily = amount * baseRate;
-            const monthly = daily * 30;
-
-            document.getElementById('calcRate').innerText = (baseRate * 100).toFixed(2) + "%";
-            document.getElementById('dailyProfit').innerText = daily.toFixed(2) + " USD";
-            document.getElementById('monthlyProfit').innerText = monthly.toFixed(2) + " USD";
+        function openCasino() {
+            alert("🎰 مرحباً بك في لعبة الحظ والمخاطرة! ميزة مضاعفة الرصيد ستكون متاحة بالكامل في التحديث القادم بعد ربط حسابك.");
         }
     </script>
 </body>
