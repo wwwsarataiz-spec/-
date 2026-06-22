@@ -1,45 +1,63 @@
-// ==========================================
-// server.js - الخادم الرئيسي (بدون مجلدات)
-// ==========================================
-
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const helmet = require('helmet');
+const TelegramBot = require('node-telegram-bot-api');
 const path = require('path');
 
 const app = express();
+app.use(express.json());
+
+// تشغيل ملفات الواجهات الأمامية التي قمنا بصنعها سابقاً تلقائياً
+app.use(express.static(path.join(__dirname)));
+
+// جلب المتغيرات السرية من إعدادات البيئة السحابية لحماية بياناتك
+const TOKEN = process.env.TELEGRAM_TOKEN;
+const MONGO_URI = process.env.MONGO_URI;
+const WEB_APP_URL = process.env.WEB_APP_URL; // رابط موقعك على Render
 const PORT = process.env.PORT || 3000;
 
-// الاتصال بقاعدة البيانات
-mongoose.connect(process.env.MONGO_URL || process.env.MONGO_URI)
-  .then(() => console.log('✅ تم الاتصال بقاعدة البيانات'))
-  .catch(err => console.error('❌ فشل الاتصال:', err.message));
+// الاتصال بقاعدة بيانات MongoDB Atlas
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to MongoDB Atlas successfully!'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
+// تعريف هيكل بيانات المستخدم داخل قاعدة البيانات (Schema)
+const UserSchema = new mongoose.Schema({
+    telegramId: String,
+    fullName: String,
+    phone: String,
+    email: String,
+    balance: { type: Number, default: 0.00 },
+    status: { type: String, default: 'active' } // active, frozen, banned
+});
+const User = mongoose.model('User', UserSchema);
 
-// ===== استيراد المسارات (من الجذر) =====
-app.use('/api/auth', require('./auth'));
-app.use('/api/user', require('./user'));
-app.use('/api/mining', require('./mining'));
-app.use('/api/casino', require('./casino'));
-app.use('/api/tokens', require('./tokens'));
-app.use('/api/market', require('./market'));
-app.use('/api/chat', require('./chat'));
-app.use('/api/wallet', require('./wallet'));
-app.use('/api/admin', require('./admin'));
+// تشغيل البوت بنظام سحب البيانات المستمر (Polling) وهو الأسهل للهواتف
+const bot = new TelegramBot(TOKEN, { polling: true });
 
-// الصفحة الرئيسية
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+// الخوارزمية الخلفية للبوت عند إرسال أمر /start
+bot.onText(/\/start/, async (msg) => {
+    const chatId = msg.chat.id;
+    
+    // التحقق مما إذا كان المستخدم مسجلاً مسبقاً في قاعدة البيانات
+    let user = await User.findOne({ telegramId: chatId.toString() });
+    
+    if (user && user.status === 'banned') {
+        return bot.sendMessage(chatId, "❌ نعتذر منك، تم حظر حسابك من قبل الإدارة لمخالفة الشروط.");
+    }
+
+    // إرسال رسالة ترحيبية فخمة تحتوي على زر يفتح تطبيق الويب مباشرة داخل تليجرام
+    bot.sendMessage(chatId, `✨ أهلاً بك في منصة NEXORA الملكية الرقمية.\n\nاضغط على الزر أدناه لفتح واجهة الاستثمار، التعدين السحابي، وصالة الألعاب مباشرة من هاتفك!`, {
+        reply_markup: {
+            inline_keyboard: [
+                [
+                    { text: "🚀 فتح تطبيق الويب (Web App)", web_app: { url: WEB_APP_URL } }
+                ]
+            ]
+        }
+    });
 });
 
-// تشغيل الخادم
+// تشغيل السيرفر لاستضافة الصفحات
 app.listen(PORT, () => {
-  console.log(`🚀 الخادم يعمل على المنفذ ${PORT}`);
+    console.log(`Server is running smoothly on port ${PORT}`);
 });
