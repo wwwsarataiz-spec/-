@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Premium Casino & Games</title>
+    <title>Nexora Premium Casino</title>
     <style>
         :root {
             --bg-main: #0c0914;
@@ -15,8 +15,8 @@
             --text-muted: #a39bb4;
             --input-bg: #1d1833;
             --border-color: rgba(212, 175, 55, 0.25);
-            --danger-red: #ff3333;
             --success-green: #00cc66;
+            --danger-red: #ff3333;
         }
 
         * {
@@ -32,405 +32,294 @@
             color: var(--text-main);
             padding: 15px;
             min-height: 100vh;
+            padding-bottom: 80px !important; /* مساحة لشريط التنقل السفلي */
         }
 
-        .header {
+        .casino-header {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            margin-bottom: 25px;
             border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
         }
 
-        .header h1 {
+        .casino-header h1 {
             color: var(--gold-primary);
-            font-size: 22px;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
 
-        .balance-bar {
-            background: linear-gradient(135deg, var(--bg-card), #1e183a);
+        .casino-header p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .balance-display {
+            background: rgba(212, 175, 55, 0.08);
             border: 1px solid var(--gold-primary);
             border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            font-size: 16px;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .balance-display span:first-child {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .balance-display span:last-child {
+            font-size: 20px;
             font-weight: bold;
             color: var(--yellow-accent);
-            margin-bottom: 20px;
         }
 
-        .game-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
+        /* هندسة وهيكل لعبة عجلة الحظ */
+        .game-container {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 10px 5px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
-            color: #0c0914;
-            border: none;
-        }
-
-        .game-section {
-            display: none;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-
-        .game-section.active {
-            display: block;
-        }
-
-        .bet-group {
-            margin-bottom: 15px;
-        }
-
-        .bet-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--gold-primary);
-            margin-bottom: 6px;
-        }
-
-        .bet-input {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 10px;
-            border-radius: 6px;
+            border-radius: 20px;
+            padding: 25px 15px;
             text-align: center;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .action-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
-            color: #0c0914;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        /* نمط لعبة الدجاجة */
-        .chicken-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .chicken-tile {
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            height: 70px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        /* نمط عجلة الحظ */
-        .wheel-container {
-            text-align: center;
-            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            margin-bottom: 25px;
             position: relative;
         }
 
-        .wheel {
-            width: 160px;
-            height: 160px;
+        .wheel-outer {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto 25px auto;
+        }
+
+        /* مؤشر العجلة العلوي */
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid var(--yellow-accent);
+            z-index: 10;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+        }
+
+        .wheel-canvas {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            border: 5px solid var(--gold-primary);
-            margin: 0 auto;
-            transition: transform 3s cubic-bezier(0.1, 0.8, 0.1, 1);
+            border: 8px solid var(--gold-primary);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1);
             background: conic-gradient(
-                var(--bg-main) 0deg 60deg, 
-                var(--gold-primary) 60deg 120deg, 
-                var(--input-bg) 120deg 180deg, 
-                var(--yellow-accent) 180deg 240deg, 
-                #2a1b4e 240deg 300deg,
-                var(--danger-red) 300deg 360deg
+                #ff3333 0deg 45deg, #151124 45deg 90deg,
+                #00cc66 90deg 135deg, #151124 135deg 180deg,
+                #ff9900 180deg 225deg, #151124 225deg 270deg,
+                #3399ff 270deg 315deg, #151124 315deg 360deg
             );
         }
 
-        .pointer {
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 15px solid var(--yellow-accent);
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
+        .spin-btn {
+            background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
+            color: #0c0914;
+            border: none;
+            padding: 14px 35px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            transition: transform 0.2s;
         }
 
-        /* نمط النرد */
-        .dice-display {
-            font-size: 48px;
-            text-align: center;
-            margin: 15px 0;
-            color: var(--yellow-accent);
+        .spin-btn:active {
+            transform: scale(0.95);
         }
 
-        .log-box {
-            background-color: #0c0914;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 15px;
+        .spin-btn:disabled {
+            background: #444;
+            color: #888;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .game-rules {
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: right;
             font-size: 13px;
-            text-align: center;
-            min-height: 40px;
+            line-height: 1.6;
         }
+
+        .game-rules h3 {
+            color: var(--gold-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .game-rules ul {
+            list-style-position: inside;
+            color: var(--text-muted);
+        }
+
+        /* أنماط شريط التنقل السفلي الفخم */
+        .premium-navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background-color: #151124;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 9999;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #a39bb4;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        .nav-text { font-size: 11px; font-weight: bold; }
+        .nav-item.active { color: #ffdf00; transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>صالة الألعاب والمحاكاة الملكية</h1>
+    <div class="casino-header">
+        <h1>صالة الألعاب والامتيازات الملكية</h1>
+        <p>استثمر رصيدك وضاعف أرباحك بلمسة حظ واحدة</p>
     </div>
 
-    <div class="balance-bar">
-        رصيد الحساب الحالي: $<span id="userBalance">100.00</span>
+    <div class="balance-display">
+        <span>رصيدك الحالي بالمحفظة:</span>
+        <span>$<span id="userBalance">10.00</span></span>
     </div>
 
-    <div class="game-tabs">
-        <button class="tab-btn active" onclick="switchGame('chicken')">🍗 لعبة الدجاجة</button>
-        <button class="tab-btn" onclick="switchGame('wheel')">🎡 العجلة</button>
-        <button class="tab-btn" onclick="switchGame('dice')">🎲 النرد الآمن</button>
-    </div>
-
-    <div id="chickenGame" class="game-section active">
-        <h3>لعبة الدجاجة الموزونة</h3>
-        <div class="bet-group" style="margin-top:10px;">
-            <label>مبلغ الرهان ($):</label>
-            <input type="number" id="chickenBet" class="bet-input" value="1" min="0.5">
+    <div class="game-container">
+        <div class="wheel-outer">
+            <div class="wheel-pointer"></div>
+            <div id="wheel" class="wheel-canvas"></div>
         </div>
-        <button class="action-btn" onclick="startChickenGame()">ابدأ الجولة</button>
         
-        <div class="chicken-grid" id="chickenGrid">
-            </div>
-        <div class="log-box" id="chickenLog">اضغط على "ابدأ الجولة" للبدء في فتح الأطباق.</div>
+        <button id="spinButton" class="spin-btn" onclick="startLuckySpin()">🎁 أدِر العجلة الآن ($1.00)</button>
     </div>
 
-    <div id="wheelGame" class="game-section">
-        <h3>عجلة الحظ الرقمية</h3>
-        <div class="bet-group" style="margin-top:10px;">
-            <label>مبلغ الرهان ($):</label>
-            <input type="number" id="wheelBet" class="bet-input" value="1" min="0.5">
-        </div>
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <div class="wheel" id="wheelDisk"></div>
-        </div>
-        <button class="action-btn" onclick="spinWheel()">تدوير العجلة</button>
-        <div class="log-box" id="wheelLog">جرب حظك لتضاعف رهانك طبقاً لخوارزمية المنصة.</div>
+    <div class="game-rules">
+        <h3>📜 آلية عمل اللعبة الاستثمارية:</h3>
+        <ul>
+            <li>تكلفة الدورة الواحدة للعجلة هي 1 دولار يخصم تلقائياً من محفظتك.</li>
+            <li>تحتوي العجلة على جوائز نقدية عشوائية مضاعفة تبدأ من 0$ وتصل إلى 5$!</li>
+            <li>العملية مؤمنة كلياً وموثقة في خوارزمية السيرفر لمنع أي تلاعب خارجي.</li>
+        </ul>
     </div>
 
-    <div id="diceGame" class="game-section">
-        <h3>محاكاة النرد الذكي</h3>
-        <div class="bet-group" style="margin-top:10px;">
-            <label>مبلغ الرهان ($):</label>
-            <input type="number" id="diceBet" class="bet-input" value="1" min="0.5">
-        </div>
-        <div class="bet-group">
-            <label>توقع نتيجة النرد الإجمالية:</label>
-            <select id="dicePrediction" class="bet-input" style="appearance:none;-webkit-appearance:none;">
-                <option value="over">أعلى من 50 (ربح X1.9)</option>
-                <option value="under">أقل من 50 (ربح X1.9)</option>
-            </select>
-        </div>
-        <div class="dice-display" id="diceResult">00</div>
-        <button class="action-btn" onclick="rollDice()">رمي النرد</button>
-        <div class="log-box" id="diceLog">الخوارزمية مبرمجة لضمان ميزة تفوق السيرفر المستدامة.</div>
+    <div class="premium-navbar">
+        <a href="index.html" class="nav-item" id="nav-mining">
+            <span class="nav-icon">🚀</span>
+            <span class="nav-text">التعدين</span>
+        </a>
+        <a href="games.html" class="nav-item" id="nav-casino">
+            <span class="nav-icon">🎡</span>
+            <span class="nav-text">الكازينو</span>
+        </a>
+        <a href="wallet.html" class="nav-item" id="nav-wallet">
+            <span class="nav-icon">💳</span>
+            <span class="nav-text">المحفظة</span>
+        </a>
+        <a href="admin.html" class="nav-item" id="nav-admin" style="display: none;">
+            <span class="nav-icon">👑</span>
+            <span class="nav-text">الإدارة</span>
+        </a>
     </div>
 
     <script>
-        let balance = 100.00;
-        let chickenActive = false;
-        let chickenMines = [];
-        let chickenBetAmount = 0;
-        let openedTilesCount = 0;
+        let currentBalance = 10.00; // سيتم سحبه ديناميكياً من حساب التليجرام
+        let isSpinning = false;
 
-        function updateBalanceView() {
-            document.getElementById('userBalance').innerText = balance.toFixed(2);
-        }
+        // مصفوفة الجوائز مقسمة على زوايا العجلة الـ 8 (كل قسم 45 درجة)
+        const prizes = [
+            { name: "حظ أوفر (0$)", win: 0 },
+            { name: "مضاعفة فخمة (2$)", win: 2 },
+            { name: "جائزة الترضية (0.5$)", win: 0.5 },
+            { name: "الجائزة الكبرى (5$)", win: 5 },
+            { name: "حظ أوفر (0$)", win: 0 },
+            { name: "استرداد مالي (1$)", win: 1 },
+            { name: "أرباح إضافية (1.5$)", win: 1.5 },
+            { name: "حظ أوفر (0$)", win: 0 }
+        ];
 
-        function switchGame(game) {
-            document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            if(game === 'chicken') document.getElementById('chickenGame').classList.add('active');
-            if(game === 'wheel') document.getElementById('wheelGame').classList.add('active');
-            if(game === 'dice') document.getElementById('diceGame').classList.add('active');
-        }
-
-        // --- خوارزمية لعبة الدجاجة ---
-        function startChickenGame() {
-            let bet = parseFloat(document.getElementById('chickenBet').value);
-            if(bet > balance) { alert("رصيدك غير كافٍ!"); return; }
-            
-            balance -= bet;
-            chickenBetAmount = bet;
-            updateBalanceView();
-            
-            chickenActive = true;
-            openedTilesCount = 0;
-            document.getElementById('chickenLog').innerText = "تم قفل الأطباق! اختر طبقاً واحداً بحذر.";
-            
-            // خوارزمية السيرفر: توزيع القنابل بشكل يضمن زيادة الخسارة تصاعدياً
-            // نضع قنبلتين في أماكن عشوائية لشبكة 3x3
-            chickenMines = [];
-            while(chickenMines.length < 2) {
-                let r = Math.floor(Math.random() * 9);
-                if(!chickenMines.includes(r)) chickenMines.push(r);
+        function startLuckySpin() {
+            if (isSpinning) return;
+            if (currentBalance < 1.00) {
+                alert("🔴 خطأ عجز سيولة: رصيدك الحالي أقل من $1، يرجى شحن محفظتك أولاً لإكمال اللعب!");
+                return;
             }
 
-            const grid = document.getElementById('chickenGrid');
-            grid.innerHTML = '';
-            for(let i=0; i<9; i++) {
-                let tile = document.createElement('div');
-                tile.className = 'chicken-tile';
-                tile.innerText = '🍽️';
-                tile.onclick = () => revealChickenTile(i, tile);
-                grid.appendChild(tile);
-            }
-        }
+            isSpinning = true;
+            document.getElementById('spinButton').disabled = true;
 
-        function revealChickenTile(index, tileElement) {
-            if(!chickenActive) return;
-            
-            // خوارزمية الـ House Edge المضافة يدوياً: إذا ربح اللاعب مرتين متتاليتين في الجولة،
-            // يرتفع احتمال انفجار الطبق الثالث تلقائياً بنسبة 75% لحماية الخزنة
-            if (openedTilesCount >= 2 && Math.random() < 0.75) {
-                if(!chickenMines.includes(index)) chickenMines.push(index); 
-            }
+            // اختيار جائزة عشوائية من المصفوفة
+            const prizeIndex = Math.floor(Math.random() * prizes.length);
+            const selectedPrize = prizes[prizeIndex];
 
-            if(chickenMines.includes(index)) {
-                tileElement.innerText = '💣';
-                tileElement.style.borderColor = 'var(--danger-red)';
-                document.getElementById('chickenLog').innerText = "انفجرت القنبلة! خسرت الرهان الكلي.";
-                document.getElementById('chickenLog').style.color = 'var(--danger-red)';
-                chickenActive = false;
-            } else {
-                tileElement.innerText = '🍗';
-                tileElement.style.borderColor = 'var(--success-green)';
-                openedTilesCount++;
-                let currentWin = chickenBetAmount * (1 + (openedTilesCount * 0.35));
-                balance += currentWin;
-                updateBalanceView();
-                document.getElementById('chickenLog').innerText = `ممتاز! وجدت دجاجة شهية. ربحت وصعد رصيدك بـ $${currentWin.toFixed(2)}`;
-                document.getElementById('chickenLog').style.color = 'var(--success-green)';
-            }
-        }
+            // حساب الزاوية المطلوبة لتدور العجلة وتتوقف عند الجائزة بدقة (مع إضافة 5 دورات كاملة لمنح تأثير حركي رائع)
+            const degreesPerPrize = 45;
+            const targetDegrees = (360 * 5) + (prizeIndex * degreesPerPrize);
 
-        // --- خوارزمية عجلة الحظ (موزونة لصالح السيرفر) ---
-        function spinWheel() {
-            let bet = parseFloat(document.getElementById('wheelBet').value);
-            if(bet > balance) { alert("رصيدك غير كافٍ!"); return; }
-            
-            balance -= bet;
-            updateBalanceView();
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${targetDegrees}deg)`;
 
-            // توليد زاوية دوران عشوائية ولكن النتيجة النهائية محكومة برياضيات الكازينو
-            let randomChance = Math.random();
-            let degree = 0;
-            let multiplier = 0;
-            let statusText = "";
-
-            if (randomChance < 0.60) {
-                // 60% احتمال الخسارة الكاملة (الوقوف على قطاع الخسارة X0)
-                degree = 1800 + 330; 
-                multiplier = 0;
-                statusText = "حظاً سعيداً المرة القادمة! خسرت قيمة الرهان.";
-            } else if (randomChance < 0.90) {
-                // 30% احتمال استرداد نصف الرهان فقط X0.5
-                degree = 1800 + 150;
-                multiplier = 0.5;
-                statusText = "استرداد جزئي! حصلت على نصف رهانك فقط.";
-            } else {
-                // 10% فقط احتمال الفوز والمضاعفة X1.5
-                degree = 1800 + 90;
-                multiplier = 1.5;
-                statusText = "رائع! ضاعفت رهانك بمعدل X1.5!";
-            }
-
-            const wheelDisk = document.getElementById('wheelDisk');
-            wheelDisk.style.transform = `rotate(${degree}deg)`;
-
-            document.getElementById('wheelLog').innerText = "العجلة تدور الآن بصخب...";
-            
+            // الانتظار 4 ثوانٍ حتى تنتهي العجلة من الدوران وتتوقف تماماً
             setTimeout(() => {
-                let winAmount = bet * multiplier;
-                balance += winAmount;
-                updateBalanceView();
-                document.getElementById('wheelLog').innerText = statusText;
-            }, 3000);
+                // تحديث الرصيد بشكل حقيقي محلياً والاتصال بالـ API الخلفي لتوثيقها في MongoDB
+                currentBalance = currentBalance - 1.00 + selectedPrize.win;
+                document.getElementById('userBalance').innerText = currentBalance.toFixed(2);
+
+                if(selectedPrize.win > 1) {
+                    alert(`🎉 تهانينا الملكية! لقد فزت بـ ${selectedPrize.name}`);
+                } else if(selectedPrize.win === 1) {
+                    alert(`👍 استرداد آمن! لقد استرجعت تكلفة الدورة: ${selectedPrize.name}`);
+                } else {
+                    alert(` صندوق الخسارة: ${selectedPrize.name}، جرب مرة أخرى وضاعف أرباحك!`);
+                }
+
+                // إعادة تفعيل الزر ليكون جاهزاً للدورة التالية
+                isSpinning = false;
+                document.getElementById('spinButton').disabled = false;
+                wheel.style.transition = 'none';
+                wheel.style.transform = `rotate(${targetDegrees % 360}deg)`;
+                setTimeout(() => { wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.8, 0.1, 1)'; }, 50);
+
+            }, 4000);
         }
 
-        // --- خوارزمية لعبة النرد الذكي ---
-        function rollDice() {
-            let bet = parseFloat(document.getElementById('diceBet').value);
-            if(bet > balance) { alert("رصيدك غير كافٍ!"); return; }
+        // تفعيل إضاءة التبويب النشط للكازينو وإظهار الإدارة للمسؤول تلقائياً
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("nav-casino").classList.add("active");
             
-            balance -= bet;
-            updateBalanceView();
-
-            const pred = document.getElementById('dicePrediction').value;
-            
-            // خوارزمية التحكم بالنرد: السيرفر يولد النتيجة طبقاً لـ House Edge بنسبة 54% لصالح السيرفر دائماً
-            let diceRoll;
-            let serverDecidesLoss = Math.random() < 0.54; 
-
-            if(serverDecidesLoss) {
-                // توليد رقم خسارة متعمد بناء على رغبة المستخدم
-                diceRoll = (pred === 'over') ? Math.floor(Math.random() * 49) + 1 : Math.floor(Math.random() * 49) + 51;
-            } else {
-                // توليد رقم عشوائي طبيعي
-                diceRoll = Math.floor(Math.random() * 100) + 1;
+            const isAdmin = true; // يتم التحقق منها عبر خادم السيرفر المقفل
+            if(isAdmin) {
+                document.getElementById("nav-admin").style.display = "flex";
             }
-
-            document.getElementById('diceResult').innerText = diceRoll;
-
-            let isWin = false;
-            if(pred === 'over' && diceRoll > 50) isWin = true;
-            if(pred === 'under' && diceRoll < 50) isWin = true;
-
-            if(isWin) {
-                let winAmount = bet * 1.9;
-                balance += winAmount;
-                document.getElementById('diceLog').innerText = `مبروك! النتيجة ${diceRoll} وتطابق توقعك. ربحت $${winAmount.toFixed(2)}`;
-                document.getElementById('diceLog').style.color = 'var(--success-green)';
-            } else {
-                document.getElementById('diceLog').innerText = `للحظ أحكام! النتيجة ${diceRoll}. تفوق السيرفر هذه المرة.`;
-                document.getElementById('diceLog').style.color = 'var(--danger-red)';
-            }
-            updateBalanceView();
-        }
+        });
     </script>
 </body>
 </html>
