@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 // جلب المتغيرات السرية من بيئة Render
-const TOKEN = process.env.TELEGRAM_TOKEN;
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MONGO_URI = process.env.MONGO_URI;
 const WEB_APP_URL = process.env.WEB_APP_URL;
 const PORT = process.env.PORT || 3000;
