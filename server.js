@@ -7,24 +7,29 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-// 1. الاتصال الآمن والمستقر بقاعدة البيانات
+// الاتصال بقاعدة البيانات
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI)
     .then(() => console.log('Connected to MongoDB Atlas Successfully! ✅'))
     .catch(err => console.error('Database connection error ❌:', err));
 
-// 2. بناء قواعد البيانات (Schemas) للمستخدمين والعمليات
+// القواعد والبيانات المتكاملة للسيستم
 const userSchema = new mongoose.Schema({
     fullName: String,
-    email: { type: String, unique: true },
+    email: { type: String, unique: true, required: true },
     phone: String,
     password: String,
-    balance: { type: Number, default: 0.00 },
+    balance: { type: Number, default: 0.000660 }, // الرصيد الافتراضي المبدئي المتداول
     miningSpeed: { type: Number, default: 1.00 }
 });
 const User = mongoose.model('User', userSchema);
 
-// 3. مسارات الاستجابة وتوجيه المستخدمين (Routes)
+// مسار افتراضي لتوجيه الزوار إلى واجهة تسجيل الدخول أولاً
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+// ممرات التسجيل والتوثيق
 app.post('/api/auth/register', async (req, res) => {
     try {
         const newUser = new User(req.body);
@@ -45,8 +50,8 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// تشغيل خادم الويب
+// تشغيل الخادم
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Backend Server running on port ${PORT} 🚀`);
+    console.log(`Nexora Core Online on port ${PORT} 🚀`);
 });
