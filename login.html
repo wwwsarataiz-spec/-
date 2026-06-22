@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora - تسجيل الدخول الملكي</title>
+    <style>
+        :root {
+            --bg-main: #0c0914;
+            --bg-card: #151124;
+            --gold-primary: #d4af37;
+            --yellow-accent: #ffdf00;
+            --text-main: #f1ebd9;
+            --text-muted: #a39bb4;
+            --input-bg: #1d1833;
+            --border-color: rgba(212, 175, 55, 0.25);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .login-container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 30px 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.6); }
+        .brand-title { color: var(--gold-primary); font-size: 24px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        .brand-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 25px; }
+        
+        .form-group { text-align: right; margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; padding-right: 5px; }
+        .form-group input { width: 100%; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: white; font-size: 14px; text-align: right; outline: none; transition: 0.3s; }
+        .form-group input:focus { border-color: var(--yellow-accent); }
+        
+        .submit-btn { background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary)); color: #0c0914; border: none; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
+        .submit-btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="brand-title">NEXORA PREMIUM</div>
+        <div class="brand-subtitle">بوابة تفعيل الحساب الاستثماري ومحرك التعدين</div>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label>معرّف التليجرام الخاص بك (Telegram ID)</label>
+                <input type="text" id="telegramId" placeholder="جاري الجلب تلقائياً أو أدخله يدوياً..." required>
+            </div>
+            <div class="form-group">
+                <label>الاسم الكامل</label>
+                <input type="text" id="fullName" placeholder="أدخل اسمك الثلاثي" required>
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف (مع رمز الدولة)</label>
+                <input type="tel" id="phone" placeholder="+967..." required>
+            </div>
+            
+            <button type="submit" class="submit-btn">🔐 إنشاء الحساب وتفعيل البونص</button>
+        </form>
+    </div>
+
+    <script>
+        // محاولة جلب المعرف تلقائياً من بيئة تليجرام WebApp إذا كان مفتوحاً داخل التطبيق
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const webapp = window.Telegram.WebApp;
+                webapp.ready();
+                if (webapp.initDataUnsafe && webapp.initDataUnsafe.user) {
+                    document.getElementById('telegramId').value = webapp.initDataUnsafe.user.id;
+                }
+            }
+        } catch (e) { console.log("خارج بيئة التليجرام"); }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const telegramId = document.getElementById('telegramId').value;
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telegramId, fullName, phone })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = 'index.html'; // التوجه لواجهة التعدين بعد النجاح
+                } else {
+                    alert("⚠️ " + data.message);
+                }
+            } catch (err) {
+                alert("❌ فشل الاتصال بالسيرفر، تأكد من تشغيل المشروع كلياً.");
+            }
+        });
+    </script>
+</body>
+</html>
