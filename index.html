@@ -3,155 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Premium Portal</title>
+    <title>Nexora Premium Mining Cloud</title>
     <style>
-        @page {
-            size: A4;
-            margin: 15mm 12mm;
-            background-color: #0b0813;
-        }
-        
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0b0813;
-            color: #f1ebd9;
-            font-size: 11pt;
-            line-height: 1.4;
-        }
-
-        .header {
-            text-align: center;
-            padding: 10px 0 25px 0;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            color: #d4af37;
-            font-size: 22pt;
-            margin: 0 0 8px 0;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .header p {
-            color: #a39bb4;
-            font-size: 11pt;
-            margin: 0;
-        }
-
-        .section-title {
-            color: #d4af37;
-            font-size: 14pt;
-            border-left: 4px solid #d4af37;
-            padding-left: 10px;
-            margin: 25px 0 15px 0;
-            font-weight: bold;
-        }
-        
-        html[dir="rtl"] .section-title {
-            border-left: none;
-            border-right: 4px solid #d4af37;
-            padding-left: 0;
-            padding-right: 10px;
-        }
-
-        p.intro {
-            color: #c5bed4;
-            margin-bottom: 20px;
-        }
-
-        .code-container {
-            background-color: #130f22;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 6px;
-            padding: 15px;
-            margin: 15px 0;
-            position: relative;
-        }
-
-        pre {
-            margin: 0;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 9.5pt;
-            color: #f8f6f0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        .note-box {
-            background-color: #1a152e;
-            border-right: 4px solid #9b51e0;
-            padding: 12px 15px;
-            margin: 20px 0;
-            border-radius: 0 6px 6px 0;
-        }
-        
-        html[dir="rtl"] .note-box {
-            border-right: none;
-            border-left: 4px solid #9b51e0;
-            border-radius: 6px 0 0 6px;
-        }
-
-        .note-box h4 {
-            margin: 0 0 5px 0;
-            color: #b57cff;
-            font-size: 11pt;
-        }
-
-        .note-box p {
-            margin: 0;
-            color: #c5bed4;
-            font-size: 10pt;
-        }
-
-        .instruction-list {
-            margin: 15px 0;
-            padding-right: 20px;
-        }
-        
-        html[dir="ltr"] .instruction-list {
-            padding-right: 0;
-            padding-left: 20px;
-        }
-
-        .instruction-list li {
-            margin-bottom: 10px;
-            color: #f1ebd9;
-        }
-        
-        .instruction-list strong {
-            color: #e6c65b;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h1>Nexora Premium UI Template</h1>
-        <p>واجهة دخول وتسجيل احترافية لـ Telegram Web App (عربي / English)</p>
-    </div>
-
-    <p class="intro">
-        هذا هو الكود البرمجي الكامل والموثوق 100% للواجهة الأمامية الفخمة التي طلبتها. تم تصميمه بأسلوب يعتمد على خلفية داكنة مريحة جداً للعين (Deep Violet/Dark Slate) مع لمسات وتفاصيل ذهبية وصفراء ملكية مصقولة لتمنح التطبيق طابعاً فخماً وثميناً. الواجهة تدعم التبديل الفوري بين اللغتين العربية والإنجليزية، وتضم كافة الشاشات المطلوبة (تسجيل الدخول، إنشاء حساب، واستعادة الحساب) في ملف واحد ليسهل عليك تشغيله مباشرة عبر الهاتف.
-    </p>
-
-    <div class="section-title">كود الواجهة الكامل (index.html)</div>
-    
-    <div class="code-container">
-        <pre>&lt;!DOCTYPE html&gt;
-&lt;html lang="ar" dir="rtl"&gt;
-&lt;head&gt;
-    &lt;meta charset="UTF-8"&gt;
-    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-    &lt;title&gt;Premium Authentication Portal&lt;/title&gt;
-    &lt;style&gt;
         :root {
             --bg-main: #0c0914;
             --bg-card: #151124;
@@ -162,7 +15,7 @@
             --text-muted: #a39bb4;
             --input-bg: #1d1833;
             --border-color: rgba(212, 175, 55, 0.25);
-            --border-focus: rgba(255, 223, 0, 0.7);
+            --success-green: #00cc66;
         }
 
         * {
@@ -176,110 +29,77 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-main);
-            display: block;
-            padding: 20px;
+            padding: 15px;
             min-height: 100vh;
         }
 
-        .top-bar {
-            display: table;
-            width: 100%;
-            margin-bottom: 30px;
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .brand-title {
-            display: table-cell;
-            text-align: right;
-            font-size: 22px;
-            font-weight: bold;
+        .dashboard-header h1 {
             color: var(--gold-primary);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 24px;
+            letter-spacing: 1px;
         }
 
-        html[dir="ltr"] .brand-title {
-            text-align: left;
+        .balance-card {
+            background: linear-gradient(135deg, var(--bg-card), #1e183a);
+            border: 1px solid var(--gold-primary);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
         }
 
-        .lang-switch-btn {
-            display: table-cell;
-            text-align: left;
+        .balance-card h2 {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
         }
 
-        html[dir="ltr"] .lang-switch-btn {
-            text-align: right;
-        }
-
-        .lang-btn {
-            background: linear-gradient(135deg, var(--gold-primary), #aa841c);
-            color: #0c0914;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 20px;
+        .main-balance {
+            font-size: 32px;
             font-weight: bold;
-            cursor: pointer;
-            font-size: 12px;
-            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+            color: var(--yellow-accent);
+            font-family: 'Courier New', Courier, monospace;
         }
 
-        .auth-container {
+        .section-title {
+            color: var(--gold-light);
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mining-container {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 25px 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255,255,255,0.05);
-            max-width: 450px;
-            margin: 0 auto;
-        }
-
-        .form-screen {
-            display: none;
-        }
-
-        .form-screen.active {
-            display: block;
-        }
-
-        h2 {
-            font-size: 20px;
-            color: var(--gold-light);
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .screen-desc {
-            font-size: 13px;
-            color: var(--text-muted);
+            padding: 20px;
             margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .input-group {
-            margin-bottom: 18px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            color: var(--gold-primary);
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-
-        .input-group input {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 12px 15px;
+        .mining-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--input-bg);
+            padding: 12px;
             border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
+            font-size: 13px;
         }
 
-        .input-group input:focus {
-            border-color: var(--border-focus);
-            box-shadow: 0 0 8px rgba(255, 223, 0, 0.2);
-            background-color: #211b3b;
+        .mining-stats span {
+            color: var(--gold-primary);
         }
 
         .action-btn {
@@ -287,280 +107,209 @@
             background: linear-gradient(135deg, var(--yellow-accent), var(--gold-primary));
             color: #0c0914;
             border: none;
-            padding: 14px;
+            padding: 15px;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
             box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-            transition: transform 0.1s ease;
+            transition: all 0.2s ease;
         }
 
-        .action-btn:active {
-            transform: scale(0.98);
-        }
-
-        .links-container {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .links-container a {
-            color: var(--gold-light);
-            text-decoration: none;
-            margin: 0 8px;
-            font-weight: 500;
-        }
-
-        .links-container a:hover {
-            color: var(--yellow-accent);
-            text-decoration: underline;
-        }
-
-        .divider {
+        .action-btn:disabled {
+            background: #2a2442;
             color: var(--text-muted);
-            opacity: 0.5;
+            border: 1px solid #3d355e;
+            box-shadow: none;
+            cursor: not-allowed;
         }
-    &lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
 
-    &lt;div class="top-bar"&gt;
-        &lt;div class="brand-title" id="brandText"&gt;NEXORA&lt;/div&gt;
-        &lt;div class="lang-switch-btn"&gt;
-            &lt;button class="lang-btn" onclick="toggleLanguage()" id="langBtn"&gt;English&lt;/button&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
+        .calc-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
 
-    &lt;div class="auth-container"&gt;
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--gold-primary);
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            text-align: center;
+        }
+
+        .input-group input:focus {
+            border-color: var(--yellow-accent);
+        }
+
+        .results-panel {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid var(--gold-primary);
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .result-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight-green {
+            color: var(--success-green);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <h1>NEXORA CLOUD MINING</h1>
+    </div>
+
+    <!-- لوحة الرصيد الإجمالي الحية -->
+    <div class="balance-card">
+        <h2>إجمالي الرصيد المُعدّن (USD)</h2>
+        <div class="main-balance" id="userBalance">0.00000000</div>
+    </div>
+
+    <!-- قسم التعدين السحابي المجاني -->
+    <div class="section-title">⛏️ جلسة التعدين الحرة (24H)</div>
+    <div class="mining-container">
+        <div class="mining-stats">
+            <div>الوضع: <span id="miningStatus">متوقف</span></div>
+            <div>العائد اليومي: <span>0.0050 USD</span></div>
+        </div>
+        <div class="mining-stats" style="margin-top: -10px;">
+            <div>الوقت المتبقي: <span id="timeLeft">24:00:00</span></div>
+        </div>
+        <button class="action-btn" id="startMiningBtn" onclick="startFreeMining()">تفعيل التعدين المجاني</button>
+    </div>
+
+    <!-- قسم الاستثمار والآلة الحاسبة الذكية -->
+    <div class="section-title">📊 حاسبة الاستثمار وهامش الأرباح</div>
+    <div class="calc-box">
+        <div class="input-group">
+            <label for="investAmount">أدخل مبلغ الاستثمار المطلوب (يبدأ من 3$)</label>
+            <input type="number" id="investAmount" value="3" min="3" oninput="calculateInvestment()">
+        </div>
+
+        <div class="results-panel">
+            <div class="result-row">
+                <div>نسبة الربح اليومية المخصصة:</div>
+                <div id="calcRate" class="highlight-green">3.00%</div>
+            </div>
+            <div class="result-row">
+                <div>الربح اليومي الصافي:</div>
+                <div id="dailyProfit" style="color: var(--yellow-accent);">0.09 USD</div>
+            </div>
+            <div class="result-row">
+                <div>الربح الشهري المتوقع (30 يوم):</div>
+                <div id="monthlyProfit" style="color: var(--gold-light);">2.70 USD</div>
+            </div>
+        </div>
+        <button class="action-btn" style="margin-top: 15px; background: linear-gradient(135deg, #00cc66, #00994d); color: white;">شراء خطة التعدين المدفوعة</button>
+    </div>
+
+    <script>
+        let balance = 0.00000000;
+        let isMining = false;
+        let miningInterval;
+        let countdownInterval;
         
-        &lt;!-- شاشة تسجيل الدخول --&gt;
-        &lt;div id="loginScreen" class="form-screen active"&gt;
-            &lt;h2 id="loginTitle"&gt;تسجيل الدخول&lt;/h2&gt;
-            &lt;p class="screen-desc" id="loginDesc"&gt;أدخل اسمك وكلمة المرور للوصول إلى حسابك.&lt;/p&gt;
-            
-            &lt;form onsubmit="handleLogin(event)"&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="loginName" id="lblLoginName"&gt;الاسم المستعار أو الاسم الثلاثي&lt;/label&gt;
-                    &lt;input type="text" id="loginName" required&gt;
-                &lt;/div&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="loginPassword" id="lblLoginPass"&gt;كلمة السر&lt;/label&gt;
-                    &lt;input type="password" id="loginPassword" required&gt;
-                &lt;/div&gt;
-                &lt;button type="submit" class="action-btn" id="btnLogin"&gt;تسجيل الدخول&lt;/button&gt;
-            &lt;/form&gt;
-            
-            &lt;div class="links-container"&gt;
-                &lt;a href="#" onclick="switchScreen('registerScreen')" id="lnkGoRegister"&gt;حساب جديد&lt;/a&gt;
-                &lt;span class="divider"&gt;|&lt;/span&gt;
-                &lt;a href="#" onclick="switchScreen('forgotScreen')" id="lnkGoForgot"&gt;استعادة الحساب&lt;/a&gt;
-            &lt;/div&gt;
-        &lt;/div&gt;
+        // كمية التعدين لكل ثانية للحصول على 0.005 في 24 ساعة بالضبط
+        const rewardPerSecond = 0.005 / 86400; 
 
-        &lt;!-- شاشة إنشاء حساب جديد --&gt;
-        &lt;div id="registerScreen" class="form-screen"&gt;
-            &lt;h2 id="registerTitle"&gt;إنشاء حساب جديد&lt;/h2&gt;
-            &lt;p class="screen-desc" id="registerDesc"&gt;قم بملء البيانات التالية لتأسيس حسابك الاستثماري الفخم.&lt;/p&gt;
+        function startFreeMining() {
+            if (isMining) return;
             
-            &lt;form onsubmit="handleRegister(event)"&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="regFullName" id="lblRegName"&gt;الاسم الثلاثي&lt;/label&gt;
-                    &lt;input type="text" id="regFullName" required&gt;
-                &lt;/div&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="regPhone" id="lblRegPhone"&gt;رقم الجوال (مع رمز البلد)&lt;/label&gt;
-                    &lt;input type="tel" id="regPhone" required&gt;
-                &lt;/div&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="regEmail" id="lblRegEmail"&gt;البريد الإلكتروني&lt;/label&gt;
-                    &lt;input type="email" id="regEmail" required&gt;
-                &lt;/div&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="regPassword" id="lblRegPass"&gt;كلمة السر&lt;/label&gt;
-                    &lt;input type="password" id="regPassword" required&gt;
-                &lt;/div&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="regConfirmPassword" id="lblRegConfirm"&gt;تأكيد كلمة السر&lt;/label&gt;
-                    &lt;input type="password" id="regConfirmPassword" required&gt;
-                &lt;/div&gt;
-                &lt;button type="submit" class="action-btn" id="btnRegister"&gt;تأكيد التسجيل&lt;/button&gt;
-            &lt;/form&gt;
+            isMining = true;
+            document.getElementById('startMiningBtn').disabled = true;
+            document.getElementById('miningStatus').innerText = "يعمل الآن...";
+            document.getElementById('miningStatus').style.color = "var(--success-green)";
             
-            &lt;div class="links-container"&gt;
-                &lt;a href="#" onclick="switchScreen('loginScreen')" id="lnkBackLogin1"&gt;لديك حساب بالفعل؟ سجل دخولك&lt;/a&gt;
-            &lt;/div&gt;
-        &lt;/div&gt;
+            let totalSeconds = 86400; // 24 ساعة
 
-        &lt;!-- شاشة استعادة الحساب --&gt;
-        &lt;div id="forgotScreen" class="form-screen"&gt;
-            &lt;h2 id="forgotTitle"&gt;استعادة الحساب&lt;/h2&gt;
-            &lt;p class="screen-desc" id="forgotDesc"&gt;أدخل بياناتك المسجلة لإرسال رابط أو رمز تعيين كلمة السر.&lt;/p&gt;
-            
-            &lt;form onsubmit="handleForgot(event)"&gt;
-                &lt;div class="input-group"&gt;
-                    &lt;label for="forgotEmail" id="lblForgotEmail"&gt;البريد الإلكتروني أو رقم الهاتف&lt;/label&gt;
-                    &lt;input type="text" id="forgotEmail" required&gt;
-                &lt;/div&gt;
-                &lt;button type="submit" class="action-btn" id="btnForgot"&gt;إرسال تعليمات الاستعادة&lt;/button&gt;
-            &lt;/form&gt;
-            
-            &lt;div class="links-container"&gt;
-                &lt;a href="#" onclick="switchScreen('loginScreen')" id="lnkBackLogin2"&gt;العودة لتسجيل الدخول&lt;/a&gt;
-            &lt;/div&gt;
-        &lt;/div&gt;
+            // عداد الرصيد الحي (يتحدث كل ثانية)
+            miningInterval = setInterval(() => {
+                balance += rewardPerSecond;
+                document.getElementById('userBalance').innerText = balance.toFixed(8);
+            }, 1000);
 
-    &lt;/div&gt;
-
-    &lt;script&gt;
-        let currentLang = 'ar';
-
-        const dictionary = {
-            ar: {
-                brand: "NEXORA",
-                langBtn: "English",
-                loginTitle: "تسجيل الدخول",
-                loginDesc: "أدخل اسمك وكلمة المرور للوصول إلى حسابك.",
-                lblLoginName: "الاسم المستعار أو الاسم الثلاثي",
-                lblLoginPass: "كلمة السر",
-                btnLogin: "تسجيل الدخول",
-                lnkGoRegister: "حساب جديد",
-                lnkGoForgot: "استعادة الحساب",
-                
-                registerTitle: "إنشاء حساب جديد",
-                registerDesc: "قم بملء البيانات التالية لتأسيس حسابك الاستثماري الفخم.",
-                lblRegName: "الاسم الثلاثي",
-                lblRegPhone: "رقم الجوال (مع رمز البلد)",
-                lblRegEmail: "البريد الإلكتروني",
-                lblRegPass: "كلمة السر",
-                lblRegConfirm: "تأكيد كلمة السر",
-                btnRegister: "تأكيد التسجيل",
-                lnkBackLogin1: "لديك حساب بالفعل؟ سجل دخولك",
-                
-                forgotTitle: "استعادة الحساب",
-                forgotDesc: "أدخل بياناتك المسجلة لإرسال رابط أو رمز تعيين كلمة السر.",
-                lblForgotEmail: "البريد الإلكتروني أو رقم الهاتف",
-                btnForgot: "إرسال تعليمات الاستعادة",
-                lnkBackLogin2: "العودة لتسجيل الدخول"
-            },
-            en: {
-                brand: "NEXORA",
-                langBtn: "العربية",
-                loginTitle: "Sign In",
-                loginDesc: "Enter your name and password to access your account.",
-                lblLoginName: "Username or Full Name",
-                lblLoginPass: "Password",
-                btnLogin: "Sign In",
-                lnkGoRegister: "New Account",
-                lnkGoForgot: "Recover Account",
-                
-                registerTitle: "Create New Account",
-                registerDesc: "Fill in the details below to establish your premium investment account.",
-                lblRegName: "Full Name (Triple)",
-                lblRegPhone: "Mobile Number (with country code)",
-                lblRegEmail: "Email Address",
-                lblRegPass: "Password",
-                lblRegConfirm: "Confirm Password",
-                btnRegister: "Confirm Registration",
-                lnkBackLogin1: "Already have an account? Sign In",
-                
-                forgotTitle: "Account Recovery",
-                forgotDesc: "Enter your registered details to send password reset instructions.",
-                lblForgotEmail: "Email Address or Phone Number",
-                btnForgot: "Send Recovery Instructions",
-                lnkBackLogin2: "Back to Sign In"
-            }
-        };
-
-        function switchScreen(screenId) {
-            document.querySelectorAll('.form-screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
+            // عداد الوقت المتبقي تنازلياً
+            countdownInterval = setInterval(() => {
+                totalSeconds--;
+                if (totalSeconds <= 0) {
+                    clearInterval(miningInterval);
+                    clearInterval(countdownInterval);
+                    isMining = false;
+                    document.getElementById('startMiningBtn').disabled = false;
+                    document.getElementById('miningStatus').innerText = "منتهي (بحاجة لإعادة تفعيل)";
+                    document.getElementById('miningStatus').style.color = "var(--text-muted)";
+                    document.getElementById('timeLeft').innerText = "24:00:00";
+                } else {
+                    let hrs = Math.floor(totalSeconds / 3600);
+                    let mins = Math.floor((totalSeconds % 3600) / 60);
+                    let secs = totalSeconds % 60;
+                    document.getElementById('timeLeft').innerText = 
+                        (hrs < 10 ? "0" : "") + hrs + ":" + 
+                        (mins < 10 ? "0" : "") + mins + ":" + 
+                        (secs < 10 ? "0" : "") + secs;
+                }
+            }, 1000);
         }
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        // خوارزمية احتساب أرباح الهامش الاستثماري بدقة وأمان
+        function calculateInvestment() {
+            const amount = parseFloat(document.getElementById('investAmount').value);
             
-            // تحديث اتجاه الصفحة واللغة
-            if (currentLang === 'ar') {
-                document.documentElement.setAttribute('dir', 'rtl');
-                document.documentElement.setAttribute('lang', 'ar');
-            } else {
-                document.documentElement.setAttribute('dir', 'ltr');
-                document.documentElement.setAttribute('lang', 'en');
-            }
-
-            // تحديث نصوص الواجهة
-            document.getElementById('langBtn').innerText = dictionary[currentLang].langBtn;
-            document.getElementById('loginTitle').innerText = dictionary[currentLang].loginTitle;
-            document.getElementById('loginDesc').innerText = dictionary[currentLang].loginDesc;
-            document.getElementById('lblLoginName').innerText = dictionary[currentLang].lblLoginName;
-            document.getElementById('lblLoginPass').innerText = dictionary[currentLang].lblLoginPass;
-            document.getElementById('btnLogin').innerText = dictionary[currentLang].btnLogin;
-            document.getElementById('lnkGoRegister').innerText = dictionary[currentLang].lnkGoRegister;
-            document.getElementById('lnkGoForgot').innerText = dictionary[currentLang].lnkGoForgot;
-
-            document.getElementById('registerTitle').innerText = dictionary[currentLang].registerTitle;
-            document.getElementById('registerDesc').innerText = dictionary[currentLang].registerDesc;
-            document.getElementById('lblRegName').innerText = dictionary[currentLang].lblRegName;
-            document.getElementById('lblRegPhone').innerText = dictionary[currentLang].lblRegPhone;
-            document.getElementById('lblRegEmail').innerText = dictionary[currentLang].lblRegEmail;
-            document.getElementById('lblRegPass').innerText = dictionary[currentLang].lblRegPass;
-            document.getElementById('lblRegConfirm').innerText = dictionary[currentLang].lblRegConfirm;
-            document.getElementById('btnRegister').innerText = dictionary[currentLang].btnRegister;
-            document.getElementById('lnkBackLogin1').innerText = dictionary[currentLang].lnkBackLogin1;
-
-            document.getElementById('forgotTitle').innerText = dictionary[currentLang].forgotTitle;
-            document.getElementById('forgotDesc').innerText = dictionary[currentLang].forgotDesc;
-            document.getElementById('lblForgotEmail').innerText = dictionary[currentLang].lblForgotEmail;
-            document.getElementById('btnForgot').innerText = dictionary[currentLang].btnForgot;
-            document.getElementById('lnkBackLogin2').innerText = dictionary[currentLang].lnkBackLogin2;
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const name = document.getElementById('loginName').value;
-            const pass = document.getElementById('loginPassword').value;
-            alert(currentLang === 'ar' ? 'تم إرسال بيانات الدخول مع الاسم: ' + name : 'Login submitted for: ' + name);
-        }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            const pass = document.getElementById('regPassword').value;
-            const confirmPass = document.getElementById('regConfirmPassword').value;
-            
-            if (pass !== confirmPass) {
-                alert(currentLang === 'ar' ? 'كلمات السر غير متطابقة!' : 'Passwords do not match!');
+            if (isNaN(amount) || amount < 3) {
+                document.getElementById('calcRate').innerText = "0.00%";
+                document.getElementById('dailyProfit').innerText = "0.00 USD";
+                document.getElementById('monthlyProfit').innerText = "0.00 USD";
                 return;
             }
-            alert(currentLang === 'ar' ? 'تم إرسال بيانات التسجيل بنجاح' : 'Registration data sent successfully');
+
+            // النسبة الأساسية 3%
+            let baseRate = 0.03; 
+            
+            // خوارزمية زيادة الهامش التدريجي الصغير جداً للمبالغ الكبيرة لحماية البوت وجذب العميل
+            // لكل 1000 دولار زيادة، يرتفع الهامش بنسبة 0.05% فقط وبحد أقصى مضاف 0.5%
+            if (amount > 100) {
+                let bonus = Math.min(0.005, (amount / 10000)); 
+                baseRate += bonus;
+            }
+
+            const daily = amount * baseRate;
+            const monthly = daily * 30;
+
+            document.getElementById('calcRate').innerText = (baseRate * 100).toFixed(2) + "%";
+            document.getElementById('dailyProfit').innerText = daily.toFixed(2) + " USD";
+            document.getElementById('monthlyProfit').innerText = monthly.toFixed(2) + " USD";
         }
-
-        function handleForgot(e) {
-            e.preventDefault();
-            const contact = document.getElementById('forgotEmail').value;
-            alert(currentLang === 'ar' ? 'تم إرسال تعليمات الاستعادة إلى: ' + contact : 'Recovery instructions sent to: ' + contact);
-        }
-    &lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;</pre>
-    </div>
-
-    <div class="section-title">خطوات التشغيل الفوري عبر الهاتف (بدون حاسوب)</div>
-    <ul class="instruction-list">
-        <li><strong>خطوة 1:</strong> افتح مستودعك الخاص على متصفح الهاتف في موقع <strong>GitHub</strong>.</li>
-        <li><strong>خطوة 2:</strong> قم بإنشاء ملف جديد باسم <code>index.html</code>.</li>
-        <li><strong>خطوة 3:</strong> انسخ الكود البرمجي الموجود في الصندوق البرمجي أعلاه بالكامل والصفه داخل الملف ثم قم بحفظ التعديلات (Commit).</li>
-        <li><strong>خطوة 4:</strong> توجه إلى منصة <strong>Render</strong> المربوطة بمستودعك، وسيتم سحب الملف تلقائياً وتحديث واجهتك على السيرفر لتصبح حية ومتاحة 100%.</li>
-    </ul>
-
-    <div class="note-box">
-        <h4>تنويه بخصوص الفخامة البصرية المريحة</h4>
-        <p>تم اختيار درجة لون الخلفية بعناية فائقة لتكون داكنة مائلة للبنفسجي العميق، مما يبرز الألوان الذهبية والصفراء البراقة للأزرار والحقول دون إرهاق العين أو التسبب في توهج عالي أثناء التصفح من شاشات الهواتف المحمولة.</p>
-    </div>
-
+    </script>
 </body>
 </html>
