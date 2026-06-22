@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// الاتصال المباشر بقاعدة البيانات
+// الاتصال بقاعدة البيانات
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI)
     .then(() => console.log('Connected to MongoDB Atlas Successfully! ✅'))
@@ -23,19 +23,20 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// توجيهات المسارات لمنع التداخل مع الكازينو القديم
+// ===== التعديل هنا: كل المسارات تذهب إلى index.html =====
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'login.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+// ===== انتهى التعديل =====
 
-// خدمة ملفات التنسيق والصور بشكل فرعي لضمان عدم الكاش
+// خدمة ملفات التنسيق والصور
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// واجهات الـ API للتوثيق
+// واجهات الـ API (لم نلمسها)
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { fullName, email, phone, password } = req.body;
