@@ -461,10 +461,7 @@
       </div>
     </div>
 
-    <div class="card">
-      <h4 style="color:var(--gold); margin-bottom:8px;"><i class="fas fa-user-check"></i> طلبات التسجيل المعلقة للتفعيل</h4>
-      <div id="pendingUsersList"></div>
-    </div>
+    <!-- تم حذف قسم طلبات التسجيل المعلقة -->
 
     <div class="card">
       <h4 style="color:var(--gold); margin-bottom:4px;"><i class="fas fa-sliders-h"></i> هندسة خوارزمية الكازينو (House Edge)</h4>
@@ -534,7 +531,6 @@ let currentBalance = 0.000660;
 let casinoBalance = 0.000000;
 let adViews = 0;
 let users = [];
-let pendingUsers = [];
 let withdrawals = [];
 let adminRevenue = 0;
 let flexMiningPlans = [];
@@ -542,9 +538,8 @@ let points = 0;
 let exchangeRate = 1.00; // 1000 نقطة = 1 USDT
 let houseEdge = 5; 
 let pendingAds = [];
-let currentRisk = 'low'; // مستوى الصعوبة التلقائي
+let currentRisk = 'low';
 
-// خطط افتراضية أولية
 let plans = [
   { name: 'VIP 1 - التعدين البرونزي', min: 10, max: 50, profit: 2.0, duration: 30 },
   { name: 'VIP 2 - التعدين الذهبي', min: 51, max: 200, profit: 3.0, duration: 45 },
@@ -553,7 +548,6 @@ let plans = [
 let isLoginMode = true;
 let currentUser = null;
 
-// مستخدم مسؤول افتراضي لأغراض لوحة الإدارة والاختبار
 const adminUser = {
   _id: 'admin_root',
   fullName: 'الإدارة العامة',
@@ -563,12 +557,12 @@ const adminUser = {
   casinoBalance: 100.0,
   points: 50000,
   approved: true,
-  isGiftedPoints: false // الإدارة لا يطبق عليها فخ النقاط
+  isGiftedPoints: false
 };
 users.push(adminUser);
 
 // ================================================================
-// 2. معالجة التسجيل وتفعيل الحسابات المباشرة
+// 2. معالجة التسجيل وتفعيل الحسابات المباشرة (بدون موافقة)
 // ================================================================
 function toggleAuthMode() {
   isLoginMode = !isLoginMode;
@@ -604,10 +598,6 @@ function handleAuth() {
   if (isLoginMode) {
     const user = users.find(u => u.email === email && u.password === password);
     if (user) {
-      if (user.approved === false) {
-        errorEl.textContent = '❌ حسابك معلق بانتظار موافقة الإدارة من لوحة التحكم العليا.';
-        return;
-      }
       currentUser = user;
       localStorage.setItem('nexora_user', JSON.stringify(user));
       document.getElementById('loginOverlay').style.display = 'none';
@@ -626,18 +616,20 @@ function handleAuth() {
       errorEl.textContent = '❌ هذا البريد الإلكتروني مستخدم بالفعل داخل المنصة';
       return;
     }
+    // تسجيل جديد مع تفعيل فوري (approved: true)
     const newUser = {
       _id: 'user_' + Date.now(),
       fullName, email, phone, password,
       balance: 0.000660,
       casinoBalance: 0.0,
       points: 0,
-      approved: false,
+      approved: true,        // تم التعديل: تفعيل فوري
       isGiftedPoints: false
     };
     users.push(newUser);
-    pendingUsers.push(newUser);
-    alert('✅ تم تسجيل بياناتك بنجاح! توجه الآن للوحة الإدارة لتفعيل الحساب والموافقة عليه.');
+    // لا نضيفه إلى pendingUsers (تم إلغاء هذه الخاصية)
+
+    alert('✅ تم إنشاء حسابك بنجاح! يمكنك الدخول فوراً والبدء في الاستثمار واللعب.');
     toggleAuthMode();
     document.getElementById('loginEmail').value = email;
     document.getElementById('loginPassword').value = password;
@@ -648,7 +640,7 @@ function handleAuth() {
 function syncUserInterface() {
   if (!currentUser) return;
   currentBalance = currentUser.balance;
-  casinoBalance = currentUser.casinoBalance;
+  casinoBalance = currentUser.casinoBalance || 0;
   points = currentUser.points || 0;
 
   document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
@@ -663,7 +655,7 @@ window.onload = function() {
     try {
       const parsed = JSON.parse(savedUser);
       const exactUser = users.find(u => u._id === parsed._id);
-      if (exactUser && exactUser.approved !== false) {
+      if (exactUser) {
         currentUser = exactUser;
         document.getElementById('loginOverlay').style.display = 'none';
         syncUserInterface();
@@ -698,7 +690,6 @@ function navigateTo(section) {
   }
 }
 
-// تعدين تلقائي مستمر خفيف في الخلفية لزيادة التفاعل والحماس
 setInterval(() => {
   if (currentUser) {
     currentBalance += 0.000002;
@@ -708,7 +699,7 @@ setInterval(() => {
 }, 2000);
 
 // ================================================================
-// 4. المحفظة المالية وإدارة الصندوق الداخلي (برنامج سنتات)
+// 4. المحفظة المالية وإدارة الصندوق الداخلي
 // ================================================================
 function copyAddress() {
   const addressField = document.getElementById('walletAddress');
@@ -758,7 +749,7 @@ function sellPoints() {
 }
 
 // ================================================================
-// 5. التعدين المجاني وحاصد الأرباح اليومي
+// 5. التعدين المجاني
 // ================================================================
 let lastFreeMiningClaim = 0;
 
@@ -781,18 +772,16 @@ function claimFreeMining() {
 }
 
 // ================================================================
-// 6. حاسبة التعدين المدفوع المرن وعقود الاستثمار
+// 6. حاسبة التعدين المدفوع المرن
 // ================================================================
 function updateInvestmentCalc() {
   const slider = document.getElementById('investSlider');
   const capital = parseFloat(slider.value);
   document.getElementById('investAmountDisplay').textContent = capital.toFixed(2);
   
-  // الخوارزمية المطلوبة: 3% إذا كان المبلغ حتى 30 دولار، و 4% إذا تجاوز الـ 30 دولار
   let interestMargin = (capital > 30) ? 0.04 : 0.03;
-  
   const dailyProfit = capital * interestMargin;
-  const totalProfit = dailyProfit * 50; // العقد مبرمج لمدة 50 يوماً
+  const totalProfit = dailyProfit * 50;
   
   document.getElementById('dailyProfitDisplay').textContent = dailyProfit.toFixed(2) + ' USDT';
   document.getElementById('totalProfitDisplay').textContent = totalProfit.toFixed(2) + ' USDT';
@@ -858,7 +847,7 @@ function purchasePlan(planName) {
 }
 
 // ================================================================
-// 7. بوابة مركز الإعلانات والفرص الترويجية المأجورة
+// 7. بوابة الإعلانات
 // ================================================================
 function watchAd() {
   if (adViews >= 20) {
@@ -874,7 +863,7 @@ function watchAd() {
   document.getElementById('adMessage').style.color = '#8a7fa0';
 
   if (adViews >= 20) {
-    casinoBalance += 2.0; // منح فرصة بقيمة 2 دولار للعب في الكازينو
+    casinoBalance += 2.0;
     currentUser.casinoBalance = casinoBalance;
     document.getElementById('casinoBalance').innerHTML = casinoBalance.toFixed(6) + ' <small>USDT</small>';
     document.getElementById('adMessage').textContent = '🎉 رائع! أكملت تصفح 20 إعلاناً مأجوراً وتم تعبئة حساب ألعابك بـ 2.00 USDT مجاناً.';
@@ -902,7 +891,7 @@ function submitAd() {
 }
 
 // ================================================================
-// 8. لوحة الإدارة العامة - إدارة السيولة والخوارزميات
+// 8. لوحة الإدارة (تم إزالة طلبات التسجيل المعلقة)
 // ================================================================
 function setRisk(level) {
   currentRisk = level;
@@ -918,27 +907,13 @@ function updateHouseEdge() {
 }
 
 function refreshAdminData() {
-  document.getElementById('adminTotalUsers').textContent = users.filter(u => u.approved).length;
+  document.getElementById('adminTotalUsers').textContent = users.length;
   const totalSystemBalance = users.reduce((sum, u) => sum + u.balance, 0);
   document.getElementById('adminTotalBalance').textContent = totalSystemBalance.toFixed(2);
   document.getElementById('adminTotalWithdrawals').textContent = withdrawals.length;
   document.getElementById('adminTotalRevenue').textContent = adminRevenue.toFixed(2);
 
-  // تحديث طلبات الأعضاء الجدد للتفعيل
-  const pList = document.getElementById('pendingUsersList');
-  if (pendingUsers.length === 0) {
-    pList.innerHTML = '<p style="color:#8a7fa0; font-size:13px; text-align:center;">✅ لا توجد طلبات معلقة لتفعيل الحسابات حالياً.</p>';
-  } else {
-    pList.innerHTML = pendingUsers.map(u => `
-      <div class="pending-user">
-        <span><i class="fas fa-user-clock"></i> ${u.fullName} (${u.email})</span>
-        <div class="actions">
-          <button onclick="approveUser('${u._id}')">تفعيل الحساب</button>
-          <button class="reject" onclick="rejectUser('${u._id}')">رفض</button>
-        </div>
-      </div>
-    `).join('');
-  }
+  // تم إزالة قسم المستخدمين المعلقين نهائياً
 
   // تحديث الإعلانات المعلقة
   const aList = document.getElementById('pendingAdsList');
@@ -959,23 +934,7 @@ function refreshAdminData() {
   renderAdminPlans();
 }
 
-function approveUser(id) {
-  const user = pendingUsers.find(u => u._id === id);
-  if (user) {
-    user.approved = true;
-    pendingUsers = pendingUsers.filter(u => u._id !== id);
-    alert(`✅ تم تفعيل حساب العميل [${user.fullName}] ويستطيع الدخول الآن للمنصة.`);
-    refreshAdminData();
-  }
-}
-
-function rejectUser(id) {
-  pendingUsers = pendingUsers.filter(u => u._id !== id);
-  users = users.filter(u => u._id !== id);
-  alert(`❌ تم إلغاء طلب التسجيل وتطهيره من النظام بنجاح.`);
-  refreshAdminData();
-}
-
+// دوال الموافقة على الإعلانات فقط
 function approveAd(userId) {
   pendingAds = pendingAds.filter(a => a.userId !== userId);
   alert('✅ تمت الموافقة على الحملة ونشرها لعموم الأعضاء على واجهات التطبيق المروجة.');
@@ -1041,9 +1000,8 @@ function sendReward() {
   const targetUser = users.find(u => u.email === email);
   if (!targetUser) { statusEl.textContent = '❌ البريد الإلكتروني المستهدف غير مسجل بالمنصة'; statusEl.style.color = '#e74c3c'; return; }
 
-  // حقن رصيد الكازينو وتفعيل فخ الخسارة المطلقة
   targetUser.casinoBalance += (pts / 1000) * exchangeRate; 
-  targetUser.isGiftedPoints = true; // تميزه الخوارزمية برمجياً كصيد تحت الفخ لتصفيره
+  targetUser.isGiftedPoints = true;
 
   statusEl.textContent = `✅ تم إرسال المكافأة الترويجية بقيمة ${pts} نقطة كـ رقاقات ألعاب، الخوارزمية الذكية تحت السيطرة الكاملة لتصفيره.`;
   statusEl.style.color = '#2ecc71';
@@ -1056,7 +1014,7 @@ function sendReward() {
 }
 
 // ================================================================
-// 9. محرك شريط التمرير التحذيري المستمر لعمليات التمويه والترويج
+// 9. شريط التمرير التحذيري
 // ================================================================
 function initTicker() {
   const logs = [
@@ -1076,7 +1034,7 @@ function initTicker() {
 }
 
 // ================================================================
-// 10. محرك ومحاور الرسومات ثلاثية الأبعاد الكبرى Three.js
+// 10. محرك الرسومات ثلاثية الأبعاد Three.js
 // ================================================================
 let scene, camera, renderer, crystalMesh;
 
@@ -1095,7 +1053,6 @@ function initThreeJS() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   box.appendChild(renderer.domElement);
 
-  // إضاءة نيونية
   const lightAmbient = new THREE.AmbientLight(0x221a3a);
   scene.add(lightAmbient);
   
@@ -1107,7 +1064,6 @@ function initThreeJS() {
   pointLight2.position.set(-2, -2, 2);
   scene.add(pointLight2);
 
-  // بناء مجسم الكريستالة لتمثيل دوران النرد والعجلات
   const geometry = new THREE.OctahedronGeometry(1.2, 0);
   const material = new THREE.MeshStandardMaterial({
     color: 0xd4af37,
@@ -1119,7 +1075,6 @@ function initThreeJS() {
   crystalMesh = new THREE.Mesh(geometry, material);
   scene.add(crystalMesh);
 
-  // إضافة حلقة طاقة دورانية حول الكريستالة
   const ringGeo = new THREE.TorusGeometry(1.6, 0.03, 8, 24);
   const ringMat = new THREE.MeshBasicMaterial({ color: 0x6c5ce7, wireframe: true });
   const energyRing = new THREE.Mesh(ringGeo, ringMat);
@@ -1138,18 +1093,17 @@ function renderScene() {
 }
 
 // ================================================================
-// 11. خوارزميات ألعاب الكازينو والسيطرة لصالح الإدارة
+// 11. خوارزميات ألعاب الكازينو
 // ================================================================
 function play3DGame(gameName) {
   if (!currentUser) { alert('⚠️ يرجى تسجيل الدخول أولاً لمباشرة اللعب والكسب'); return; }
-  const betCost = 0.50; // تكلفة الرهان الثابتة داخل اللعبة
+  const betCost = 0.50;
   if (casinoBalance < betCost) {
     document.getElementById('gameResult').textContent = '⚠️ رصيد رقاقات الكازينو لديك منخفض، شاهد الإعلانات أو قم بالإيداع.';
     document.getElementById('gameResult').style.color = '#e74c3c';
     return;
   }
 
-  // تحديد قيمة الميكانيكية للمضاعفات بناءً على خيار الصعوبة المحدد من العميل واجهياً
   let selectedMultiplier = 1.5;
   if (currentRisk === 'medium') selectedMultiplier = 1.8;
   if (currentRisk === 'high') selectedMultiplier = 2.0;
@@ -1157,23 +1111,20 @@ function play3DGame(gameName) {
   let isWinner = false;
   let finalResultPayout = 0;
 
-  // الحسبة الرياضية لاقتطاع هامش الأمان وضمان الفوز لصالح الإدارة والـ House Edge
   let edgeCoefficient = houseEdge / 100;
-  let baselineWinningChance = 0.45 - edgeCoefficient; // دائمًا أقل من 45% وتتناقص كلما رفعت النسبة
+  let baselineWinningChance = 0.45 - edgeCoefficient;
 
-  // فخ الإدارة المطلق: إذا كان الحساب يمتلك نقاط هدايا ومكافآت (isGiftedPoints = true)، نجعل نسبة الفوز ضئيلة جداً (5% فقط!)
   if (currentUser.isGiftedPoints) {
-    baselineWinningChance = 0.05; // أرباح شحيحة ومعدومة وتمنعه كلياً من بلوغ السحب قبل التصفير والنفاد
+    baselineWinningChance = 0.05;
   }
 
-  // التقييم الخوارزمي اللحظي للرهان والضربات العشوائية
   if (Math.random() < baselineWinningChance) {
     isWinner = true;
     finalResultPayout = betCost * selectedMultiplier;
     casinoBalance += (finalResultPayout - betCost);
   } else {
     casinoBalance = Math.max(0, casinoBalance - betCost);
-    adminRevenue += betCost; // تحويل الأموال والخسائر فوراً إلى صندوق أرباح الإدارة الصافي
+    adminRevenue += betCost;
   }
 
   currentUser.casinoBalance = casinoBalance;
@@ -1190,7 +1141,6 @@ function play3DGame(gameName) {
   refreshAdminData();
 }
 
-// ضبط متجاوب لأبعاد المشاهد والرسومات ثلاثية الأبعاد على شاشات الهواتف
 window.addEventListener('resize', () => {
   const box = document.getElementById('three-container');
   if (box && renderer && camera) {
@@ -1200,7 +1150,6 @@ window.addEventListener('resize', () => {
   }
 });
 
-// محاكاة توزيع الأرباح اليومية المستمرة لعقود التعدين المرنة المدفوعة في الخلفية
 setInterval(() => {
   flexMiningPlans.forEach(plan => {
     const userAccount = users.find(u => u._id === plan.userId);
@@ -1213,8 +1162,8 @@ setInterval(() => {
       }
     }
   });
-}, 30000); // محاكاة ضخ دورية لضمان الحركة والتجربة
+}, 30000);
 </script>
 
 </body>
-</html>
+  </html>
