@@ -129,24 +129,100 @@
     </div>
   </div>
 
-  <!-- ===== القسم 3: الكازينو ===== -->
-  <div id="section-casino" class="section">
-    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-dice"></i> الكازينو</h2>
-    <div class="card" style="text-align:center; background:rgba(212,175,55,0.05); border-color:var(--gold);">
-      <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);"><i class="fas fa-gift"></i> رصيد الكازينو</p>
-      <div class="balance" id="casinoBalance" style="font-size:clamp(24px,6vw,34px);">5.000000 <small>USDT</small></div>
-      <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">تم منحك 5 USDT مجاناً للتجربة</p>
-    </div>
-    <div id="three-container"></div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-      <button class="game-btn" onclick="play3DGame('wheel')"><i class="fas fa-circle-notch"></i> عجلة الحظ</button>
-      <button class="game-btn" onclick="play3DGame('dice')"><i class="fas fa-cube"></i> النرد 3D</button>
-      <button class="game-btn" onclick="play3DGame('crash')"><i class="fas fa-rocket"></i> الكراش</button>
-      <button class="game-btn" onclick="play3DGame('street')"><i class="fas fa-road"></i> عبور الشارع</button>
-    </div>
-    <div id="gameResult" class="game-result" style="margin-top:10px;"></div>
+  <!-- ===== القسم 3: الكازينو (مطور بالكامل) ===== -->
+<div id="section-casino" class="section">
+  <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-dice"></i> الكازينو التفاعلي</h2>
+  
+  <div class="card" style="text-align:center; background:rgba(212,175,55,0.05); border-color:var(--gold);">
+    <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);"><i class="fas fa-gift"></i> رصيد الكازينو</p>
+    <div class="balance" id="casinoBalance" style="font-size:clamp(24px,6vw,34px);">5.000000 <small>USDT</small></div>
+    <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">تم منحك 5 USDT مجاناً للتجربة</p>
   </div>
 
+  <!-- ===== عجلة الحظ ===== -->
+  <div class="game-container" style="border-color:var(--gold);">
+    <div class="game-title"><i class="fas fa-circle-notch"></i> عجلة الحظ</div>
+    <div class="game-desc">دور العجلة واربح مضاعفات تصل إلى 10x</div>
+    <canvas id="wheelCanvas" width="300" height="300" style="width:100%; max-width:300px; margin:10px auto; display:block; border-radius:50%; box-shadow:0 0 30px rgba(212,175,55,0.3);"></canvas>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+      <input type="number" id="wheelBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:2; min-width:80px;">
+      <button class="btn btn-gold" onclick="spinWheel()" style="flex:1;"><i class="fas fa-sync-alt"></i> دور</button>
+    </div>
+    <div id="wheelResult" class="game-result"></div>
+  </div>
+
+  <!-- ===== النرد 3D ===== -->
+  <div class="game-container" style="border-color:var(--purple);">
+    <div class="game-title"><i class="fas fa-cube"></i> النرد 3D</div>
+    <div class="game-desc">خمن الرقم أو زوجي/فردي</div>
+    <div id="diceContainer" style="width:120px; height:120px; margin:10px auto; perspective:600px; position:relative;">
+      <div id="dice3d" style="width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 1.2s cubic-bezier(0.2,0.8,0.2,1);">
+        <div class="dice-face front" style="position:absolute; width:100%; height:100%; background:#1e1735; border:2px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:900; color:var(--gold); backface-visibility:hidden; transform:translateZ(60px);">1</div>
+        <div class="dice-face back" style="position:absolute; width:100%; height:100%; background:#1e1735; border:2px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:900; color:var(--gold); backface-visibility:hidden; transform:rotateY(180deg) translateZ(60px);">6</div>
+        <div class="dice-face right" style="position:absolute; width:100%; height:100%; background:#1e1735; border:2px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:900; color:var(--gold); backface-visibility:hidden; transform:rotateY(90deg) translateZ(60px);">3</div>
+        <div class="dice-face left" style="position:absolute; width:100%; height:100%; background:#1e1735; border:2px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:900; color:var(--gold); backface-visibility:hidden; transform:rotateY(-90deg) translateZ(60px);">4</div>
+        <div class="dice-face top" style="position:absolute; width:100%; height:100%; background:#1e1735; border:2px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:900; color:var(--gold); backface-visibility:hidden; transform:rotateX(90deg) translateZ(60px);">2</div>
+        <div class="dice-face bottom" style="position:absolute; width:100%; height:100%; background:#1e1735; border:2px solid var(--gold); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:900; color:var(--gold); backface-visibility:hidden; transform:rotateX(-90deg) translateZ(60px);">5</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+      <input type="number" id="diceBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:1; min-width:60px;">
+      <select id="diceGuess" style="flex:1; min-width:60px;">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="even">زوجي</option><option value="odd">فردي</option>
+      </select>
+      <button class="btn btn-gold" onclick="rollDice()" style="flex:1;"><i class="fas fa-dice"></i> رمي</button>
+    </div>
+    <div id="diceResult" class="game-result"></div>
+  </div>
+
+  <!-- ===== الكراش ===== -->
+  <div class="game-container" style="border-color:var(--neon-purple);">
+    <div class="game-title"><i class="fas fa-rocket"></i> لعبة الكراش</div>
+    <div class="game-desc">اربح مضاعفات تتصاعد، لكن انسحب قبل الانهيار!</div>
+    <div style="text-align:center; margin:10px 0;">
+      <span id="crashMultiplier" style="font-size:clamp(32px,8vw,48px); font-weight:900; color:#2ecc71; transition:color 0.3s;">1.00x</span>
+    </div>
+    <div class="crash-bar-bg" style="width:100%; height:8px; background:#2d2d3a; border-radius:4px; margin:6px 0; overflow:hidden;">
+      <div class="crash-bar-fill" id="crashProgress" style="height:100%; width:0%; background:linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c); border-radius:4px; transition:width 0.1s linear;"></div>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+      <input type="number" id="crashBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:2; min-width:80px;">
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="startCrash()" style="flex:1;"><i class="fas fa-play"></i> بدء</button>
+      <button class="btn btn-green" id="crashCashoutBtn" onclick="cashoutCrash()" disabled style="flex:1;"><i class="fas fa-hand-holding-usd"></i> سحب</button>
+    </div>
+    <div id="crashResult" class="game-result"></div>
+    <div id="crashExplosion" style="display:none; text-align:center; font-size:60px; margin:8px 0; animation: explode 0.6s ease-out;"></div>
+  </div>
+
+  <!-- ===== لعبة الشارع (مطورة) ===== -->
+  <div class="game-container" style="border-color:var(--neon-gold);">
+    <div class="game-title" style="color:var(--neon-gold);"><i class="fas fa-road"></i> عبور الشارع</div>
+    <div class="game-desc">تقدم عبر الشارع وتجنب السيارات. كل خطوة تزيد المضاعف!</div>
+    <div class="street-progress" style="width:100%; height:6px; background:#2d2d3a; border-radius:4px; margin:6px 0; overflow:hidden;">
+      <div class="street-progress-fill" id="streetProgressFill" style="height:100%; width:0%; background:linear-gradient(90deg, var(--gold), var(--purple)); border-radius:4px; transition:width 0.3s ease;"></div>
+    </div>
+    <div id="streetGame" style="position:relative; width:100%; height:250px; background:#1a1a2e; border-radius:12px; overflow:hidden; border:2px solid var(--neon-gold); box-shadow:0 0 30px rgba(255,215,0,0.2); margin-bottom:10px;">
+      <canvas id="streetCanvas" style="width:100%; height:100%; display:block; background:#0f0b1a;"></canvas>
+    </div>
+    <div class="street-info" style="display:flex; justify-content:space-between; align-items:center; padding:4px 8px; background:rgba(255,215,0,0.05); border-radius:6px; margin:4px 0; font-weight:700; font-size:clamp(13px,3vw,16px);">
+      <span>🚶 الخطوات: <span id="streetSteps">0</span></span>
+      <span class="multiplier" style="color:var(--neon-gold); text-shadow:0 0 10px rgba(255,215,0,0.4);">المضاعف: <span id="streetMultiplier">1.00x</span></span>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+      <input type="number" id="streetBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:2; min-width:80px;">
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="startStreetGame()" style="flex:1;"><i class="fas fa-play"></i> ابدأ</button>
+      <button class="btn btn-green" id="streetCashoutBtn" onclick="cashoutStreet()" disabled style="flex:1;"><i class="fas fa-hand-holding-usd"></i> سحب</button>
+    </div>
+    <div id="streetResult" class="game-result"></div>
+  </div>
+
+</div>
   <!-- ===== القسم 4: الإعلانات ===== -->
   <div id="section-ads" class="section">
     <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-bullhorn"></i> الإعلانات</h2>
