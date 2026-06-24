@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>Nexora Premium - النظام المتكامل</title>
+  <!-- ===== المكتبات الخارجية ===== -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- ===== ملفات المشروع ===== -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== طبقة تسجيل الدخول ===== -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2><i class="fas fa-crown"></i> NEXORA</h2>
+    <div id="authForm">
+      <input type="text" id="loginFullName" placeholder="الاسم الكامل (للتسجيل)" style="display:none;">
+      <input type="text" id="loginPhone" placeholder="رقم الجوال (للتسجيل)" style="display:none;">
+      <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
+      <input type="password" id="loginPassword" placeholder="كلمة المرور">
+      <div id="authError" class="auth-error"></div>
+      <button class="login-btn" id="authActionBtn" onclick="handleAuth()">تسجيل الدخول</button>
+      <div class="switch-auth" id="toggleAuthText" onclick="toggleAuthMode()">ليس لديك حساب؟ سجل الآن</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== الحاوية الرئيسية ===== -->
+<div class="container" id="mainApp">
+
+  <!-- ===== شريط التحذير المتحرك ===== -->
+  <div class="ticker-wrap">
+    <div class="ticker" id="tickerText">
+      <span>🔄</span> قام أحمد بشراء خطة VIP بقيمة 100 USDT <span>💰</span>
+      <span>🔄</span> ربحت مريم 25.5 USDT من لعبة الكراش <span>💰</span>
+      <span>🔄</span> انضم محمد للتو وحصل على 5 USDT مجاناً <span>💰</span>
+    </div>
+  </div>
+
+  <!-- ===== الأقسام (محتواها مباشر في HTML) ===== -->
+  <div id="section-dashboard" class="section active">
+    <h1 style="margin-top:12px; font-size:clamp(24px,7vw,34px); color:var(--gold); text-shadow:0 0 30px rgba(212,175,55,0.15);">
+      <i class="fas fa-gem"></i> NEXORA PREMIUM
+    </h1>
+    <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);">نظام التعدين وإدارة الأصول المتقدم</p>
+
+    <div class="card" style="text-align:center; margin-top:16px;">
+      <p style="color:#8a7fa0; font-size:clamp(13px,2.5vw,15px);">إجمالي الرصيد الاستثماري</p>
+      <div class="balance" id="liveBalance">0.000660 <small>USDT</small></div>
+      <p style="font-size:clamp(11px,2vw,13px); color:#2ecc71;"><i class="fas fa-bolt"></i> محرك التعدين يعمل بكفاءة</p>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-green" onclick="navigateTo('wallet')"><i class="fas fa-arrow-down"></i> إيداع أموال</button>
+      <button class="btn btn-red" onclick="navigateTo('wallet')"><i class="fas fa-arrow-up"></i> سحب الأرباح</button>
+    </div>
+
+    <!-- التعدين المجاني -->
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-free-brands"></i> التعدين المجاني</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">احصل على 0.005 USDT يومياً</p>
+      <div style="text-align:center; margin:10px 0;">
+        <span style="font-size:clamp(20px,5vw,28px); font-weight:700; color:var(--gold);" id="freeMiningCounter">0.0000 USDT</span>
+      </div>
+      <button class="btn btn-gold" onclick="claimFreeMining()" style="width:100%;"><i class="fas fa-hand-holding-heart"></i> احصد الآن (مرة كل 24 ساعة)</button>
+      <div id="freeMiningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:6px; text-align:center;"></div>
+    </div>
+
+    <!-- التعدين المدفوع المرن -->
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-rocket"></i> التعدين المدفوع المرن</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">اختر مبلغ الاستثمار (الحد الأدنى 3 USDT)</p>
+      <div style="margin:10px 0;">
+        <label style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">مبلغ الاستثمار: <span id="investAmountDisplay" style="color:var(--gold);">10.00</span> USDT</label>
+        <input type="range" id="investSlider" min="3" max="500" step="0.5" value="10" oninput="updateInvestmentCalc()">
+        <div style="display:flex; justify-content:space-between; font-size:clamp(10px,2vw,12px); color:#6a5f7a; padding:0 4px;">
+          <span>3 USDT</span>
+          <span>500 USDT</span>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;">
+        <div style="background:var(--glass-bg); padding:8px; border-radius:8px; text-align:center;">
+          <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">الأرباح اليومية</p>
+          <p style="font-size:clamp(16px,4vw,20px); color:var(--gold);" id="dailyProfitDisplay">0.00 USDT</p>
+        </div>
+        <div style="background:var(--glass-bg); padding:8px; border-radius:8px; text-align:center;">
+          <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">الأرباح الإجمالية (50 يوم)</p>
+          <p style="font-size:clamp(16px,4vw,20px); color:var(--gold);" id="totalProfitDisplay">0.00 USDT</p>
+        </div>
+      </div>
+      <button class="btn btn-gold" onclick="purchaseFlexMining()" style="width:100%;"><i class="fas fa-play"></i> بدء التعدين المدفوع</button>
+      <div id="flexMiningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:6px; text-align:center;"></div>
+    </div>
+
+    <!-- خطط الترقية -->
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-layer-group"></i> خطط الترقية السحابية</h4>
+      <div id="plansContainer"></div>
+    </div>
+  </div>
+
+  <div id="section-wallet" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-wallet"></i> المحفظة</h2>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-arrow-down"></i> الإيداع</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#2ecc71; font-weight:700;">عنوان الإيداع (TRC-20):</p>
+      <input type="text" id="walletAddress" value="0x2975dc1f8188c30b2a4be0ec27e33494da66cb46" readonly style="text-align:center; color:var(--gold); font-weight:bold; font-size:12px;">
+      <button class="btn btn-gold" style="margin-top:8px; padding:10px;" onclick="copyAddress()"><i class="fas fa-copy"></i> نسخ العنوان</button>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-arrow-up"></i> طلب سحب</h4>
+      <input type="text" id="withdrawAddress" placeholder="عنوان محفظة السحب">
+      <input type="number" id="withdrawAmount" placeholder="الكمية (الحد الأدنى 10 USDT)" min="10">
+      <button class="btn btn-red" style="width:100%; padding:12px; margin-top:6px;" onclick="submitWithdraw()"><i class="fas fa-check"></i> تأكيد عملية السحب</button>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-exchange-alt"></i> تبادل النقاط</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">بيع نقاطك للمنصة مباشرة</p>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input type="number" id="pointsToSell" placeholder="عدد النقاط" style="flex:2; min-width:80px;">
+        <button class="btn btn-gold" style="flex:1; min-width:60px;" onclick="sellPoints()"><i class="fas fa-coins"></i> بيع</button>
+      </div>
+      <div style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;">
+        سعر الصرف: 1000 نقطة = <span id="exchangeRateDisplay">1.00</span> USDT
+      </div>
+      <div id="pointsBalanceDisplay" style="font-size:clamp(13px,3vw,15px); color:var(--gold); text-align:center; margin-top:4px;">نقاطك: 0</div>
+    </div>
+  </div>
+
+  <div id="section-casino" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-dice"></i> الكازينو</h2>
+    <div class="card" style="text-align:center; background:rgba(212,175,55,0.05); border-color:var(--gold);">
+      <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);"><i class="fas fa-gift"></i> رصيد الكازينو</p>
+      <div class="balance" id="casinoBalance" style="font-size:clamp(24px,6vw,34px);">5.000000 <small>USDT</small></div>
+      <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">تم منحك 5 USDT مجاناً للتجربة</p>
+    </div>
+    <div id="three-container"></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button class="game-btn" onclick="play3DGame('wheel')"><i class="fas fa-circle-notch"></i> عجلة الحظ</button>
+      <button class="game-btn" onclick="play3DGame('dice')"><i class="fas fa-cube"></i> النرد 3D</button>
+      <button class="game-btn" onclick="play3DGame('crash')"><i class="fas fa-rocket"></i> الكراش</button>
+      <button class="game-btn" onclick="play3DGame('street')"><i class="fas fa-road"></i> عبور الشارع</button>
+    </div>
+    <div id="gameResult" class="game-result" style="margin-top:10px;"></div>
+  </div>
+
+  <div id="section-ads" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-bullhorn"></i> الإعلانات</h2>
+    <div class="ad-container">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-eye"></i> مشاهدة الإعلانات</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">شاهد الإعلانات واكسب فرصاً مجانية</p>
+      <div class="ad-progress"><div class="ad-progress-fill" id="adProgressFill"></div></div>
+      <p style="font-size:clamp(11px,2vw,13px); color:#8a7fa0;">مشاهداتك: <span id="adViews">0</span> / 20</p>
+      <button class="btn btn-gold" onclick="watchAd()" style="width:100%; margin-top:6px;"><i class="fas fa-play"></i> مشاهدة إعلان</button>
+      <div id="adMessage" style="font-size:clamp(11px,2vw,13px); margin-top:6px; color:#8a7fa0;"></div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-ad"></i> نشر إعلان ممول</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">ادفع 10 USDT وانشر إعلانك للجميع</p>
+      <input type="text" id="adTitle" placeholder="عنوان الإعلان">
+      <textarea id="adContent" placeholder="محتوى الإعلان" rows="3"></textarea>
+      <input type="url" id="adLink" placeholder="رابط الفيديو أو الصفحة">
+      <button class="btn btn-purple" onclick="submitAd()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> نشر الإعلان (10 USDT)</button>
+      <div id="adSubmitStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;"></div>
+    </div>
+  </div>
+
+  <div id="section-admin" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-crown"></i> لوحة الإدارة</h2>
+
+    <div class="admin-stats">
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalUsers">0</div>
+        <div class="label"><i class="fas fa-users"></i> المشتركين</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalBalance">0.00</div>
+        <div class="label"><i class="fas fa-coins"></i> أموال البوت</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalWithdrawals">0.00</div>
+        <div class="label"><i class="fas fa-arrow-up"></i> السحوبات</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalRevenue">0.00</div>
+        <div class="label"><i class="fas fa-chart-line"></i> أرباح الإدارة</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-sliders-h"></i> التحكم بالكازينو</h4>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <label style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0; flex:1;">نسبة الربح (House Edge):</label>
+        <input type="number" id="houseEdgeInput" value="5" min="0" max="20" step="0.5" style="flex:1; min-width:60px;">
+        <span style="color:var(--gold);">%</span>
+      </div>
+      <button class="btn btn-purple" onclick="updateHouseEdge()" style="margin-top:6px;"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+      <div style="margin-top:8px; display:flex; gap:8px;">
+        <button class="mini-btn" onclick="emergencyStop()" style="border-color:#e74c3c; color:#e74c3c;"><i class="fas fa-stop-circle"></i> إيقاف الطوارئ</button>
+        <button class="mini-btn" onclick="resetCasino()" style="border-color:var(--gold);"><i class="fas fa-undo"></i> إعادة تعيين</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-cogs"></i> إدارة خطط التعدين</h4>
+      <div id="adminPlansList"></div>
+      <button class="btn btn-gold" onclick="showAddPlanForm()" style="margin-top:6px;"><i class="fas fa-plus"></i> إضافة خطة جديدة</button>
+      <div id="addPlanForm" style="display:none; margin-top:8px;">
+        <input type="text" id="planName" placeholder="اسم الخطة">
+        <input type="number" id="planMin" placeholder="الحد الأدنى" step="0.5">
+        <input type="number" id="planMax" placeholder="الحد الأقصى" step="0.5">
+        <input type="number" id="planProfit" placeholder="نسبة الربح اليومي (%)" step="0.5">
+        <input type="number" id="planDuration" placeholder="المدة (أيام)">
+        <button class="btn btn-green" onclick="addPlan()"><i class="fas fa-check"></i> إضافة الخطة</button>
+        <button class="btn btn-red" onclick="document.getElementById('addPlanForm').style.display='none'"><i class="fas fa-times"></i> إلغاء</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-clipboard-list"></i> مراجعة الإعلانات</h4>
+      <div id="pendingAdsList"><p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);">لا توجد إعلانات معلقة</p></div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-gift"></i> إرسال النقاط والمكافآت</h4>
+      <input type="text" id="rewardUserEmail" placeholder="البريد الإلكتروني للمستخدم">
+      <input type="number" id="rewardPoints" placeholder="عدد النقاط" step="1">
+      <button class="btn btn-purple" onclick="sendReward()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> إرسال المكافأة</button>
+      <div id="rewardStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;"></div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-history"></i> سجل الأرباح</h4>
+      <div id="revenueLog" style="max-height:150px; overflow-y:auto; font-size:clamp(11px,2vw,13px); color:#8a7fa0;"></div>
+    </div>
+
+    <button class="close-btn" onclick="refreshAdminData()"><i class="fas fa-sync"></i> تحديث البيانات</button>
+  </div>
+
+</div>
+
+<!-- ===== شريط التنقل السفلي ===== -->
+<div class="bottom-nav">
+  <button class="nav-item active" data-section="dashboard" onclick="navigateTo('dashboard')">
+    <i class="fas fa-home"></i><span>الرئيسية</span>
+  </button>
+  <button class="nav-item" data-section="wallet" onclick="navigateTo('wallet')">
+    <i class="fas fa-wallet"></i><span>المحفظة</span>
+  </button>
+  <button class="nav-item" data-section="casino" onclick="navigateTo('casino')">
+    <i class="fas fa-dice"></i><span>الكازينو</span>
+  </button>
+  <button class="nav-item" data-section="ads" onclick="navigateTo('ads')">
+    <i class="fas fa-bullhorn"></i><span>الإعلانات</span>
+  </button>
+  <button class="nav-item" data-section="admin" onclick="navigateTo('admin')">
+    <i class="fas fa-crown"></i><span>الإدارة</span>
+  </button>
+</div>
+
+<!-- ===== تحميل ملفات JavaScript بالترتيب الصحيح ===== -->
+<script src="app.js"></script>
+<script src="mining.js"></script>
+<script src="games.js"></script>
+<script src="ads.js"></script>
+
+<!-- ===== التهيئة النهائية ===== -->
+<script>
+  // تهيئة التطبيق بعد تحميل جميع الملفات
+  window.onload = function() {
+    // استعادة جلسة المستخدم
+    const savedUser = localStorage.getItem('nexora_user');
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        if (user.approved !== false) {
+          currentUser = user;
+          document.getElementById('loginOverlay').classList.add('hidden');
+          document.getElementById('liveBalance').innerHTML = user.balance.toFixed(6) + ' <small>USDT</small>';
+          currentBalance = user.balance;
+          casinoBalance = user.casinoBalance || 5.000000;
+          document.getElementById('casinoBalance').innerHTML = casinoBalance.toFixed(6) + ' <small>USDT</small>';
+          points = user.points || 0;
+          document.getElementById('pointsBalanceDisplay').textContent = `نقاطك: ${points}`;
+          if (typeof loadUserPlans === 'function') loadUserPlans(user);
+        }
+      } catch(e) {
+        localStorage.removeItem('nexora_user');
+      }
+    }
+    // تهيئة المكونات
+    if (typeof initTicker === 'function') initTicker();
+    if (typeof renderPlans === 'function') renderPlans();
+    if (typeof renderAdminPlans === 'function') renderAdminPlans();
+    if (typeof refreshAdminData === 'function') refreshAdminData();
+    if (typeof updateInvestmentCalc === 'function') updateInvestmentCalc();
+    if (typeof initThreeJS === 'function') initThreeJS();
+  };
+
+  // تحديث حجم Three.js عند تغيير حجم الشاشة
+  window.addEventListener('resize', function() {
+    if (typeof threeInitialized !== 'undefined' && threeInitialized && document.getElementById('section-casino').classList.contains('active')) {
+      const container = document.getElementById('three-container');
+      if (container && typeof renderer !== 'undefined') {
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      }
+    }
+  });
+
+  // محاكاة تحديث خطط التعدين اليومية
+  setInterval(function() {
+    if (typeof flexMiningPlans !== 'undefined') {
+      flexMiningPlans.forEach(function(plan) {
+        if (plan.day < plan.duration) {
+          plan.day++;
+          const profit = plan.dailyProfit;
+          const user = users.find(u => u._id === plan.userId);
+          if (user) {
+            user.balance += profit;
+            if (user._id === currentUser?._id) {
+              currentBalance += profit;
+              document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+            }
+          }
+          if (plan.day >= plan.duration) {
+            const user = users.find(u => u._id === plan.userId);
+            if (user) {
+              user.balance += plan.capital;
+              if (user._id === currentUser?._id) {
+                currentBalance += plan.capital;
+                document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+              }
+            }
+            flexMiningPlans = flexMiningPlans.filter(p => p.userId !== plan.userId);
+          }
+        }
+      });
+    }
+  }, 15000);
+</script>
+</body>
+</html>
