@@ -183,3 +183,4 @@ function removePlan(index) {
   plans.splice(index, 1);
   renderPlans();
   renderAdminPlans();
+}
