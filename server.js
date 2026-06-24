@@ -43,10 +43,9 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// خدمة الملفات الثابتة (CSS, JS, صور)
 app.use(express.static(__dirname));
 
-// ===== واجهات المصادقة =====
+// ===== واجهات المصادقة (تسجيل الدخول والتسجيل) =====
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { fullName, email, phone, password } = req.body;
