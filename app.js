@@ -1,5 +1,5 @@
 // ================================================================
-// 1. البيانات الأساسية والمتغيرات
+// البيانات الأساسية
 // ================================================================
 let currentBalance = 0.000660;
 let casinoBalance = 5.000000;
@@ -17,7 +17,7 @@ let currentUser = null;
 let isLoginMode = true;
 
 // ================================================================
-// 2. تسجيل الدخول (مع الاتصال بالخادم)
+// تسجيل الدخول
 // ================================================================
 function toggleAuthMode() {
   isLoginMode = !isLoginMode;
@@ -51,7 +51,6 @@ async function handleAuth() {
   }
 
   if (isLoginMode) {
-    // تسجيل الدخول
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -68,28 +67,15 @@ async function handleAuth() {
         if (overlay) overlay.classList.add('hidden');
 
         // تحديث الرصيد
-        const balanceEl = document.getElementById('liveBalance');
-        if (balanceEl) balanceEl.innerHTML = data.user.balance.toFixed(6) + ' <small>USDT</small>';
+        document.getElementById('liveBalance').innerHTML = data.user.balance.toFixed(6) + ' <small>USDT</small>';
         currentBalance = data.user.balance;
-        
         casinoBalance = data.user.casinoBalance || 5.000000;
-        const casinoBalanceEl = document.getElementById('casinoBalance');
-        if (casinoBalanceEl) casinoBalanceEl.innerHTML = casinoBalance.toFixed(6) + ' <small>USDT</small>';
-        
+        document.getElementById('casinoBalance').innerHTML = casinoBalance.toFixed(6) + ' <small>USDT</small>';
         points = data.user.points || 0;
-        const pointsEl = document.getElementById('pointsBalanceDisplay');
-        if (pointsEl) pointsEl.textContent = `نقاطك: ${points}`;
+        document.getElementById('pointsBalanceDisplay').textContent = `نقاطك: ${points}`;
 
-        // إظهار الواجهة الرئيسية (حل مباشر)
-        document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-        const dashboard = document.getElementById('section-dashboard');
-        if (dashboard) dashboard.classList.add('active');
-        
-        // تحديث شريط التنقل
-        document.querySelectorAll('.nav-item').forEach(item => {
-          item.classList.remove('active');
-          if (item.dataset.section === 'dashboard') item.classList.add('active');
-        });
+        // إظهار الواجهة الرئيسية
+        showDashboard();
 
         if (typeof loadUserPlans === 'function') loadUserPlans(data.user);
         if (!users.find(u => u._id === data.user._id)) {
@@ -147,30 +133,38 @@ async function handleAuth() {
 }
 
 // ================================================================
-// 3. التنقل بين الأقسام (مع إصلاحات)
+// دالة إظهار الواجهة الرئيسية (حل سريع)
 // ================================================================
-function navigateTo(section) {
+function showDashboard() {
   // إخفاء كل الأقسام
   document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-  
-  // إظهار القسم المطلوب
+  // إظهار الرئيسية
+  const dashboard = document.getElementById('section-dashboard');
+  if (dashboard) dashboard.classList.add('active');
+  // تحديث شريط التنقل
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.dataset.section === 'dashboard') item.classList.add('active');
+  });
+}
+
+// ================================================================
+// التنقل بين الأقسام
+// ================================================================
+function navigateTo(section) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
   const target = document.getElementById('section-' + section);
   if (target) {
     target.classList.add('active');
   } else {
     console.warn('القسم غير موجود:', section);
-    // عرض لوحة التحكم كحل احتياطي
-    const dashboard = document.getElementById('section-dashboard');
-    if (dashboard) dashboard.classList.add('active');
+    showDashboard();
+    return;
   }
-  
-  // تحديث شريط التنقل
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.remove('active');
     if (item.dataset.section === section) item.classList.add('active');
   });
-  
-  // تهيئة العناصر الخاصة بالقسم
   if (section === 'casino') {
     setTimeout(() => { if (typeof initThreeJS === 'function') initThreeJS(); }, 200);
   }
@@ -180,7 +174,7 @@ function navigateTo(section) {
 }
 
 // ================================================================
-// 4. التعدين التلقائي
+// التعدين التلقائي
 // ================================================================
 setInterval(() => {
   currentBalance += 0.000015;
@@ -193,15 +187,11 @@ setInterval(() => {
 }, 1000);
 
 // ================================================================
-// 5. المحفظة والتبادل
+// المحفظة
 // ================================================================
 function copyAddress() {
   const a = document.getElementById('walletAddress');
-  if (a) {
-    a.select();
-    document.execCommand('copy');
-    alert('✅ تم نسخ العنوان');
-  }
+  if (a) { a.select(); document.execCommand('copy'); alert('✅ تم نسخ العنوان'); }
 }
 
 function submitWithdraw() {
@@ -238,7 +228,7 @@ function sellPoints() {
 }
 
 // ================================================================
-// 6. الإدارة الأساسية
+// الإدارة
 // ================================================================
 function refreshAdminData() {
   document.getElementById('adminTotalUsers').textContent = users.filter(u => u.approved !== false).length;
@@ -326,7 +316,7 @@ function rejectAd(userId) {
 }
 
 // ================================================================
-// 7. التحكم بالكازينو
+// التحكم بالكازينو
 // ================================================================
 function updateHouseEdge() {
   const val = parseFloat(document.getElementById('houseEdgeInput').value);
@@ -351,7 +341,7 @@ function resetCasino() {
 }
 
 // ================================================================
-// 8. إرسال النقاط
+// إرسال النقاط
 // ================================================================
 function sendReward() {
   const email = document.getElementById('rewardUserEmail').value.trim();
@@ -376,7 +366,7 @@ function sendReward() {
 }
 
 // ================================================================
-// 9. شريط التحذير
+// شريط التحذير
 // ================================================================
 function initTicker() {
   const messages = [
@@ -397,3 +387,37 @@ function initTicker() {
     }
   }, 5000);
 }
+
+// ================================================================
+// تهيئة الصفحة عند التحميل
+// ================================================================
+window.onload = function() {
+  const savedUser = localStorage.getItem('nexora_user');
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser);
+      if (user.approved !== false) {
+        currentUser = user;
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('liveBalance').innerHTML = user.balance.toFixed(6) + ' <small>USDT</small>';
+        currentBalance = user.balance;
+        casinoBalance = user.casinoBalance || 5.000000;
+        document.getElementById('casinoBalance').innerHTML = casinoBalance.toFixed(6) + ' <small>USDT</small>';
+        points = user.points || 0;
+        document.getElementById('pointsBalanceDisplay').textContent = `نقاطك: ${points}`;
+        if (typeof loadUserPlans === 'function') loadUserPlans(user);
+        // إظهار الرئيسية
+        showDashboard();
+      }
+    } catch(e) {
+      localStorage.removeItem('nexora_user');
+    }
+  }
+  // تهيئة المكونات
+  if (typeof initTicker === 'function') initTicker();
+  if (typeof renderPlans === 'function') renderPlans();
+  if (typeof renderAdminPlans === 'function') renderAdminPlans();
+  if (typeof refreshAdminData === 'function') refreshAdminData();
+  if (typeof updateInvestmentCalc === 'function') updateInvestmentCalc();
+  if (typeof initThreeJS === 'function') initThreeJS();
+};
