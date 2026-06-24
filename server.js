@@ -6,6 +6,9 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
+// ===== خدمة الملفات الثابتة (CSS, JS, صور) من الجذر =====
+app.use(express.static(__dirname));
+
 // ===== الاتصال بقاعدة البيانات =====
 const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/nexora';
 mongoose.connect(mongoURI)
@@ -35,6 +38,7 @@ const adminRevenueSchema = new mongoose.Schema({
 const AdminRevenue = mongoose.model('AdminRevenue', adminRevenueSchema);
 
 // ===== المسارات =====
+// يجب أن يكون مسار الملفات الرئيسي هو index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -43,9 +47,7 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.use(express.static(__dirname));
-
-// ===== واجهات المصادقة (تسجيل الدخول والتسجيل) =====
+// ===== واجهات المصادقة =====
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { fullName, email, phone, password } = req.body;
