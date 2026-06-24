@@ -389,3 +389,37 @@ input[type="range"]::-webkit-slider-thumb {
   .admin-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
   #three-container { height: 200px; }
 }
+/* ===== ألعاب الكازينو ===== */
+.game-container {
+  margin: 12px 0;
+  padding: 14px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  transition: 0.3s;
+}
+.game-container:hover {
+  border-color: rgba(212,175,55,0.3);
+}
+.game-title {
+  color: var(--gold);
+  font-size: clamp(16px,4vw,20px);
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.game-desc {
+  font-size: clamp(11px,2.5vw,13px);
+  color: #8a7fa0;
+  margin-bottom: 8px;
+}
+.game-result {
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: clamp(13px,3vw,15px);
+  min-height: 24px;
+  text-align: center;
+}
