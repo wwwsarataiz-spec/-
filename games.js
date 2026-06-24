@@ -1,5 +1,5 @@
 // ================================================================
-// 1. عجلة الحظ (Canvas)
+// 1. عجلة الحظ (Canvas) - سهم ثابت، عجلة تدور
 // ================================================================
 const wheelSegments = [
   { label: '10x', value: 10, color: '#ffd700' },
@@ -44,14 +44,14 @@ function drawWheel(rotation = 0) {
     ctx.textBaseline = 'middle';
     ctx.fillText(wheelSegments[i].label, textX, textY);
   }
-  // المؤشر
+  // المؤشر (سهم ثابت في الأعلى)
   ctx.fillStyle = '#ffd700';
   ctx.shadowColor = '#ffd700';
-  ctx.shadowBlur = 15;
+  ctx.shadowBlur = 20;
   ctx.beginPath();
   ctx.moveTo(cx, 8);
-  ctx.lineTo(cx-12, 25);
-  ctx.lineTo(cx+12, 25);
+  ctx.lineTo(cx-14, 28);
+  ctx.lineTo(cx+14, 28);
   ctx.closePath();
   ctx.fill();
   ctx.shadowBlur = 0;
@@ -75,12 +75,9 @@ function spinWheel() {
   wheelSpinning = true;
   // تحديد النتيجة (خوارزمية لصالح المنصة)
   let winIndex = Math.floor(Math.random() * wheelSegments.length);
-  // تعديل الاحتمالات لصالح المنصة (زيادة فرص الخسارة)
-  if (Math.random() < 0.3) { // 30% فرصة للفوز الحقيقي
-    // فوز عشوائي
-  } else {
-    // خسارة: نختار قطاع بقيمة 0 أو منخفضة
-    const lossIndices = [5, 7]; // قطاعات الخسارة
+  if (Math.random() < 0.4) {
+    // زيادة فرص الخسارة
+    const lossIndices = [5, 7]; // قطاعات الخسارة (0x)
     winIndex = lossIndices[Math.floor(Math.random() * lossIndices.length)];
   }
   
@@ -88,14 +85,14 @@ function spinWheel() {
   const isWin = multiplier > 0;
   let profit = isWin ? bet * multiplier : -bet;
   
-  // دوران العجلة
+  // دوران العجلة مع توقف دقيق
   const segAngle = (2 * Math.PI) / wheelSegments.length;
   const targetAngle = (2 * Math.PI) - (winIndex * segAngle) - segAngle/2;
-  const extraSpins = 3 + Math.floor(Math.random() * 3);
+  const extraSpins = 4 + Math.floor(Math.random() * 3);
   const totalRotation = extraSpins * 2 * Math.PI + targetAngle;
   wheelRotation += totalRotation;
   const canvas = document.getElementById('wheelCanvas');
-  canvas.style.transition = 'transform 4s cubic-bezier(0.2,0.8,0.2,1)';
+  canvas.style.transition = 'transform 4.5s cubic-bezier(0.2,0.8,0.2,1)';
   canvas.style.transform = `rotate(${wheelRotation}rad)`;
   
   setTimeout(() => {
@@ -118,7 +115,7 @@ function spinWheel() {
     }
     wheelSpinning = false;
     if (typeof refreshAdminData === 'function') refreshAdminData();
-  }, 4200);
+  }, 4800);
 }
 
 // ================================================================
@@ -157,10 +154,11 @@ function rollDice() {
   let actualWin = (Math.random() < winChance && isWin);
   let profit = actualWin ? bet * finalMult : -bet;
   
-  // تحريك النرد 3D
+  // تحريك النرد 3D مع اهتزاز
   const dice = document.getElementById('dice3d');
   const rotX = 720 + Math.floor(Math.random() * 360);
   const rotY = 720 + Math.floor(Math.random() * 360);
+  dice.style.transition = 'transform 1.2s cubic-bezier(0.2,0.9,0.2,1)';
   dice.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   
   setTimeout(() => {
@@ -172,6 +170,7 @@ function rollDice() {
       5: 'rotateX(90deg) rotateY(0deg)',
       6: 'rotateX(0deg) rotateY(180deg)'
     };
+    dice.style.transition = 'transform 0.8s ease';
     dice.style.transform = faceMap[roll] || 'rotateX(0deg) rotateY(0deg)';
     
     if (actualWin) {
@@ -196,13 +195,14 @@ function rollDice() {
 }
 
 // ================================================================
-// 3. لعبة الكراش
+// 3. لعبة الكراش (توقف تلقائي مع انفجار)
 // ================================================================
 let crashActive = false;
 let crashMultiplier = 1.00;
 let crashIntervalId = null;
 let crashBetAmount = 0;
 let crashCashedOut = false;
+let crashTimer = 0;
 
 function startCrash() {
   if (crashActive) return;
@@ -223,38 +223,48 @@ function startCrash() {
   crashMultiplier = 1.00;
   crashActive = true;
   crashCashedOut = false;
+  crashTimer = 0;
   document.getElementById('crashMultiplier').textContent = '1.00x';
   document.getElementById('crashProgress').style.width = '0%';
   document.getElementById('crashResult').textContent = '';
   document.getElementById('crashExplosion').style.display = 'none';
   document.getElementById('crashCashoutBtn').disabled = false;
+  document.getElementById('crashCashoutBtn').textContent = '💰 سحب';
+  document.getElementById('crashMultiplier').style.color = '#2ecc71';
   
   // تحديد نقطة الانهيار (لصالح المنصة)
-  let crashPoint = 1.2 + Math.random() * 1.5;
-  const maxCrash = 3.5;
-  crashPoint = Math.min(crashPoint, maxCrash);
+  const maxCrash = 2.8 + Math.random() * 1.2; // ينهار بين 2.8x و 4.0x
+  const crashPoint = Math.min(maxCrash, 4.0);
   
   if (crashIntervalId) clearInterval(crashIntervalId);
   crashIntervalId = setInterval(() => {
-    crashMultiplier += 0.02 + Math.random() * 0.04;
+    crashMultiplier += 0.03 + Math.random() * 0.05;
     crashMultiplier = Math.round(crashMultiplier * 100) / 100;
     document.getElementById('crashMultiplier').textContent = crashMultiplier.toFixed(2) + 'x';
-    const progress = Math.min((crashMultiplier / maxCrash) * 100, 100);
+    const progress = Math.min((crashMultiplier / 4.0) * 100, 100);
     document.getElementById('crashProgress').style.width = progress + '%';
     
     // تغيير اللون حسب المخاطرة
-    if (crashMultiplier > 1.8) document.getElementById('crashMultiplier').style.color = '#f1c40f';
-    if (crashMultiplier > 2.8) document.getElementById('crashMultiplier').style.color = '#e74c3c';
+    if (crashMultiplier > 2.0) document.getElementById('crashMultiplier').style.color = '#f1c40f';
+    if (crashMultiplier > 3.0) document.getElementById('crashMultiplier').style.color = '#e74c3c';
     
+    // انهيار تلقائي بعد وصول المضاعف إلى النقطة المحددة
     if (crashMultiplier >= crashPoint && !crashCashedOut) {
       clearInterval(crashIntervalId);
       crashActive = false;
       document.getElementById('crashCashoutBtn').disabled = true;
-      document.getElementById('crashExplosion').style.display = 'block';
-      document.getElementById('crashExplosion').textContent = '💥';
+      
+      // تأثير الانفجار
+      const explosion = document.getElementById('crashExplosion');
+      explosion.style.display = 'block';
+      explosion.textContent = '💥';
+      explosion.style.fontSize = '60px';
+      explosion.style.animation = 'explode 0.6s ease-out';
       setTimeout(() => {
-        document.getElementById('crashExplosion').style.display = 'none';
+        explosion.style.display = 'none';
+        explosion.style.animation = 'none';
       }, 1000);
+      
       casinoBalance = Math.max(0, casinoBalance - crashBetAmount);
       document.getElementById('casinoBalance').innerHTML = casinoBalance.toFixed(6) + ' <small>USDT</small>';
       document.getElementById('crashResult').textContent = `💥 انهارت عند ${crashMultiplier.toFixed(2)}x | خسرت ${crashBetAmount.toFixed(4)} USDT`;
@@ -267,7 +277,7 @@ function startCrash() {
       }
       if (typeof refreshAdminData === 'function') refreshAdminData();
     }
-  }, 100);
+  }, 120);
 }
 
 function cashoutCrash() {
@@ -288,7 +298,7 @@ function cashoutCrash() {
 }
 
 // ================================================================
-// 4. لعبة عبور الشارع
+// 4. لعبة عبور الشارع (دجاجة تتحرك)
 // ================================================================
 let streetGameActive = false;
 let streetSteps = 0;
@@ -314,69 +324,84 @@ function drawStreetScene(step) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  // الخلفية
+  // خلفية واقعية
   const grad = ctx.createLinearGradient(0, 0, 0, h);
   grad.addColorStop(0, '#0a0a1a');
-  grad.addColorStop(0.5, '#1a1a3e');
+  grad.addColorStop(0.4, '#1a1a3e');
+  grad.addColorStop(0.7, '#2a1a3e');
   grad.addColorStop(1, '#0c0914');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, w, h);
+  
   // خطوط الشارع
   ctx.strokeStyle = 'rgba(255,215,0,0.15)';
   ctx.lineWidth = 2;
-  ctx.setLineDash([8, 12]);
+  ctx.setLineDash([10, 15]);
   ctx.beginPath();
-  for (let i=0; i<w; i+=25) { ctx.moveTo(i, h*0.5); ctx.lineTo(i+15, h*0.5); }
+  for (let i=0; i<w; i+=30) { ctx.moveTo(i, h*0.5); ctx.lineTo(i+20, h*0.5); }
   ctx.stroke();
   ctx.setLineDash([]);
-  // أرصفة
-  ctx.fillStyle = 'rgba(30,20,40,0.4)';
-  ctx.fillRect(0, 0, 12, h);
-  ctx.fillRect(w-12, 0, 12, h);
-  // عقبات (سيارات)
+  
+  // أرصفة جانبية
+  ctx.fillStyle = 'rgba(30,20,40,0.5)';
+  ctx.fillRect(0, 0, 15, h);
+  ctx.fillRect(w-15, 0, 15, h);
+  
+  // عقبات متحركة (سيارات)
   const obs = [
-    {x: 50, y: 70, w: 35, h: 18, color: '#e74c3c'},
-    {x: 140, y: 140, w: 40, h: 18, color: '#f1c40f'},
-    {x: 230, y: 95, w: 30, h: 18, color: '#3498db'},
-    {x: 320, y: 180, w: 38, h: 18, color: '#2ecc71'}
+    {x: 50 + Math.sin(Date.now()/1000)*10, y: 75, w: 35, h: 18, color: '#e74c3c'},
+    {x: 140 + Math.sin(Date.now()/800+1)*12, y: 140, w: 40, h: 18, color: '#f1c40f'},
+    {x: 230 + Math.sin(Date.now()/900+2)*8, y: 100, w: 30, h: 18, color: '#3498db'},
+    {x: 320 + Math.sin(Date.now()/700+3)*15, y: 180, w: 38, h: 18, color: '#2ecc71'}
   ];
   obs.forEach(o => {
     ctx.shadowColor = o.color;
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 10;
     ctx.fillStyle = o.color;
     ctx.fillRect(o.x, o.y, o.w, o.h);
     ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    ctx.fillRect(o.x+4, o.y+3, 8, 4);
-    ctx.fillRect(o.x+o.w-12, o.y+3, 8, 4);
+    ctx.fillRect(o.x+4, o.y+4, 8, 4);
+    ctx.fillRect(o.x+o.w-12, o.y+4, 8, 4);
   });
   ctx.shadowBlur = 0;
-  // الدجاجة
+  
+  // الدجاجة (تتحرك مع الخطوات)
   const progress = Math.min(step / maxStreetSteps, 1);
   const x = 15 + progress * (w - 45);
-  const y = h*0.5 - 8 + Math.sin(step*0.3)*6;
+  const y = h*0.5 - 8 + Math.sin(step*0.5)*6;
+  
   ctx.shadowColor = '#ffd700';
-  ctx.shadowBlur = 15;
+  ctx.shadowBlur = 20;
+  // جسم الدجاجة
   ctx.fillStyle = '#f39c12';
   ctx.beginPath();
-  ctx.ellipse(x, y, 10, 14, 0, 0, Math.PI*2);
+  ctx.ellipse(x, y, 12, 16, 0, 0, Math.PI*2);
   ctx.fill();
+  // الرأس
   ctx.fillStyle = '#e67e22';
   ctx.beginPath();
-  ctx.arc(x+3, y-12, 7, 0, Math.PI*2);
+  ctx.arc(x+4, y-14, 8, 0, Math.PI*2);
   ctx.fill();
+  // العين
   ctx.fillStyle = '#fff';
   ctx.beginPath();
-  ctx.arc(x+7, y-13, 2.5, 0, Math.PI*2);
+  ctx.arc(x+8, y-16, 3, 0, Math.PI*2);
   ctx.fill();
   ctx.fillStyle = '#000';
   ctx.beginPath();
-  ctx.arc(x+8.5, y-13, 1.2, 0, Math.PI*2);
+  ctx.arc(x+10, y-16, 1.5, 0, Math.PI*2);
   ctx.fill();
+  // المنقار
   ctx.fillStyle = '#e74c3c';
   ctx.beginPath();
-  ctx.moveTo(x+10, y-9);
-  ctx.lineTo(x+15, y-7);
-  ctx.lineTo(x+10, y-5);
+  ctx.moveTo(x+12, y-10);
+  ctx.lineTo(x+18, y-8);
+  ctx.lineTo(x+12, y-6);
+  ctx.fill();
+  // الأجنحة
+  ctx.fillStyle = '#d35400';
+  ctx.beginPath();
+  ctx.ellipse(x-8, y-4, 6, 10, -0.3, 0, Math.PI*2);
   ctx.fill();
   ctx.shadowBlur = 0;
 }
@@ -460,7 +485,7 @@ function cashoutStreet() {
 }
 
 // ================================================================
-// 5. Three.js (تطوير البيئة ثلاثية الأبعاد)
+// 5. Three.js (بيئة ثلاثية الأبعاد متطورة)
 // ================================================================
 let scene, camera, renderer, gameObject;
 let threeInitialized = false;
@@ -520,17 +545,17 @@ function initThreeJS() {
   gameObject.userData.ring = ring;
 
   const particleGeo = new THREE.BufferGeometry();
-  const particleCount = 100;
+  const particleCount = 150;
   const positions = new Float32Array(particleCount * 3);
   for (let i = 0; i < particleCount * 3; i++) {
-    positions[i] = (Math.random() - 0.5) * 6;
+    positions[i] = (Math.random() - 0.5) * 8;
   }
   particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   const particleMat = new THREE.PointsMaterial({
     color: 0x9b59b6,
-    size: 0.03,
+    size: 0.04,
     transparent: true,
-    opacity: 0.6
+    opacity: 0.7
   });
   const particles = new THREE.Points(particleGeo, particleMat);
   scene.add(particles);
@@ -544,13 +569,13 @@ function animateThree() {
   if (!threeInitialized) return;
   requestAnimationFrame(animateThree);
   if (gameObject) {
-    gameObject.rotation.x += 0.005;
-    gameObject.rotation.y += 0.01;
+    gameObject.rotation.x += 0.008;
+    gameObject.rotation.y += 0.015;
     if (gameObject.userData.ring) {
-      gameObject.userData.ring.rotation.z += 0.005;
+      gameObject.userData.ring.rotation.z += 0.008;
     }
     if (gameObject.userData.particles) {
-      gameObject.userData.particles.rotation.y += 0.001;
+      gameObject.userData.particles.rotation.y += 0.002;
     }
   }
   renderer.render(scene, camera);
@@ -581,7 +606,7 @@ window.addEventListener('load', function() {
   setTimeout(() => {
     drawWheel();
     initStreetGame();
-  }, 500);
+  }, 600);
 });
 
 window.addEventListener('resize', function() {
