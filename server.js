@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
@@ -20,20 +20,23 @@ mongoose.connect(mongoURI)
     })
     .catch(err => console.error('❌ Database connection error:', err));
 
-// ===== النماذج (جميع النماذج السابقة) =====
+// ===== النماذج =====
 
-// نموذج المستخدم (معدل: إضافة حقل language)
+// نموذج المستخدم (معدل)
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     phone: { type: String, required: true },
     password: { type: String, required: true },
-    balance: { type: Number, default: 0.000660 },
-    casinoBalance: { type: Number, default: 0 }, // أصبح 0 بدلاً من 5
+    balance: { type: Number, default: 0 }, // أصبح صفراً
+    casinoBalance: { type: Number, default: 0 },
     points: { type: Number, default: 0 },
     approved: { type: Boolean, default: false },
     isAgent: { type: Boolean, default: false },
-    language: { type: String, default: 'ar' }, // ar أو en
+    language: { type: String, default: 'ar' },
+    registrationDate: { type: Date, default: Date.now },
+    totalInvested: { type: Number, default: 0 },
+    freeRounds: { type: Number, default: 2 }, // جولتان مجانيتان
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model('User', userSchema);
@@ -65,20 +68,17 @@ const adSchema = new mongoose.Schema({
 });
 const Ad = mongoose.model('Ad', adSchema);
 
-// نموذج المسؤولين (معدل: إضافة كلمة المرور وإيقاف السحب)
+// نموذج المسؤولين (معدل - بدون IP)
 const adminSchema = new mongoose.Schema({
-    ip: { type: String, required: true, unique: true },
-    pin: { type: String, required: true },
-    role: { type: String, default: 'admin' },
-    createdBy: { type: String },
+    password: { type: String, required: true }, // مشفر
+    role: { type: String, default: 'superadmin' },
     createdAt: { type: Date, default: Date.now },
     lastLogin: { type: Date },
-    isActive: { type: Boolean, default: true },
-    withdrawalBlocked: { type: Boolean, default: false } // إيقاف السحب مؤقتاً
+    withdrawalBlocked: { type: Boolean, default: false }
 });
 const Admin = mongoose.model('Admin', adminSchema);
 
-// نموذج محاولات الدخول الفاشلة
+// نموذج محاولات الدخول الفاشلة (للإدارة)
 const failedLoginSchema = new mongoose.Schema({
     ip: { type: String, required: true },
     attempts: { type: Number, default: 0 },
@@ -142,36 +142,70 @@ const transactionLogSchema = new mongoose.Schema({
 });
 const TransactionLog = mongoose.model('TransactionLog', transactionLogSchema);
 
+// نموذج نقاط الهدايا (للمسابقات)
+const giftPointsSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
+    points: { type: Number, required: true },
+    reason: { type: String, default: 'مسابقة أو جائزة' },
+    createdAt: { type: Date, default: Date.now }
+});
+const GiftPoints = mongoose.model('GiftPoints', giftPointsSchema);
+
 // ===== دالة تهيئة المسؤول الأول =====
 async function seedAdmin() {
     try {
         const adminCount = await Admin.countDocuments();
         if (adminCount === 0) {
-            console.log('🚀 لم يتم العثور على مسؤول. جاري إنشاء المسؤول الأول...');
-            // الـ IP الافتراضي (يمكن تغييره)
-            const myIP = '127.0.0.1'; // يمكن تغييره لاحقاً
-            // كلمة المرور: wwwtaiz199@gmail.com
-            const defaultPin = 'wwwtaiz199@gmail.com';
-            const hashedPin = await bcrypt.hash(defaultPin, 10);
-            
+            console.log('🚀 جاري إنشاء المسؤول الأول...');
+            const defaultPassword = 'wwwtaiz100@gmail.com';
+            const hashedPassword = await bcrypt.hash(defaultPassword, 10);
             const newAdmin = new Admin({
-                ip: myIP,
-                pin: hashedPin,
+                password: hashedPassword,
                 role: 'superadmin',
-                createdBy: 'system',
-                isActive: true,
                 withdrawalBlocked: false
             });
             await newAdmin.save();
             console.log(`✅ تم إنشاء المسؤول الأول بنجاح!`);
-            console.log(`🔑 IP: ${myIP}`);
-            console.log(`🔐 PIN: ${defaultPin}`);
+            console.log(`🔐 كلمة المرور: ${defaultPassword}`);
+            console.log(`⚠️ يرجى تغييرها فور تسجيل الدخول.`);
         } else {
             console.log(`👑 يوجد ${adminCount} مسؤول(ين) في النظام.`);
         }
     } catch (error) {
         console.error('❌ خطأ في تهيئة المسؤول:', error);
     }
+}
+
+// ===== الدوال المساعدة =====
+const JWT_SECRET = process.env.JWT_SECRET || 'nexora_super_secret_key_2025';
+
+async function isIpBlocked(ip) {
+    const record = await FailedLogin.findOne({ ip });
+    if (!record) return false;
+    if (record.blockedUntil && new Date() < record.blockedUntil) return true;
+    if (record.blockedUntil && new Date() >= record.blockedUntil) {
+        record.attempts = 0;
+        record.blockedUntil = null;
+        await record.save();
+        return false;
+    }
+    return false;
+}
+
+async function recordFailedLogin(ip) {
+    let record = await FailedLogin.findOne({ ip });
+    if (!record) record = new FailedLogin({ ip, attempts: 0 });
+    record.attempts += 1;
+    record.lastAttempt = new Date();
+    if (record.attempts >= 10) record.blockedUntil = new Date(Date.now() + 60 * 60 * 1000);
+    await record.save();
+    return record;
+}
+
+async function createTransaction(userId, type, amount, status, description, referenceId = null) {
+    const transaction = new TransactionLog({ userId, type, amount, status, description, referenceId, updatedAt: new Date() });
+    await transaction.save();
+    return transaction;
 }
 
 // ===== المسارات العامة =====
@@ -182,28 +216,23 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ===== واجهات المصادقة (معدلة لدعم تسجيل الدخول التلقائي) =====
+// ===== واجهات المصادقة =====
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { fullName, email, phone, password } = req.body;
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ success: false, message: "المستخدم مسجل بالفعل!" });
-        
         const newUser = new User({ 
             fullName, 
             email, 
             phone, 
             password,
-            casinoBalance: 0 // تصفير رصيد الكازينو
+            balance: 0,
+            casinoBalance: 0,
+            freeRounds: 2
         });
         await newUser.save();
-        
-        // تسجيل الدخول التلقائي (إرجاع بيانات المستخدم مع الجلسة)
-        res.status(201).json({ 
-            success: true, 
-            message: "تم التسجيل بنجاح!",
-            user: newUser 
-        });
+        res.status(201).json({ success: true, message: "تم التسجيل بنجاح!", user: newUser });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -223,18 +252,16 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// ===== تحديث بيانات المستخدم (الإعدادات) =====
+// ===== تحديث بيانات المستخدم =====
 app.post('/api/user/update', async (req, res) => {
     try {
         const { userId, fullName, password, language } = req.body;
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
-        
         if (fullName) user.fullName = fullName;
         if (password) user.password = password;
         if (language) user.language = language;
         await user.save();
-        
         res.json({ success: true, message: 'تم تحديث البيانات بنجاح', user });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -253,107 +280,14 @@ app.post('/api/wallet/transfer-to-casino', async (req, res) => {
         user.balance = Math.max(0, user.balance - amount);
         user.casinoBalance = (user.casinoBalance || 0) + amount;
         await user.save();
-        
-        // تسجيل معاملة
         await createTransaction(userId, 'transfer_to_casino', amount, 'completed', `تحويل من المحفظة إلى الكازينو`);
-        
         res.json({ success: true, message: 'تم التحويل بنجاح', user });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// ===== نقاط نهاية الإعلانات (معدلة: 30 مشاهدة = لعبة مجانية) =====
-app.post('/api/ads/view', async (req, res) => {
-    try {
-        const { adId, userId } = req.body;
-        const ad = await Ad.findById(adId);
-        if (!ad) return res.status(404).json({ success: false, message: 'الإعلان غير موجود' });
-        if (ad.status !== 'active') return res.status(400).json({ success: false, message: 'هذا الإعلان غير نشط حالياً' });
-        if (ad.currentViews >= ad.targetViews) {
-            ad.status = 'completed';
-            ad.completedAt = new Date();
-            await ad.save();
-            return res.status(400).json({ success: false, message: 'هذا الإعلان قد اكتمل' });
-        }
-        ad.currentViews += 1;
-        await ad.save();
-        
-        const user = await User.findById(userId);
-        if (user) {
-            user.points = (user.points || 0) + 0.5;
-            // كل 30 مشاهدة = لعبة مجانية
-            const views = ad.currentViews;
-            if (views % 30 === 0) {
-                // إضافة رصيد كازينو مجاني (غير قابل للسحب)
-                user.casinoBalance = (user.casinoBalance || 0) + 1.0; // 1 USDT مجاني للعب
-                // تسجيل معاملة
-                await createTransaction(userId, 'free_game_reward', 1.0, 'completed', 'مكافأة مشاهدة 30 إعلاناً');
-            }
-            await user.save();
-        }
-        
-        res.json({ 
-            success: true, 
-            message: '✅ تم تسجيل المشاهدة',
-            currentViews: ad.currentViews,
-            targetViews: ad.targetViews,
-            completed: ad.currentViews >= ad.targetViews
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// ===== نقطة نهاية التحقق من حالة السحب (للوحة الإدارة) =====
-app.get('/api/admin/withdrawal-status', async (req, res) => {
-    try {
-        const admin = await Admin.findOne({ role: 'superadmin' });
-        if (!admin) return res.status(404).json({ success: false, message: 'الإدارة غير موجودة' });
-        res.json({ success: true, blocked: admin.withdrawalBlocked || false });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// ===== نقطة نهاية لتحديث حالة السحب (للوحة الإدارة) =====
-app.post('/api/admin/toggle-withdrawal', async (req, res) => {
-    try {
-        const { blocked } = req.body;
-        const admin = await Admin.findOne({ role: 'superadmin' });
-        if (!admin) return res.status(404).json({ success: false, message: 'الإدارة غير موجودة' });
-        admin.withdrawalBlocked = blocked;
-        await admin.save();
-        res.json({ success: true, message: `تم ${blocked ? 'إيقاف' : 'تفعيل'} السحب مؤقتاً` });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// ===== باقي نقاط النهاية (نفسها مع إضافة التحقق من حالة السحب) =====
-app.post('/api/admin/loss', async (req, res) => {
-    try {
-        const { amount, game, userId } = req.body;
-        if (!amount || amount <= 0) return res.status(400).json({ success: false, message: 'مبلغ غير صالح' });
-        const revenueEntry = new AdminRevenue({ amount, game, userId: userId || 'guest' });
-        await revenueEntry.save();
-        res.json({ success: true, message: 'تم تسجيل الخسارة للإدارة' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-app.get('/api/admin/revenue', async (req, res) => {
-    try {
-        const total = await AdminRevenue.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }]);
-        const count = await AdminRevenue.countDocuments();
-        res.json({ success: true, totalRevenue: total.length > 0 ? total[0].total : 0, totalTransactions: count });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// ===== نقاط نهاية الإعلانات (نفسها) =====
+// ===== نقاط نهاية الإعلانات =====
 app.post('/api/ads/create', async (req, res) => {
     try {
         const { title, content, link, targetViews, userId, userName } = req.body;
@@ -422,6 +356,36 @@ app.post('/api/ads/reject', async (req, res) => {
     }
 });
 
+app.post('/api/ads/view', async (req, res) => {
+    try {
+        const { adId, userId } = req.body;
+        const ad = await Ad.findById(adId);
+        if (!ad) return res.status(404).json({ success: false, message: 'الإعلان غير موجود' });
+        if (ad.status !== 'active') return res.status(400).json({ success: false, message: 'هذا الإعلان غير نشط حالياً' });
+        if (ad.currentViews >= ad.targetViews) {
+            ad.status = 'completed';
+            ad.completedAt = new Date();
+            await ad.save();
+            return res.status(400).json({ success: false, message: 'هذا الإعلان قد اكتمل' });
+        }
+        ad.currentViews += 1;
+        await ad.save();
+        const user = await User.findById(userId);
+        if (user) {
+            user.points = (user.points || 0) + 0.5;
+            // كل 30 مشاهدة = لعبة مجانية
+            if (ad.currentViews % 30 === 0) {
+                user.casinoBalance = (user.casinoBalance || 0) + 1.0;
+                await createTransaction(userId, 'free_game_reward', 1.0, 'completed', 'مكافأة مشاهدة 30 إعلاناً');
+            }
+            await user.save();
+        }
+        res.json({ success: true, message: '✅ تم تسجيل المشاهدة', currentViews: ad.currentViews, targetViews: ad.targetViews, completed: ad.currentViews >= ad.targetViews });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 app.delete('/api/ads/delete', async (req, res) => {
     try {
         const { adId } = req.body;
@@ -433,76 +397,64 @@ app.delete('/api/ads/delete', async (req, res) => {
     }
 });
 
-// ===== نقاط نهاية الإدارة والوكالة وسوق النقاط (نفسها) =====
+// ================================================================
+// نقاط النهاية الجديدة (الإدارة، سوق النقاط، الوكالة، المعاملات)
+// ================================================================
 
-async function isIpBlocked(ip) {
-    const record = await FailedLogin.findOne({ ip });
-    if (!record) return false;
-    if (record.blockedUntil && new Date() < record.blockedUntil) return true;
-    if (record.blockedUntil && new Date() >= record.blockedUntil) {
-        record.attempts = 0;
-        record.blockedUntil = null;
-        await record.save();
-        return false;
-    }
-    return false;
-}
-
-async function recordFailedLogin(ip) {
-    let record = await FailedLogin.findOne({ ip });
-    if (!record) record = new FailedLogin({ ip, attempts: 0 });
-    record.attempts += 1;
-    record.lastAttempt = new Date();
-    if (record.attempts >= 10) record.blockedUntil = new Date(Date.now() + 60 * 60 * 1000);
-    await record.save();
-    return record;
-}
-
-async function createTransaction(userId, type, amount, status, description, referenceId = null) {
-    const transaction = new TransactionLog({ userId, type, amount, status, description, referenceId, updatedAt: new Date() });
-    await transaction.save();
-    return transaction;
-}
-
-// ---- إدارة المسؤولين ----
+// ---- تسجيل دخول الإدارة (محمي بكلمة مرور) ----
 app.post('/api/admin/login', async (req, res) => {
     try {
-        const { ip, pin } = req.body;
-        if (await isIpBlocked(ip)) return res.status(403).json({ success: false, message: 'تم حظر هذا الIP مؤقتاً. حاول بعد ساعة.' });
-        const admin = await Admin.findOne({ ip });
-        if (!admin) { await recordFailedLogin(ip); return res.status(401).json({ success: false, message: 'IP غير مصرح به' }); }
-        const isPinValid = await bcrypt.compare(pin, admin.pin);
-        if (!isPinValid) { await recordFailedLogin(ip); return res.status(401).json({ success: false, message: 'رمز PIN غير صحيح' }); }
+        const { password } = req.body;
+        const admin = await Admin.findOne({ role: 'superadmin' });
+        if (!admin) return res.status(404).json({ success: false, message: 'الإدارة غير موجودة' });
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'كلمة المرور غير صحيحة' });
+        }
         admin.lastLogin = new Date();
         await admin.save();
-        const record = await FailedLogin.findOne({ ip });
-        if (record) { record.attempts = 0; record.blockedUntil = null; await record.save(); }
-        res.json({ success: true, message: 'تم تسجيل الدخول بنجاح', role: admin.role, withdrawalBlocked: admin.withdrawalBlocked });
+        // إنشاء JWT
+        const token = jwt.sign({ id: admin._id, role: admin.role }, JWT_SECRET, { expiresIn: '24h' });
+        res.json({ success: true, token, role: admin.role, withdrawalBlocked: admin.withdrawalBlocked });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-app.post('/api/admin/add', async (req, res) => {
+// التحقق من صلاحية المسؤول (Middleware)
+async function verifyAdmin(req, res, next) {
     try {
-        const { ip, pin, role, createdBy } = req.body;
-        if (createdBy !== 'superadmin') return res.status(403).json({ success: false, message: 'غير مصرح بإضافة مسؤولين' });
-        const existing = await Admin.findOne({ ip });
-        if (existing) return res.status(400).json({ success: false, message: 'هذا الIP مسجل مسبقاً' });
-        const hashedPin = await bcrypt.hash(pin, 10);
-        const newAdmin = new Admin({ ip, pin: hashedPin, role: role || 'admin', createdBy, withdrawalBlocked: false });
-        await newAdmin.save();
-        res.json({ success: true, message: 'تم إضافة المسؤول بنجاح' });
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ success: false, message: 'غير مصرح' });
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.admin = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'رمز غير صالح' });
+    }
+}
+
+// ---- لوحة الإدارة (محمية) ----
+app.get('/api/admin/dashboard', verifyAdmin, async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments();
+        const totalBalance = (await User.aggregate([{ $group: { _id: null, total: { $sum: '$balance' } } }]))[0]?.total || 0;
+        const totalWithdrawals = (await TransactionLog.aggregate([{ $match: { type: 'withdraw', status: 'pending' } }, { $group: { _id: null, total: { $sum: '$amount' } } }]))[0]?.total || 0;
+        const totalRevenue = (await AdminRevenue.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }]))[0]?.total || 0;
+        res.json({ success: true, stats: { totalUsers, totalBalance, totalWithdrawals, totalRevenue } });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// ---- طلبات الوكالة (معدلة لمنع الضغط المتكرر) ----
+// ---- طلبات الوكالة (مع شروط صارمة) ----
 app.post('/api/agent/request', async (req, res) => {
     try {
         const { userId, fullName, email, phone } = req.body;
-        // التحقق من وجود طلب سابق
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+
+        // التحقق من الطلبات السابقة
         const existing = await AgentRequest.findOne({ userId });
         if (existing) {
             if (existing.status === 'pending') {
@@ -516,9 +468,36 @@ app.post('/api/agent/request', async (req, res) => {
                 return res.status(400).json({ success: false, message: 'أنت بالفعل وكيل معتمد' });
             }
         }
-        const user = await User.findById(userId);
         if (user.isAgent) return res.status(400).json({ success: false, message: 'أنت بالفعل وكيل معتمد' });
-        
+
+        // ==== الشروط الصارمة ====
+        // 1. مرور 30 يوم على التسجيل
+        const daysSinceRegister = (Date.now() - new Date(user.registrationDate).getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSinceRegister < 30) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `⚠️ يجب أن يكون قد مضى على حسابك 30 يوماً على الأقل (تبقى ${Math.ceil(30 - daysSinceRegister)} يوم).` 
+            });
+        }
+        // 2. إجمالي الاستثمار >= 100 دولار
+        if (user.totalInvested < 100) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `⚠️ يجب أن يكون إجمالي استثماراتك في خطط التعدين 100 دولار على الأقل (لديك ${user.totalInvested} دولار).` 
+            });
+        }
+        // 3. عدد الإعلانات النشطة (حد أقصى 2، واحد من كل نوع)
+        const activeAds = await Ad.find({ advertiserId: userId, status: 'active' });
+        const buyAds = activeAds.filter(a => a.type === 'buy');
+        const sellAds = activeAds.filter(a => a.type === 'sell');
+        if (buyAds.length >= 1) {
+            return res.status(400).json({ success: false, message: '⚠️ لديك بالفعل إعلان شراء نشط. يمكنك فتح إعلان واحد فقط لكل نوع.' });
+        }
+        if (sellAds.length >= 1) {
+            return res.status(400).json({ success: false, message: '⚠️ لديك بالفعل إعلان بيع نشط. يمكنك فتح إعلان واحد فقط لكل نوع.' });
+        }
+
+        // إنشاء الطلب
         const request = new AgentRequest({ userId, fullName, email, phone, status: 'pending' });
         await request.save();
         await createTransaction(userId, 'agent_request', 0, 'pending', 'طلب التقدم للوكالة');
@@ -528,7 +507,7 @@ app.post('/api/agent/request', async (req, res) => {
     }
 });
 
-app.get('/api/agent/requests', async (req, res) => {
+app.get('/api/agent/requests', verifyAdmin, async (req, res) => {
     try {
         const requests = await AgentRequest.find().sort({ requestedAt: -1 });
         res.json({ success: true, requests });
@@ -537,15 +516,14 @@ app.get('/api/agent/requests', async (req, res) => {
     }
 });
 
-app.post('/api/agent/approve', async (req, res) => {
+app.post('/api/agent/approve', verifyAdmin, async (req, res) => {
     try {
-        const { requestId, adminId } = req.body;
+        const { requestId } = req.body;
         const request = await AgentRequest.findById(requestId);
         if (!request) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
         if (request.status !== 'pending') return res.status(400).json({ success: false, message: 'تمت مراجعة هذا الطلب مسبقاً' });
         request.status = 'approved';
         request.reviewedAt = new Date();
-        request.reviewedBy = adminId;
         await request.save();
         const user = await User.findById(request.userId);
         if (user) {
@@ -561,15 +539,14 @@ app.post('/api/agent/approve', async (req, res) => {
     }
 });
 
-app.post('/api/agent/reject', async (req, res) => {
+app.post('/api/agent/reject', verifyAdmin, async (req, res) => {
     try {
-        const { requestId, adminId } = req.body;
+        const { requestId } = req.body;
         const request = await AgentRequest.findById(requestId);
         if (!request) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
         if (request.status !== 'pending') return res.status(400).json({ success: false, message: 'تمت مراجعة هذا الطلب مسبقاً' });
         request.status = 'rejected';
         request.reviewedAt = new Date();
-        request.reviewedBy = adminId;
         await request.save();
         res.json({ success: true, message: '❌ تم رفض الطلب' });
     } catch (error) {
@@ -577,7 +554,7 @@ app.post('/api/agent/reject', async (req, res) => {
     }
 });
 
-// ---- سوق النقاط (نفسها) ----
+// ---- سوق النقاط ----
 app.post('/api/agent/set-prices', async (req, res) => {
     try {
         const { userId, sellPrice, buyPrice } = req.body;
@@ -605,7 +582,8 @@ app.get('/api/market/sell-orders', async (req, res) => {
             sellPrice: agent.sellPrice,
             buyPrice: agent.buyPrice
         }));
-        res.json({ success: true, agents: result });
+        const count = result.length;
+        res.json({ success: true, agents: result, count });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -622,7 +600,8 @@ app.get('/api/market/buy-orders', async (req, res) => {
             sellPrice: agent.sellPrice,
             buyPrice: agent.buyPrice
         }));
-        res.json({ success: true, agents: result });
+        const count = result.length;
+        res.json({ success: true, agents: result, count });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -653,10 +632,10 @@ app.post('/api/market/order', async (req, res) => {
 
         const order = new MarketOrder({ type, userId, agentId, points, pricePerPoint, totalAmount, commission, netAmount, status: 'pending' });
         await order.save();
-        await createTransaction(userId, type === 'buy' ? 'market_buy' : 'market_sell', totalAmount, 'pending', `عملية ${type === 'buy' ? 'شراء' : 'بيع'} نقاط (${points} نقطة) مع الوكيل ${agent.userId}`, order._id.toString());
+        await createTransaction(userId, type === 'buy' ? 'market_buy' : 'market_sell', totalAmount, 'pending', `عملية ${type === 'buy' ? 'شراء' : 'بيع'} نقاط (${points} نقطة)`, order._id.toString());
         await user.save();
 
-        res.json({ success: true, message: `✅ تم إنشاء طلب ${type === 'buy' ? 'شراء' : 'بيع'} النقاط بنجاح. يرجى التواصل مع الوكيل لإتمام الصفقة.`, orderId: order._id });
+        res.json({ success: true, message: `✅ تم إنشاء طلب ${type === 'buy' ? 'شراء' : 'بيع'} النقاط بنجاح.`, orderId: order._id });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -689,7 +668,7 @@ app.post('/api/market/confirm', async (req, res) => {
         }
 
         await TransactionLog.findOneAndUpdate({ referenceId: order._id.toString() }, { status: 'completed', updatedAt: new Date() });
-        await createTransaction(order.userId, order.type === 'buy' ? 'market_buy_completed' : 'market_sell_completed', order.netAmount, 'completed', `تم إتمام عملية ${order.type === 'buy' ? 'شراء' : 'بيع'} النقاط (${order.points} نقطة)`);
+        await createTransaction(order.userId, order.type === 'buy' ? 'market_buy_completed' : 'market_sell_completed', order.netAmount, 'completed', `تم إتمام عملية ${order.type === 'buy' ? 'شراء' : 'بيع'} النقاط`);
         await user.save();
         await agentUser.save();
 
@@ -711,10 +690,65 @@ app.get('/api/transactions', async (req, res) => {
     }
 });
 
-app.get('/api/transactions/all', async (req, res) => {
+app.get('/api/transactions/all', verifyAdmin, async (req, res) => {
     try {
         const transactions = await TransactionLog.find().sort({ createdAt: -1 });
         res.json({ success: true, transactions });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ---- حالة السحب ----
+app.get('/api/admin/withdrawal-status', async (req, res) => {
+    try {
+        const admin = await Admin.findOne({ role: 'superadmin' });
+        if (!admin) return res.status(404).json({ success: false, message: 'الإدارة غير موجودة' });
+        res.json({ success: true, blocked: admin.withdrawalBlocked || false });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/admin/toggle-withdrawal', verifyAdmin, async (req, res) => {
+    try {
+        const { blocked } = req.body;
+        const admin = await Admin.findOne({ role: 'superadmin' });
+        if (!admin) return res.status(404).json({ success: false, message: 'الإدارة غير موجودة' });
+        admin.withdrawalBlocked = blocked;
+        await admin.save();
+        res.json({ success: true, message: `تم ${blocked ? 'إيقاف' : 'تفعيل'} السحب مؤقتاً` });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ---- إرسال نقاط الهدايا (للمسابقات) ----
+app.post('/api/admin/gift-points', verifyAdmin, async (req, res) => {
+    try {
+        const { userId, points, reason } = req.body;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+        user.points = (user.points || 0) + points;
+        await user.save();
+        const gift = new GiftPoints({ userId, points, reason: reason || 'هدية من الإدارة' });
+        await gift.save();
+        await createTransaction(userId, 'gift_points', points, 'completed', `هدية نقاط (${reason || 'مسابقة'})`);
+        res.json({ success: true, message: `✅ تم إرسال ${points} نقطة إلى ${user.fullName}` });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ---- تحديث إعدادات لعبة الدجاجة (لوحة الإدارة) ----
+app.post('/api/admin/update-chicken-game', verifyAdmin, async (req, res) => {
+    try {
+        const { riskMultiplier, baseReward } = req.body;
+        // هنا يمكن حفظ الإعدادات في نموذج منفصل (مثل GameSettings)
+        // لكننا سنكتفي بتخزينها في متغير مؤقت أو قاعدة بيانات
+        // للتبسيط، سنستخدم متغير عام (يمكن نقله إلى نموذج لاحقاً)
+        global.chickenGameSettings = { riskMultiplier, baseReward };
+        res.json({ success: true, message: '✅ تم تحديث إعدادات لعبة الدجاجة' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
