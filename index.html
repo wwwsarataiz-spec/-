@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>Nexora - النظام المتكامل</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ===== الأساسيات ===== */
+    :root {
+      --bg: #0a0815;
+      --card: rgba(21, 17, 36, 0.85);
+      --gold: #d4af37;
+      --purple: #6c5ce7;
+      --text: #f1ebd9;
+      --radius: 16px;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background-image: radial-gradient(ellipse at 10% 20%, rgba(108, 92, 231, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 90% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 8px 80px 8px;
+    }
+    .gold-text { color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.2); }
+
+    /* ===== شريط التنقل السفلي ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(21, 17, 36, 0.9);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(212,175,55,0.15);
+      display: flex;
+      justify-content: space-around;
+      padding: 6px 0 8px;
+      z-index: 1000;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.8);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #6a5f7a;
+      font-size: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      gap: 2px;
+    }
+    .nav-item i { font-size: 20px; }
+    .nav-item.active { color: var(--gold); text-shadow: 0 0 15px rgba(212,175,55,0.3); }
+    .nav-item:hover { color: var(--gold); }
+
+    /* ===== الأقسام ===== */
+    .section { display: none; animation: fadeIn 0.4s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ===== البطاقات ===== */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      text-align: right;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: 0.3s;
+    }
+    .card:hover { border-color: rgba(212,175,55,0.3); }
+
+    .balance {
+      font-size: clamp(28px, 8vw, 40px);
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin: 8px 0;
+      text-shadow: 0 0 30px rgba(212,175,55,0.1);
+    }
+    .balance small { color: var(--gold); font-size: clamp(14px,3vw,20px); }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px 8px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      font-size: clamp(13px,3vw,15px);
+      min-width: 70px;
+      text-align: center;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+    .btn-red { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), #b8960f); color: #000; }
+    .btn-purple { background: linear-gradient(135deg, var(--purple), #5a4bd1); }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 10px;
+      margin: 6px 0;
+      background: rgba(30, 23, 53, 0.7);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 8px;
+      font-size: clamp(13px,3vw,15px);
+      box-sizing: border-box;
+      direction: rtl;
+      transition: 0.3s;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 20px rgba(212,175,55,0.1); }
+    input::placeholder, textarea::placeholder { color: #6a5f7a; }
+
+    .mini-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: clamp(11px,2.5vw,13px);
+      transition: 0.3s;
+      margin: 2px;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+    }
+    .mini-btn:hover { border-color: var(--gold); background: rgba(212,175,55,0.05); }
+    .mini-btn.active-risk { border-color: var(--gold); background: rgba(212,175,55,0.15); }
+
+    .game-btn {
+      background: linear-gradient(135deg, var(--gold), #b8960f);
+      color: #000;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: clamp(14px,3vw,16px);
+      width: 100%;
+      margin-top: 6px;
+      transition: 0.2s;
+    }
+    .game-btn:active { transform: scale(0.96); }
+
+    /* ===== النوافذ المنبثقة ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10,8,21,0.95);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal-content {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      width: 100%; max-width: 420px;
+      padding: 24px 20px;
+      border-radius: var(--radius);
+      max-height: 95vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .close-btn {
+      background: linear-gradient(135deg, var(--purple), #5a4bd1);
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: clamp(14px,3vw,16px);
+    }
+
+    /* ===== الإدارة ===== */
+    .admin-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .admin-stat-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+    }
+    .admin-stat-card .number {
+      font-size: clamp(22px,5vw,30px);
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .admin-stat-card .label {
+      font-size: clamp(11px,2vw,13px);
+      color: #8a7fa0;
+    }
+    .pending-user {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: var(--glass-bg);
+      border-radius: 8px;
+      margin: 4px 0;
+      font-size: clamp(12px,2.5vw,14px);
+      backdrop-filter: blur(4px);
+    }
+    .pending-user .actions button {
+      background: #2ecc71;
+      border: none;
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      margin: 0 4px;
+    }
+    .pending-user .actions button.reject { background: #e74c3c; color: #fff; }
+
+    /* ===== شريط التمرير ===== */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, var(--gold), var(--purple));
+      border-radius: 4px;
+      outline: none;
+      margin: 8px 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(212,175,55,0.3);
+    }
+
+    /* ===== شريط التحذير المتحرك ===== */
+    .ticker-wrap {
+      width: 100%;
+      overflow: hidden;
+      background: rgba(212,175,55,0.05);
+      border: 1px solid rgba(212,175,55,0.1);
+      border-radius: 8px;
+      padding: 6px 0;
+      margin: 8px 0;
+    }
+    .ticker {
+      display: inline-block;
+      white-space: nowrap;
+      animation: ticker 25s linear infinite;
+      font-size: clamp(11px,2vw,13px);
+      color: #8a7fa0;
+    }
+    .ticker span { color: var(--gold); margin: 0 10px; }
+    @keyframes ticker {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* ===== الإعلانات ===== */
+    .ad-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 8px 0;
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+    .ad-progress {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+    .ad-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold), var(--purple));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* ===== طبقة تسجيل الدخول ===== */
+    #loginOverlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10,8,21,0.98);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+    #loginOverlay.hidden { display: none; }
+    .login-box {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      padding: 30px 20px;
+      border-radius: var(--radius);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .login-box h2 { color: var(--gold); margin-bottom: 20px; }
+    .login-btn {
+      background: linear-gradient(135deg, var(--gold), #b8960f);
+      color: #000;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .switch-auth { color: #8a7fa0; margin-top: 12px; font-size: 13px; cursor: pointer; }
+    .switch-auth:hover { color: var(--gold); }
+    .auth-error { color: #e74c3c; font-size: 13px; margin-top: 6px; min-height: 20px; }
+
+    /* ===== الألعاب المبسطة ===== */
+    .game-container {
+      margin: 12px 0;
+      padding: 14px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      transition: 0.3s;
+    }
+    .game-container:hover { border-color: rgba(212,175,55,0.3); }
+    .game-title {
+      color: var(--gold);
+      font-size: clamp(16px,4vw,20px);
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .game-desc {
+      font-size: clamp(11px,2.5vw,13px);
+      color: #8a7fa0;
+      margin-bottom: 8px;
+    }
+    .game-result {
+      margin-top: 8px;
+      font-weight: 700;
+      font-size: clamp(13px,3vw,15px);
+      min-height: 24px;
+      text-align: center;
+    }
+    .crash-multiplier {
+      font-size: clamp(32px,8vw,48px);
+      font-weight: 900;
+      text-align: center;
+      transition: color 0.3s;
+    }
+    .crash-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #2d2d3a;
+      border-radius: 4px;
+      margin: 6px 0;
+      overflow: hidden;
+    }
+    .crash-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c);
+      border-radius: 4px;
+      transition: width 0.1s linear;
+    }
+    .street-progress {
+      width: 100%;
+      height: 6px;
+      background: #2d2d3a;
+      border-radius: 4px;
+      margin: 6px 0;
+      overflow: hidden;
+    }
+    .street-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold), var(--purple));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .street-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 8px;
+      background: rgba(255,215,0,0.05);
+      border-radius: 6px;
+      margin: 4px 0;
+      font-weight: 700;
+      font-size: clamp(13px,3vw,16px);
+    }
+    .street-info .multiplier { color: var(--neon-gold); text-shadow: 0 0 10px rgba(255,215,0,0.4); }
+    #streetGame {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #1a1a2e;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 30px rgba(255,215,0,0.2);
+      margin-bottom: 10px;
+    }
+    #streetCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #0f0b1a;
+    }
+    @keyframes explode {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    /* ===== استجابة ===== */
+    @media (max-width: 400px) {
+      .container { padding: 0 4px 70px 4px; }
+      .card { padding: 12px; }
+      .admin-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== طبقة تسجيل الدخول ===== -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2><i class="fas fa-crown"></i> NEXORA</h2>
+    <div id="authForm">
+      <input type="text" id="loginFullName" placeholder="الاسم الكامل (للتسجيل)" style="display:none;">
+      <input type="text" id="loginPhone" placeholder="رقم الجوال (للتسجيل)" style="display:none;">
+      <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
+      <input type="password" id="loginPassword" placeholder="كلمة المرور">
+      <div id="authError" class="auth-error"></div>
+      <button class="login-btn" id="authActionBtn" onclick="handleAuth()">تسجيل الدخول</button>
+      <div class="switch-auth" id="toggleAuthText" onclick="toggleAuthMode()">ليس لديك حساب؟ سجل الآن</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== الحاوية الرئيسية ===== -->
+<div class="container" id="mainApp">
+
+  <!-- ===== شريط التحذير ===== -->
+  <div class="ticker-wrap">
+    <div class="ticker" id="tickerText">
+      <span>🔄</span> قام أحمد بشراء خطة VIP بقيمة 100 USDT <span>💰</span>
+      <span>🔄</span> ربحت مريم 25.5 USDT من لعبة الكراش <span>💰</span>
+      <span>🔄</span> انضم محمد للتو وحصل على 5 USDT مجاناً <span>💰</span>
+    </div>
+  </div>
+
+  <!-- ===== القسم 1: الرئيسية ===== -->
+  <div id="section-dashboard" class="section active">
+    <h1 style="margin-top:12px; font-size:clamp(24px,7vw,34px); color:var(--gold); text-shadow:0 0 30px rgba(212,175,55,0.15);">
+      <i class="fas fa-gem"></i> NEXORA PREMIUM
+    </h1>
+    <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);">نظام التعدين وإدارة الأصول المتقدم</p>
+
+    <div class="card" style="text-align:center; margin-top:16px;">
+      <p style="color:#8a7fa0; font-size:clamp(13px,2.5vw,15px);">إجمالي الرصيد الاستثماري</p>
+      <div class="balance" id="liveBalance">0.000660 <small>USDT</small></div>
+      <p style="font-size:clamp(11px,2vw,13px); color:#2ecc71;"><i class="fas fa-bolt"></i> محرك التعدين يعمل بكفاءة</p>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-green" onclick="navigateTo('wallet')"><i class="fas fa-arrow-down"></i> إيداع أموال</button>
+      <button class="btn btn-red" onclick="navigateTo('wallet')"><i class="fas fa-arrow-up"></i> سحب الأرباح</button>
+    </div>
+
+    <!-- التعدين المجاني -->
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-free-brands"></i> التعدين المجاني</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">احصل على 0.005 USDT يومياً</p>
+      <div style="text-align:center; margin:10px 0;">
+        <span style="font-size:clamp(20px,5vw,28px); font-weight:700; color:var(--gold);" id="freeMiningCounter">0.0000 USDT</span>
+      </div>
+      <button class="btn btn-gold" onclick="claimFreeMining()" style="width:100%;"><i class="fas fa-hand-holding-heart"></i> احصد الآن (مرة كل 24 ساعة)</button>
+      <div id="freeMiningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:6px; text-align:center;"></div>
+    </div>
+
+    <!-- التعدين المدفوع المرن -->
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-rocket"></i> التعدين المدفوع المرن</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">اختر مبلغ الاستثمار (الحد الأدنى 3 USDT)</p>
+      <div style="margin:10px 0;">
+        <label style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">مبلغ الاستثمار: <span id="investAmountDisplay" style="color:var(--gold);">10.00</span> USDT</label>
+        <input type="range" id="investSlider" min="3" max="500" step="0.5" value="10" oninput="updateInvestmentCalc()">
+        <div style="display:flex; justify-content:space-between; font-size:clamp(10px,2vw,12px); color:#6a5f7a; padding:0 4px;">
+          <span>3 USDT</span>
+          <span>500 USDT</span>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;">
+        <div style="background:var(--glass-bg); padding:8px; border-radius:8px; text-align:center;">
+          <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">الأرباح اليومية</p>
+          <p style="font-size:clamp(16px,4vw,20px); color:var(--gold);" id="dailyProfitDisplay">0.00 USDT</p>
+        </div>
+        <div style="background:var(--glass-bg); padding:8px; border-radius:8px; text-align:center;">
+          <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">الأرباح الإجمالية (50 يوم)</p>
+          <p style="font-size:clamp(16px,4vw,20px); color:var(--gold);" id="totalProfitDisplay">0.00 USDT</p>
+        </div>
+      </div>
+      <button class="btn btn-gold" onclick="purchaseFlexMining()" style="width:100%;"><i class="fas fa-play"></i> بدء التعدين المدفوع</button>
+      <div id="flexMiningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:6px; text-align:center;"></div>
+    </div>
+
+    <!-- خطط الترقية -->
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-layer-group"></i> خطط الترقية السحابية</h4>
+      <div id="plansContainer"></div>
+    </div>
+  </div>
+
+  <!-- ===== القسم 2: المحفظة ===== -->
+  <div id="section-wallet" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-wallet"></i> المحفظة</h2>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-arrow-down"></i> الإيداع</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#2ecc71; font-weight:700;">عنوان الإيداع (TRC-20):</p>
+      <input type="text" id="walletAddress" value="0x2975dc1f8188c30b2a4be0ec27e33494da66cb46" readonly style="text-align:center; color:var(--gold); font-weight:bold; font-size:12px;">
+      <button class="btn btn-gold" style="margin-top:8px; padding:10px;" onclick="copyAddress()"><i class="fas fa-copy"></i> نسخ العنوان</button>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-arrow-up"></i> طلب سحب</h4>
+      <input type="text" id="withdrawAddress" placeholder="عنوان محفظة السحب">
+      <input type="number" id="withdrawAmount" placeholder="الكمية (الحد الأدنى 10 USDT)" min="10">
+      <button class="btn btn-red" style="width:100%; padding:12px; margin-top:6px;" onclick="submitWithdraw()"><i class="fas fa-check"></i> تأكيد عملية السحب</button>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-exchange-alt"></i> تبادل النقاط</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">بيع نقاطك للمنصة مباشرة</p>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input type="number" id="pointsToSell" placeholder="عدد النقاط" style="flex:2; min-width:80px;">
+        <button class="btn btn-gold" style="flex:1; min-width:60px;" onclick="sellPoints()"><i class="fas fa-coins"></i> بيع</button>
+      </div>
+      <div style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;">
+        سعر الصرف: 1000 نقطة = <span id="exchangeRateDisplay">1.00</span> USDT
+      </div>
+      <div id="pointsBalanceDisplay" style="font-size:clamp(13px,3vw,15px); color:var(--gold); text-align:center; margin-top:4px;">نقاطك: 0</div>
+    </div>
+  </div>
+
+  <!-- ===== القسم 3: الكازينو ===== -->
+  <div id="section-casino" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-dice"></i> الكازينو</h2>
+    <div class="card" style="text-align:center; background:rgba(212,175,55,0.05); border-color:var(--gold);">
+      <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);"><i class="fas fa-gift"></i> رصيد الكازينو</p>
+      <div class="balance" id="casinoBalance" style="font-size:clamp(24px,6vw,34px);">5.000000 <small>USDT</small></div>
+      <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">تم منحك 5 USDT مجاناً للتجربة</p>
+    </div>
+
+    <!-- لعبة تخمين الرقم (بديل بسيط) -->
+    <div class="game-container">
+      <div class="game-title"><i class="fas fa-dice"></i> تخمين الرقم</div>
+      <div class="game-desc">خمن رقماً بين 1 و 10، واربح مضاعفات رهانك</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+        <input type="number" id="guessBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:2; min-width:80px;">
+        <input type="number" id="guessNumber" placeholder="رقمك (1-10)" min="1" max="10" value="5" style="flex:1; min-width:60px;">
+        <button class="btn btn-gold" onclick="playGuess()" style="flex:1;"><i class="fas fa-check"></i> خمن</button>
+      </div>
+      <div id="guessResult" class="game-result"></div>
+    </div>
+
+    <!-- لعبة الكراش المبسطة -->
+    <div class="game-container">
+      <div class="game-title"><i class="fas fa-rocket"></i> لعبة الكراش</div>
+      <div class="game-desc">اربح مضاعفات تتصاعد، لكن انسحب قبل الانهيار!</div>
+      <div style="text-align:center; margin:10px 0;">
+        <span id="crashMultiplier" class="crash-multiplier" style="color:#2ecc71;">1.00x</span>
+      </div>
+      <div class="crash-bar-bg"><div class="crash-bar-fill" id="crashProgress"></div></div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+        <input type="number" id="crashBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:2; min-width:80px;">
+      </div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button class="btn btn-gold" onclick="startCrash()" style="flex:1;"><i class="fas fa-play"></i> بدء</button>
+        <button class="btn btn-green" id="crashCashoutBtn" onclick="cashoutCrash()" disabled style="flex:1;"><i class="fas fa-hand-holding-usd"></i> سحب</button>
+      </div>
+      <div id="crashResult" class="game-result"></div>
+      <div id="crashExplosion" style="display:none; text-align:center; font-size:60px; margin:8px 0; animation: explode 0.6s ease-out;">💥</div>
+    </div>
+
+    <!-- لعبة النرد المبسطة -->
+    <div class="game-container">
+      <div class="game-title"><i class="fas fa-cube"></i> النرد</div>
+      <div class="game-desc">خمن زوجي أو فردي</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+        <input type="number" id="diceBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:1; min-width:60px;">
+        <select id="diceGuess" style="flex:1; min-width:60px;">
+          <option value="even">زوجي</option>
+          <option value="odd">فردي</option>
+        </select>
+        <button class="btn btn-gold" onclick="rollDice()" style="flex:1;"><i class="fas fa-dice"></i> رمي</button>
+      </div>
+      <div id="diceResult" class="game-result"></div>
+    </div>
+  </div>
+
+  <!-- ===== القسم 4: الإعلانات ===== -->
+  <div id="section-ads" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-bullhorn"></i> الإعلانات</h2>
+    <div class="ad-container">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-eye"></i> مشاهدة الإعلانات</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">شاهد الإعلانات واكسب فرصاً مجانية</p>
+      <div class="ad-progress"><div class="ad-progress-fill" id="adProgressFill"></div></div>
+      <p style="font-size:clamp(11px,2vw,13px); color:#8a7fa0;">مشاهداتك: <span id="adViews">0</span> / 20</p>
+      <button class="btn btn-gold" onclick="watchAd()" style="width:100%; margin-top:6px;"><i class="fas fa-play"></i> مشاهدة إعلان</button>
+      <div id="adMessage" style="font-size:clamp(11px,2vw,13px); margin-top:6px; color:#8a7fa0;"></div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-ad"></i> نشر إعلان ممول</h4>
+      <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">ادفع 10 USDT وانشر إعلانك للجميع</p>
+      <input type="text" id="adTitle" placeholder="عنوان الإعلان">
+      <textarea id="adContent" placeholder="محتوى الإعلان" rows="3"></textarea>
+      <input type="url" id="adLink" placeholder="رابط الفيديو أو الصفحة">
+      <button class="btn btn-purple" onclick="submitAd()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> نشر الإعلان (10 USDT)</button>
+      <div id="adSubmitStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- ===== القسم 5: الإدارة ===== -->
+  <div id="section-admin" class="section">
+    <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-crown"></i> لوحة الإدارة</h2>
+    <div class="admin-stats">
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalUsers">0</div>
+        <div class="label"><i class="fas fa-users"></i> المشتركين</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalBalance">0.00</div>
+        <div class="label"><i class="fas fa-coins"></i> أموال البوت</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalWithdrawals">0.00</div>
+        <div class="label"><i class="fas fa-arrow-up"></i> السحوبات</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="number" id="adminTotalRevenue">0.00</div>
+        <div class="label"><i class="fas fa-chart-line"></i> أرباح الإدارة</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-sliders-h"></i> التحكم بالكازينو</h4>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <label style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0; flex:1;">نسبة الربح (House Edge):</label>
+        <input type="number" id="houseEdgeInput" value="5" min="0" max="20" step="0.5" style="flex:1; min-width:60px;">
+        <span style="color:var(--gold);">%</span>
+      </div>
+      <button class="btn btn-purple" onclick="updateHouseEdge()" style="margin-top:6px;"><i class="fas fa-save"></i> حفظ</button>
+      <div style="margin-top:8px; display:flex; gap:8px;">
+        <button class="mini-btn" onclick="emergencyStop()" style="border-color:#e74c3c; color:#e74c3c;"><i class="fas fa-stop-circle"></i> إيقاف الطوارئ</button>
+        <button class="mini-btn" onclick="resetCasino()" style="border-color:var(--gold);"><i class="fas fa-undo"></i> إعادة تعيين</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-cogs"></i> إدارة خطط التعدين</h4>
+      <div id="adminPlansList"></div>
+      <button class="btn btn-gold" onclick="showAddPlanForm()" style="margin-top:6px;"><i class="fas fa-plus"></i> إضافة خطة</button>
+      <div id="addPlanForm" style="display:none; margin-top:8px;">
+        <input type="text" id="planName" placeholder="اسم الخطة">
+        <input type="number" id="planMin" placeholder="الحد الأدنى" step="0.5">
+        <input type="number" id="planMax" placeholder="الحد الأقصى" step="0.5">
+        <input type="number" id="planProfit" placeholder="نسبة الربح (%)" step="0.5">
+        <input type="number" id="planDuration" placeholder="المدة (أيام)">
+        <button class="btn btn-green" onclick="addPlan()"><i class="fas fa-check"></i> إضافة</button>
+        <button class="btn btn-red" onclick="document.getElementById('addPlanForm').style.display='none'"><i class="fas fa-times"></i> إلغاء</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-clipboard-list"></i> مراجعة الإعلانات</h4>
+      <div id="pendingAdsList"><p style="color:#8a7fa0;">لا توجد إعلانات معلقة</p></div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-gift"></i> إرسال النقاط</h4>
+      <input type="text" id="rewardUserEmail" placeholder="البريد الإلكتروني">
+      <input type="number" id="rewardPoints" placeholder="عدد النقاط" step="1">
+      <button class="btn btn-purple" onclick="sendReward()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> إرسال</button>
+      <div id="rewardStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;"></div>
+    </div>
+
+    <div class="card">
+      <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-history"></i> سجل الأرباح</h4>
+      <div id="revenueLog" style="max-height:150px; overflow-y:auto; font-size:clamp(11px,2vw,13px); color:#8a7fa0;"></div>
+    </div>
+    <button class="close-btn" onclick="refreshAdminData()"><i class="fas fa-sync"></i> تحديث</button>
+  </div>
+
+</div>
+
+<!-- ===== شريط التنقل السفلي ===== -->
+<div class="bottom-nav">
+  <button class="nav-item active" data-section="dashboard" onclick="navigateTo('dashboard')">
+    <i class="fas fa-home"></i><span>الرئيسية</span>
+  </button>
+  <button class="nav-item" data-section="wallet" onclick="navigateTo('wallet')">
+    <i class="fas fa-wallet"></i><span>المحفظة</span>
+  </button>
+  <button class="nav-item" data-section="casino" onclick="navigateTo('casino')">
+    <i class="fas fa-dice"></i><span>الكازينو</span>
+  </button>
+  <button class="nav-item" data-section="ads" onclick="navigateTo('ads')">
+    <i class="fas fa-bullhorn"></i><span>الإعلانات</span>
+  </button>
+  <button class="nav-item" data-section="admin" onclick="navigateTo('admin')">
+    <i class="fas fa-crown"></i><span>الإدارة</span>
+  </button>
+</div>
+
+<!-- ===== تحميل JavaScript ===== -->
+<script src="app.js"></script>
+</body>
+</html>
