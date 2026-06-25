@@ -6,16 +6,6 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// ===== إضافة: منع التخزين المؤقت لملفات JS و CSS =====
-app.use((req, res, next) => {
-  if (req.url.endsWith('.js') || req.url.endsWith('.css')) {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-  }
-  next();
-});
-
 // ===== خدمة الملفات الثابتة =====
 app.use(express.static(__dirname));
 
@@ -25,7 +15,7 @@ mongoose.connect(mongoURI)
     .then(() => console.log('✅ Connected to MongoDB Atlas Successfully!'))
     .catch(err => console.error('❌ Database connection error:', err));
 
-// ===== نماذج البيانات =====
+// ===== نموذج المستخدم =====
 const userSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     email: { type: String, unique: true, required: true },
@@ -38,6 +28,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+// ===== نموذج سجل أرباح الإدارة =====
 const adminRevenueSchema = new mongoose.Schema({
     amount: { type: Number, required: true },
     game: { type: String, required: true },
