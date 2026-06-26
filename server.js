@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, unique: true, required: true },
     phone: { type: String, required: true },
     password: { type: String, required: true },
-    balance: { type: Number, default: 0 }, // أصبح صفراً
+    balance: { type: Number, default: 0 },
     casinoBalance: { type: Number, default: 0 },
     points: { type: Number, default: 0 },
     approved: { type: Boolean, default: false },
@@ -36,7 +36,10 @@ const userSchema = new mongoose.Schema({
     language: { type: String, default: 'ar' },
     registrationDate: { type: Date, default: Date.now },
     totalInvested: { type: Number, default: 0 },
-    freeRounds: { type: Number, default: 2 }, // جولتان مجانيتان
+    freeRounds: { type: Number, default: 2 },
+    // حقول التعدين المستمر (جديدة)
+    miningProgress: { type: Number, default: 0 },
+    miningActive: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model('User', userSchema);
@@ -229,7 +232,9 @@ app.post('/api/auth/register', async (req, res) => {
             password,
             balance: 0,
             casinoBalance: 0,
-            freeRounds: 2
+            freeRounds: 2,
+            miningProgress: 0,
+            miningActive: false
         });
         await newUser.save();
         res.status(201).json({ success: true, message: "تم التسجيل بنجاح!", user: newUser });
@@ -263,6 +268,21 @@ app.post('/api/user/update', async (req, res) => {
         if (language) user.language = language;
         await user.save();
         res.json({ success: true, message: 'تم تحديث البيانات بنجاح', user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ===== تحديث حالة التعدين (حفظ التقدم) =====
+app.post('/api/user/update-mining', async (req, res) => {
+    try {
+        const { userId, miningProgress, miningActive } = req.body;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+        if (miningProgress !== undefined) user.miningProgress = miningProgress;
+        if (miningActive !== undefined) user.miningActive = miningActive;
+        await user.save();
+        res.json({ success: true, message: 'تم تحديث حالة التعدين', user });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -373,10 +393,10 @@ app.post('/api/ads/view', async (req, res) => {
         const user = await User.findById(userId);
         if (user) {
             user.points = (user.points || 0) + 0.5;
-            // كل 30 مشاهدة = لعبة مجانية
+            // كل 30 مشاهدة = جولة مجانية
             if (ad.currentViews % 30 === 0) {
-                user.casinoBalance = (user.casinoBalance || 0) + 1.0;
-                await createTransaction(userId, 'free_game_reward', 1.0, 'completed', 'مكافأة مشاهدة 30 إعلاناً');
+                user.freeRounds = (user.freeRounds || 0) + 1;
+                await createTransaction(userId, 'free_round_reward', 0, 'completed', 'مكافأة مشاهدة 30 إعلاناً (جولة مجانية)');
             }
             await user.save();
         }
@@ -413,7 +433,6 @@ app.post('/api/admin/login', async (req, res) => {
         }
         admin.lastLogin = new Date();
         await admin.save();
-        // إنشاء JWT
         const token = jwt.sign({ id: admin._id, role: admin.role }, JWT_SECRET, { expiresIn: '24h' });
         res.json({ success: true, token, role: admin.role, withdrawalBlocked: admin.withdrawalBlocked });
     } catch (error) {
@@ -454,7 +473,6 @@ app.post('/api/agent/request', async (req, res) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
 
-        // التحقق من الطلبات السابقة
         const existing = await AgentRequest.findOne({ userId });
         if (existing) {
             if (existing.status === 'pending') {
@@ -470,8 +488,6 @@ app.post('/api/agent/request', async (req, res) => {
         }
         if (user.isAgent) return res.status(400).json({ success: false, message: 'أنت بالفعل وكيل معتمد' });
 
-        // ==== الشروط الصارمة ====
-        // 1. مرور 30 يوم على التسجيل
         const daysSinceRegister = (Date.now() - new Date(user.registrationDate).getTime()) / (1000 * 60 * 60 * 24);
         if (daysSinceRegister < 30) {
             return res.status(400).json({ 
@@ -479,14 +495,12 @@ app.post('/api/agent/request', async (req, res) => {
                 message: `⚠️ يجب أن يكون قد مضى على حسابك 30 يوماً على الأقل (تبقى ${Math.ceil(30 - daysSinceRegister)} يوم).` 
             });
         }
-        // 2. إجمالي الاستثمار >= 100 دولار
         if (user.totalInvested < 100) {
             return res.status(400).json({ 
                 success: false, 
                 message: `⚠️ يجب أن يكون إجمالي استثماراتك في خطط التعدين 100 دولار على الأقل (لديك ${user.totalInvested} دولار).` 
             });
         }
-        // 3. عدد الإعلانات النشطة (حد أقصى 2، واحد من كل نوع)
         const activeAds = await Ad.find({ advertiserId: userId, status: 'active' });
         const buyAds = activeAds.filter(a => a.type === 'buy');
         const sellAds = activeAds.filter(a => a.type === 'sell');
@@ -497,7 +511,6 @@ app.post('/api/agent/request', async (req, res) => {
             return res.status(400).json({ success: false, message: '⚠️ لديك بالفعل إعلان بيع نشط. يمكنك فتح إعلان واحد فقط لكل نوع.' });
         }
 
-        // إنشاء الطلب
         const request = new AgentRequest({ userId, fullName, email, phone, status: 'pending' });
         await request.save();
         await createTransaction(userId, 'agent_request', 0, 'pending', 'طلب التقدم للوكالة');
@@ -744,9 +757,6 @@ app.post('/api/admin/gift-points', verifyAdmin, async (req, res) => {
 app.post('/api/admin/update-chicken-game', verifyAdmin, async (req, res) => {
     try {
         const { riskMultiplier, baseReward } = req.body;
-        // هنا يمكن حفظ الإعدادات في نموذج منفصل (مثل GameSettings)
-        // لكننا سنكتفي بتخزينها في متغير مؤقت أو قاعدة بيانات
-        // للتبسيط، سنستخدم متغير عام (يمكن نقله إلى نموذج لاحقاً)
         global.chickenGameSettings = { riskMultiplier, baseReward };
         res.json({ success: true, message: '✅ تم تحديث إعدادات لعبة الدجاجة' });
     } catch (error) {
