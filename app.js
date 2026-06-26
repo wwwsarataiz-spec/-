@@ -17,7 +17,9 @@ let currentUser = null;
 let isLoginMode = true;
 let adViews = 0;
 let lastFreeMining = 0;
-let isMiningStarted = false; // شرط بدء التعدين
+let isMiningStarted = false; // شرط بدء التعدين المستمر
+let miningProgress = 0;      // التقدم المتراكم
+let miningInterval = null;
 let adminToken = null;
 let withdrawalBlocked = false;
 let chickenGameSettings = { riskMultiplier: 1, baseReward: 1 };
@@ -28,6 +30,14 @@ let plans = [
   { name: 'VIP 2', min: 51, max: 200, profit: 3.0, duration: 45 },
   { name: 'VIP 3', min: 201, max: 500, profit: 4.0, duration: 50 }
 ];
+
+// ===== إعدادات مستويات الصعوبة للعبة الدجاجة =====
+const DIFFICULTIES = {
+  normal: { label: 'عادي', baseMultiplier: 1.3, increment: 0.1, bombs: 3 },
+  medium: { label: 'متوسط', baseMultiplier: 1.6, increment: 0.15, bombs: 5 },
+  hard: { label: 'صعب', baseMultiplier: 2.0, increment: 0.2, bombs: 7 },
+  veryhard: { label: 'صعب جداً', baseMultiplier: 2.2, increment: 0.25, bombs: 9 }
+};
 
 // ================================================================
 // 2. تسجيل الدخول والمصادقة
@@ -123,6 +133,10 @@ function afterLogin(user) {
   document.getElementById('walletBalance').innerHTML = user.balance.toFixed(6) + ' <small>USDT</small>';
   document.getElementById('walletPoints').textContent = points;
   
+  // استعادة حالة التعدين المستمر
+  miningProgress = user.miningProgress || 0;
+  document.getElementById('miningProgressDisplay').textContent = miningProgress.toFixed(6) + ' USDT';
+  
   // رسالة الترحيب
   const welcomeEl = document.getElementById('welcomeMessage');
   if (welcomeEl) welcomeEl.textContent = `مرحباً، ${user.fullName}`;
@@ -130,6 +144,8 @@ function afterLogin(user) {
   // عرض الجولات المجانية
   const freeRoundsEl = document.getElementById('freeRoundsDisplay');
   if (freeRoundsEl) freeRoundsEl.textContent = user.freeRounds || 0;
+  const freeRoundsEl2 = document.getElementById('freeRoundsDisplay2');
+  if (freeRoundsEl2) freeRoundsEl2.textContent = user.freeRounds || 0;
   
   showDashboard();
   if (typeof loadUserPlans === 'function') loadUserPlans(user);
@@ -143,12 +159,21 @@ function afterLogin(user) {
   if (user.isAgent) loadAgentPendingOrders();
   checkWithdrawalStatus();
   
-  // إيقاف التعدين التلقائي حتى يبدأ المستخدم
-  isMiningStarted = false;
+  // إعادة تشغيل التعدين المستمر إذا كان نشطاً
+  if (user.miningActive) {
+    isMiningStarted = true;
+    startMiningInterval();
+    document.getElementById('miningStatus').textContent = '⛏️ التعدين نشط';
+    document.getElementById('miningStatus').style.color = '#2ecc71';
+  } else {
+    isMiningStarted = false;
+    document.getElementById('miningStatus').textContent = '⏸️ التعدين متوقف';
+    document.getElementById('miningStatus').style.color = '#f39c12';
+  }
 }
 
 // ================================================================
-// 3. التنقل بين الأقسام (تم إزالة الإدارة من شريط التنقل)
+// 3. التنقل بين الأقسام
 // ================================================================
 function showDashboard() {
   document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
@@ -178,30 +203,54 @@ function navigateTo(section) {
     if (currentUser) loadUserTransactions(currentUser._id);
     checkWithdrawalStatus();
   }
-  if (section === 'casino') setTimeout(initCasinoGames, 100);
+  if (section === 'casino') {
+    setTimeout(initCasinoGames, 100);
+    // تحديث عرض الجولات المجانية في الكازينو
+    if (currentUser) {
+      document.getElementById('freeRoundsDisplay').textContent = currentUser.freeRounds || 0;
+      document.getElementById('freeRoundsDisplay2').textContent = currentUser.freeRounds || 0;
+    }
+  }
   if (section === 'market') loadMarketOrders();
 }
 
 // ================================================================
-// 4. التعدين (مع شرط البدء)
+// 4. التعدين المستمر (مع حفظ التقدم)
 // ================================================================
-// تم تعديل عداد التعدين ليعمل فقط بعد الضغط على زر البدء
-let miningInterval = null;
-
 function startMining() {
   if (isMiningStarted) return;
   isMiningStarted = true;
   document.getElementById('miningStatus').textContent = '⛏️ التعدين نشط';
   document.getElementById('miningStatus').style.color = '#2ecc71';
-  
+  // حفظ حالة التعدين في قاعدة البيانات
+  if (currentUser) {
+    fetch('/api/user/update-mining', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser._id, miningActive: true, miningProgress })
+    }).catch(e => console.error('Error saving mining state:', e));
+  }
+  startMiningInterval();
+}
+
+function startMiningInterval() {
   if (miningInterval) clearInterval(miningInterval);
   miningInterval = setInterval(() => {
     if (!isMiningStarted) return;
-    currentBalance += 0.000015;
-    document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+    miningProgress += 0.000015;
+    document.getElementById('miningProgressDisplay').textContent = miningProgress.toFixed(6) + ' USDT';
+    // حفظ التقدم محلياً وخادمياً
     if (currentUser) {
-      currentUser.balance = currentBalance;
+      currentUser.miningProgress = miningProgress;
       localStorage.setItem('nexora_user', JSON.stringify(currentUser));
+      // تحديث الخادم بشكل دوري (كل 10 ثوانٍ) لتجنب الطلبات الكثيرة
+      if (Math.floor(Date.now() / 10000) % 2 === 0) { // كل 20 ثانية تقريباً
+        fetch('/api/user/update-mining', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser._id, miningProgress })
+        }).catch(e => console.error('Error updating mining progress:', e));
+      }
     }
   }, 1000);
 }
@@ -214,10 +263,49 @@ function stopMining() {
   }
   document.getElementById('miningStatus').textContent = '⏸️ التعدين متوقف';
   document.getElementById('miningStatus').style.color = '#f39c12';
+  // حفظ حالة التعدين في قاعدة البيانات
+  if (currentUser) {
+    fetch('/api/user/update-mining', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser._id, miningActive: false, miningProgress })
+    }).catch(e => console.error('Error saving mining state:', e));
+  }
+}
+
+function claimMining() {
+  if (!currentUser) {
+    alert('⚠️ يرجى تسجيل الدخول');
+    return;
+  }
+  if (miningProgress <= 0) {
+    alert('⚠️ لا توجد أرباح للحصاد');
+    return;
+  }
+  if (!confirm(`هل أنت متأكد من حصاد ${miningProgress.toFixed(6)} USDT؟`)) return;
+  // إضافة التقدم إلى الرصيد الرئيسي
+  currentBalance += miningProgress;
+  document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
+  // إعادة تعيين التقدم
+  miningProgress = 0;
+  document.getElementById('miningProgressDisplay').textContent = '0.0000 USDT';
+  // تحديث بيانات المستخدم
+  if (currentUser) {
+    currentUser.balance = currentBalance;
+    currentUser.miningProgress = 0;
+    localStorage.setItem('nexora_user', JSON.stringify(currentUser));
+    // تحديث الخادم
+    fetch('/api/user/update-mining', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser._id, miningProgress: 0, miningActive: isMiningStarted })
+    }).catch(e => console.error('Error updating mining:', e));
+  }
+  alert(`✅ تم حصاد ${miningProgress.toFixed(6)} USDT بنجاح!`);
 }
 
 // ================================================================
-// 5. التعدين المجاني
+// 5. التعدين المجاني (يومي)
 // ================================================================
 function claimFreeMining() {
   if (!currentUser) {
@@ -246,7 +334,7 @@ function claimFreeMining() {
 }
 
 // ================================================================
-// 6. التعدين المدفوع المرن (بدون شريط تمرير)
+// 6. التعدين المدفوع المرن
 // ================================================================
 function updateInvestmentCalc() {
   const amount = parseFloat(document.getElementById('investAmount').value);
@@ -284,7 +372,6 @@ function purchaseFlexMining() {
     duration: 50,
     startDate: new Date().toISOString()
   });
-  // تحديث totalInvested
   currentUser.totalInvested = (currentUser.totalInvested || 0) + amount;
   document.getElementById('liveBalance').innerHTML = currentBalance.toFixed(6) + ' <small>USDT</small>';
   document.getElementById('flexMiningStatus').textContent = `✅ تم تفعيل الخطة! الأرباح اليومية: ${dailyProfit.toFixed(2)} USDT`;
@@ -393,7 +480,6 @@ async function submitWithdraw() {
     return;
   }
 
-  // تحذير BEP20
   if (!confirm('⚠️ تنبيه هام: الإيداع والسحب يتم حصرياً عبر شبكة Smart Chain (BEP20). إرسال الأموال عبر أي شبكة أخرى سيتسبب في فقدانها بشكل دائم. هل أنت متأكد؟')) {
     return;
   }
@@ -597,14 +683,28 @@ async function watchAd(adId) {
         }
       }
 
+      // تحديث النقاط والجولات المجانية
       const savedUser = localStorage.getItem('nexora_user');
       if (savedUser) {
         try {
           const user = JSON.parse(savedUser);
           user.points = (user.points || 0) + 0.5;
-          localStorage.setItem('nexora_user', JSON.stringify(user));
-          points = user.points;
-          document.getElementById('pointsBalanceDisplay').textContent = `نقاطك: ${points}`;
+          // الجولة المجانية تضاف من الخادم، لكننا نحدث العرض
+          const userRes = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUser.email, password: currentUser.password })
+          });
+          const userData = await userRes.json();
+          if (userData.success) {
+            currentUser = userData.user;
+            points = userData.user.points;
+            document.getElementById('pointsBalanceDisplay').textContent = `نقاطك: ${points}`;
+            // تحديث الجولات المجانية
+            document.getElementById('freeRoundsDisplay').textContent = currentUser.freeRounds || 0;
+            document.getElementById('freeRoundsDisplay2').textContent = currentUser.freeRounds || 0;
+            localStorage.setItem('nexora_user', JSON.stringify(userData.user));
+          }
         } catch(e) {}
       }
 
@@ -777,7 +877,6 @@ async function deleteAd(adId) {
 // ================================================================
 async function loadMarketOrders() {
   try {
-    // جلب قائمة البيع
     const sellRes = await fetch('/api/market/sell-orders');
     const sellData = await sellRes.json();
     const sellContainer = document.getElementById('sellOrdersList');
@@ -805,7 +904,6 @@ async function loadMarketOrders() {
       }
     }
 
-    // جلب قائمة الشراء
     const buyRes = await fetch('/api/market/buy-orders');
     const buyData = await buyRes.json();
     const buyContainer = document.getElementById('buyOrdersList');
@@ -953,7 +1051,6 @@ async function loginAdmin(password) {
       adminToken = data.token;
       withdrawalBlocked = data.withdrawalBlocked || false;
       alert('✅ تم تسجيل الدخول كمسؤول بنجاح');
-      // فتح لوحة الإدارة في نافذة جديدة أو نفس النافذة
       window.open('/admin-panel.html', '_blank');
     } else {
       alert('❌ فشل تسجيل الدخول: ' + data.message);
@@ -965,7 +1062,7 @@ async function loginAdmin(password) {
 }
 
 // ================================================================
-// 14. دوال الإدارة العامة (معدلة)
+// 14. دوال الإدارة العامة
 // ================================================================
 function refreshAdminData() {
   const totalUsers = users.filter(u => u.approved !== false).length;
@@ -999,25 +1096,31 @@ function rejectUser(userId) {
 }
 
 // ================================================================
-// 15. لعبة الدجاجة (مع الجولات المجانية)
+// 15. لعبة الدجاجة (مع مستويات الصعوبة والجولات المجانية)
 // ================================================================
 let climbActive = false;
 let climbStep = 0;
 let climbMultiplier = 1.00;
 let climbBetAmount = 0;
-let climbRisk = 50;
-let climbCells = [];
 let climbBombs = [];
 let climbRevealed = [];
 let climbCashedOut = false;
 let freeRoundsUsed = 0;
+let currentDifficulty = 'normal'; // normal, medium, hard, veryhard
 
-function updateClimbRisk() {
-  const slider = document.getElementById('climbRiskSlider');
-  climbRisk = parseInt(slider.value);
-  document.getElementById('climbRiskLabel').textContent = climbRisk;
-  const mult = calculateMultiplier(climbRisk);
-  document.getElementById('climbProfitLabel').textContent = mult.toFixed(2) + 'x';
+function updateDifficultyDisplay() {
+  const select = document.getElementById('difficultySelect');
+  if (select) {
+    currentDifficulty = select.value;
+    const diff = DIFFICULTIES[currentDifficulty];
+    document.getElementById('climbMultiplier').textContent = diff.baseMultiplier.toFixed(2) + 'x';
+    // تحديث وصف المخاطرة (عدد القنابل)
+    document.getElementById('climbRiskLabel').textContent = diff.bombs + ' قنابل';
+    // تحديث الربح المحتمل (أقصى مضاعف عند كشف جميع الخلايا الآمنة)
+    const safeCells = 25 - diff.bombs;
+    const maxMult = diff.baseMultiplier + safeCells * diff.increment;
+    document.getElementById('climbProfitLabel').textContent = maxMult.toFixed(2) + 'x';
+  }
 }
 
 function initClimbGrid() {
@@ -1072,25 +1175,30 @@ function startClimbGame() {
     currentUser.freeRounds = (currentUser.freeRounds || 0) - 1;
     localStorage.setItem('nexora_user', JSON.stringify(currentUser));
     document.getElementById('freeRoundsDisplay').textContent = currentUser.freeRounds;
+    document.getElementById('freeRoundsDisplay2').textContent = currentUser.freeRounds;
   }
 
   climbActive = true;
   climbStep = 0;
-  climbMultiplier = 1.00;
   climbBetAmount = bet || 0.3;
   climbCashedOut = false;
+  
+  // تعيين المضاعف الأساسي حسب الصعوبة
+  const diff = DIFFICULTIES[currentDifficulty];
+  climbMultiplier = diff.baseMultiplier;
   document.getElementById('climbStep').textContent = '0';
-  document.getElementById('climbMultiplier').textContent = '1.00x';
+  document.getElementById('climbMultiplier').textContent = climbMultiplier.toFixed(2) + 'x';
   document.getElementById('climbResult').textContent = '';
   document.getElementById('climbResult').className = 'game-result';
-  document.getElementById('climbCashoutBtn').disabled = true;
+  document.getElementById('climbCashoutBtn').disabled = false;
+  document.getElementById('climbCashoutBtn').textContent = '💰 سحب الأرباح';
 
+  // تعيين القنابل حسب الصعوبة
   const totalCells = 25;
-  const bombCount = Math.floor(climbRisk / 4);
-  climbCells = Array.from({ length: totalCells }, (_, i) => i);
+  const bombCount = diff.bombs;
   climbBombs = [];
-  const shuffled = [...climbCells].sort(() => Math.random() - 0.5);
-  for (let i = 0; i < Math.min(bombCount, 10); i++) {
+  const shuffled = Array.from({ length: totalCells }, (_, i) => i).sort(() => Math.random() - 0.5);
+  for (let i = 0; i < Math.min(bombCount, 20); i++) {
     climbBombs.push(shuffled[i]);
   }
   climbRevealed = [];
@@ -1106,8 +1214,6 @@ function startClimbGame() {
     grid.appendChild(cell);
   }
 
-  document.getElementById('climbCashoutBtn').disabled = false;
-  document.getElementById('climbCashoutBtn').textContent = '💰 سحب الأرباح';
   document.getElementById('climbResult').textContent = '✅ اختر خلية للكشف عنها!';
   document.getElementById('climbResult').className = 'game-result';
 }
@@ -1138,13 +1244,13 @@ function revealClimbCell(index) {
   cellEl.className = 'climb-cell safe';
   cellEl.textContent = '🐣';
   climbStep++;
-  const mult = calculateMultiplier(climbRisk);
-  climbMultiplier = 1 + (climbStep / 10) * (mult - 1);
+  const diff = DIFFICULTIES[currentDifficulty];
+  climbMultiplier = diff.baseMultiplier + climbStep * diff.increment;
   climbMultiplier = Math.round(climbMultiplier * 100) / 100;
   document.getElementById('climbStep').textContent = climbStep;
   document.getElementById('climbMultiplier').textContent = climbMultiplier.toFixed(2) + 'x';
 
-  const safeCells = climbCells.filter(i => !climbBombs.includes(i));
+  const safeCells = Array.from({ length: 25 }, (_, i) => i).filter(i => !climbBombs.includes(i));
   if (climbRevealed.length >= safeCells.length) {
     const win = climbBetAmount * climbMultiplier;
     casinoBalance += win;
@@ -1178,13 +1284,6 @@ function cashoutClimb() {
   refreshAdminData();
 }
 
-function calculateMultiplier(risk) {
-  const winProb = (100 - risk) / 100;
-  const edge = 1 - (houseEdge / 100);
-  const finalProb = Math.min(winProb * edge, 0.99);
-  return Math.round((1 / finalProb) * 10) / 10;
-}
-
 function sendLossToAdmin(amount, gameType) {
   adminRevenue += amount;
   fetch('/api/admin/loss', {
@@ -1196,9 +1295,10 @@ function sendLossToAdmin(amount, gameType) {
 
 function initCasinoGames() {
   initClimbGrid();
-  updateClimbRisk();
+  updateDifficultyDisplay();
   if (currentUser) {
     document.getElementById('freeRoundsDisplay').textContent = currentUser.freeRounds || 0;
+    document.getElementById('freeRoundsDisplay2').textContent = currentUser.freeRounds || 0;
   }
 }
 
@@ -1426,6 +1526,8 @@ window.onload = function() {
         document.getElementById('pointsBalanceDisplay').textContent = `نقاطك: ${points}`;
         document.getElementById('walletBalance').innerHTML = user.balance.toFixed(6) + ' <small>USDT</small>';
         document.getElementById('walletPoints').textContent = points;
+        miningProgress = user.miningProgress || 0;
+        document.getElementById('miningProgressDisplay').textContent = miningProgress.toFixed(6) + ' USDT';
         const welcomeEl = document.getElementById('welcomeMessage');
         if (welcomeEl) welcomeEl.textContent = `مرحباً، ${user.fullName}`;
         showDashboard();
@@ -1436,10 +1538,20 @@ window.onload = function() {
         loadMarketOrders();
         if (user.isAgent) loadAgentPendingOrders();
         checkWithdrawalStatus();
-        // عرض الجولات المجانية
         const freeRoundsEl = document.getElementById('freeRoundsDisplay');
         if (freeRoundsEl) freeRoundsEl.textContent = user.freeRounds || 0;
-        isMiningStarted = false;
+        const freeRoundsEl2 = document.getElementById('freeRoundsDisplay2');
+        if (freeRoundsEl2) freeRoundsEl2.textContent = user.freeRounds || 0;
+        if (user.miningActive) {
+          isMiningStarted = true;
+          startMiningInterval();
+          document.getElementById('miningStatus').textContent = '⛏️ التعدين نشط';
+          document.getElementById('miningStatus').style.color = '#2ecc71';
+        } else {
+          isMiningStarted = false;
+          document.getElementById('miningStatus').textContent = '⏸️ التعدين متوقف';
+          document.getElementById('miningStatus').style.color = '#f39c12';
+        }
       }
     } catch(e) {
       localStorage.removeItem('nexora_user');
@@ -1458,6 +1570,11 @@ window.onload = function() {
   const startMiningBtn = document.getElementById('startMiningBtn');
   if (startMiningBtn) {
     startMiningBtn.onclick = startMining;
+  }
+  // زر حصاد التعدين
+  const claimMiningBtn = document.getElementById('claimMiningBtn');
+  if (claimMiningBtn) {
+    claimMiningBtn.onclick = claimMining;
   }
 };
 
