@@ -1,7 +1,7 @@
 {
   "name": "nexora-premium",
   "version": "3.0.0",
-  "description": "Nexora Premium - نظام متكامل للتعدين والكازينو والإعلانات وسوق النقاط",
+  "description": "Nexora Premium - نظام متكامل بالتعدين والكازينو",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
