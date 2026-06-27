@@ -6,7 +6,7 @@
     <title>Nexora - النظام المتكامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-        /* ===== الأساسيات ===== */
+        /* ===== الأساسيات والمتغيرات ===== */
         :root {
             --bg: #0a0815;
             --card: rgba(21, 17, 36, 0.85);
@@ -87,7 +87,7 @@
             color: var(--gold);
         }
 
-        /* ===== الأقسام ===== */
+        /* ===== الأقسام وحركية العرض ===== */
         .section {
             display: none;
             animation: fadeIn 0.4s ease;
@@ -106,7 +106,7 @@
             }
         }
 
-        /* ===== البطاقات ===== */
+        /* ===== مكونات الواجهة والبطاقات ===== */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -174,9 +174,7 @@
             color: #fff;
         }
 
-        input,
-        select,
-        textarea {
+        input, select, textarea {
             width: 100%;
             padding: 12px 10px;
             margin: 6px 0;
@@ -190,19 +188,16 @@
             direction: rtl;
             transition: 0.3s;
         }
-        input:focus,
-        select:focus,
-        textarea:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--gold);
             box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
         }
-        input::placeholder,
-        textarea::placeholder {
+        input::placeholder, textarea::placeholder {
             color: #6a5f7a;
         }
 
-        /* ===== الرأس ===== */
+        /* ===== الرأس وإشعارات التحرك ===== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -238,57 +233,7 @@
             font-weight: 700;
         }
 
-        /* ===== الإدارة ===== */
-        .admin-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .admin-stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(8px);
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid var(--glass-border);
-        }
-        .admin-stat-card .number {
-            font-size: clamp(22px, 5vw, 30px);
-            font-weight: 700;
-            color: var(--gold);
-        }
-        .admin-stat-card .label {
-            font-size: clamp(11px, 2vw, 13px);
-            color: #8a7fa0;
-        }
-        .pending-user {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: var(--glass-bg);
-            border-radius: 8px;
-            margin: 4px 0;
-            font-size: clamp(12px, 2.5vw, 14px);
-            backdrop-filter: blur(4px);
-        }
-        .pending-user .actions button {
-            background: #2ecc71;
-            border: none;
-            color: #000;
-            padding: 4px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            margin: 0 4px;
-        }
-        .pending-user .actions button.reject {
-            background: #e74c3c;
-            color: #fff;
-        }
-
-        /* ===== سوق النقاط ===== */
+        /* ===== سوق النقاط ولعبة المخاطرة ===== */
         .market-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -320,7 +265,6 @@
             font-weight: 700;
         }
 
-        /* ===== لعبة الدجاجة ===== */
         .game-container {
             margin: 16px 0;
             padding: 16px;
@@ -329,9 +273,6 @@
             border: 1px solid var(--glass-border);
             border-radius: var(--radius);
             transition: 0.3s;
-        }
-        .game-container:hover {
-            border-color: rgba(212, 175, 55, 0.3);
         }
         .game-title {
             color: var(--gold);
@@ -356,14 +297,8 @@
             padding: 8px;
             border-radius: 8px;
         }
-        .game-result.win {
-            color: #2ecc71;
-            background: rgba(46, 204, 113, 0.1);
-        }
-        .game-result.lose {
-            color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
-        }
+        .game-result.win { color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+        .game-result.lose { color: #e74c3c; background: rgba(231, 76, 60, 0.1); }
 
         .climb-grid {
             display: grid;
@@ -383,53 +318,22 @@
             border: 1px solid transparent;
             cursor: pointer;
         }
-        .climb-cell.revealed {
-            border-color: var(--gold);
-            background: rgba(212, 175, 55, 0.1);
-        }
-        .climb-cell.bomb {
-            border-color: #e74c3c;
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-        }
-        .climb-cell.safe {
-            border-color: #2ecc71;
-            background: rgba(46, 204, 113, 0.1);
-            color: #2ecc71;
-        }
+        .climb-cell.revealed { border-color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+        .climb-cell.bomb { border-color: #e74c3c; background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .climb-cell.safe { border-color: #2ecc71; background: rgba(46, 204, 113, 0.1); color: #2ecc71; }
 
-        .risk-slider-container {
-            margin: 12px 0;
-        }
-        .risk-slider-container label {
-            display: flex;
-            justify-content: space-between;
-            font-size: clamp(13px, 3vw, 15px);
-            color: #8a7fa0;
-        }
-        .risk-slider-container label span {
-            color: var(--gold);
-            font-weight: 700;
-        }
+        .risk-slider-container { margin: 12px 0; }
+        .risk-slider-container label { display: flex; justify-content: space-between; font-size: clamp(13px, 3vw, 15px); color: #8a7fa0; }
+        .risk-slider-container label span { color: var(--gold); font-weight: 700; }
 
-        /* ===== الإعلانات ===== */
-        .ad-container {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 14px;
-            margin: 8px 0;
-            text-align: center;
-            backdrop-filter: blur(8px);
-        }
-        .ad-card {
+        /* ===== الإعلانات الممولة والسجلات ===== */
+        .ad-container, .ad-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
             padding: 14px;
             margin: 8px 0;
             backdrop-filter: blur(8px);
-            text-align: right;
         }
         .ad-progress {
             width: 100%;
@@ -446,12 +350,7 @@
             border-radius: 4px;
             transition: width 0.5s ease;
         }
-
-        /* ===== سجل المعاملات ===== */
-        .transactions-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
+        .transactions-list { max-height: 300px; overflow-y: auto; }
         .transaction-item {
             background: var(--glass-bg);
             padding: 8px;
@@ -460,25 +359,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
             backdrop-filter: blur(4px);
         }
 
-        /* ===== نافذة الإعدادات ===== */
+        /* ===== النوافذ المنبثقة وطبقات الحماية ===== */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 8, 21, 0.95);
             backdrop-filter: blur(8px);
             justify-content: center;
             align-items: center;
             z-index: 2000;
             padding: 20px;
-            overflow-y: auto;
         }
         .modal-content {
             background: var(--glass-bg);
@@ -488,176 +382,73 @@
             max-width: 420px;
             padding: 24px 20px;
             border-radius: var(--radius);
-            max-height: 95vh;
-            overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-        .modal-content h2 {
-            color: var(--gold);
-            text-align: center;
-            margin-bottom: 16px;
         }
         .close-btn {
             background: linear-gradient(135deg, var(--purple), #5a4bd1);
-            color: white;
-            border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: clamp(14px, 3vw, 16px);
+            color: white; border: none; padding: 12px; width: 100%;
+            border-radius: 8px; margin-top: 12px; font-weight: 700; cursor: pointer;
         }
 
-        /* ===== طبقة تسجيل الدخول ===== */
         #loginOverlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(10, 8, 21, 0.98);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
-            backdrop-filter: blur(8px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; padding: 20px; backdrop-filter: blur(8px);
         }
-        #loginOverlay.hidden {
-            display: none;
-        }
+        #loginOverlay.hidden { display: none; }
         .login-box {
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             padding: 30px 20px;
             border-radius: var(--radius);
-            max-width: 400px;
-            width: 100%;
+            max-width: 400px; width: 100%;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-        .login-box h2 {
-            color: var(--gold);
-            margin-bottom: 20px;
         }
         .login-btn {
             background: linear-gradient(135deg, var(--gold), #b8960f);
-            color: #000;
-            border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
+            color: #000; border: none; padding: 12px; width: 100%;
+            border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 10px;
         }
-        .switch-auth {
-            color: #8a7fa0;
-            margin-top: 12px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .switch-auth:hover {
-            color: var(--gold);
-        }
-        .auth-error {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-top: 6px;
-            min-height: 20px;
-        }
+        .switch-auth { color: #8a7fa0; margin-top: 12px; font-size: 13px; cursor: pointer; }
+        .switch-auth:hover { color: var(--gold); }
+        .auth-error { color: #e74c3c; font-size: 13px; margin-top: 6px; min-height: 20px; }
 
-        /* ===== شريط التحذير ===== */
         .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
+            width: 100%; overflow: hidden;
             background: rgba(212, 175, 55, 0.05);
             border: 1px solid rgba(212, 175, 55, 0.1);
-            border-radius: 8px;
-            padding: 6px 0;
-            margin: 8px 0;
+            border-radius: 8px; padding: 6px 0; margin: 8px 0;
         }
         .ticker {
-            display: inline-block;
-            white-space: nowrap;
-            animation: ticker 25s linear infinite;
-            font-size: clamp(11px, 2vw, 13px);
-            color: #8a7fa0;
+            display: inline-block; white-space: nowrap;
+            animation: ticker 25s linear infinite; font-size: clamp(11px, 2vw, 13px); color: #8a7fa0;
         }
-        .ticker span {
-            color: var(--gold);
-            margin: 0 10px;
-        }
+        .ticker span { color: var(--gold); margin: 0 10px; }
         @keyframes ticker {
-            0% {
-                transform: translateX(100%);
-            }
-            100% {
-                transform: translateX(-100%);
-            }
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
 
-        /* ===== حالة السحب ===== */
-        .withdrawal-status {
-            text-align: center;
-            font-size: clamp(13px, 3vw, 15px);
-            padding: 6px;
-            border-radius: 8px;
-            margin: 6px 0;
-        }
+        .withdrawal-status { text-align: center; font-size: clamp(13px, 3vw, 15px); padding: 6px; border-radius: 8px; margin: 6px 0; }
 
-        /* ===== استجابة ===== */
         @media (max-width: 400px) {
-            .container {
-                padding: 0 4px 70px 4px;
-            }
-            .card {
-                padding: 12px;
-            }
-            .admin-stats {
-                grid-template-columns: 1fr 1fr;
-                gap: 6px;
-            }
-            .market-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ===== أزرار صغيرة للإدارة ===== */
-        .mini-btn {
-            background: transparent;
-            border: 1px solid var(--glass-border);
-            border-radius: 6px;
-            padding: 4px 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: clamp(10px, 2vw, 12px);
-            transition: 0.2s;
-        }
-        .mini-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* ===== نقطة الرصيد ===== */
-        #pointsBalanceDisplay {
-            font-size: clamp(14px, 3vw, 18px);
-            color: var(--gold);
-            font-weight: 700;
+            .container { padding: 0 4px 70px 4px; }
+            .card { padding: 12px; }
+            .market-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== طبقة تسجيل الدخول ===== -->
+    <!-- ===== طبقة المصادقة والحماية الموحدة ===== -->
     <div id="loginOverlay">
         <div class="login-box">
             <h2><i class="fas fa-crown"></i> NEXORA</h2>
             <div id="authForm">
-                <input type="text" id="loginFullName" placeholder="الاسم الكامل (للتسجيل)" style="display:none;">
+                <input type="text" id="loginFullName" placeholder="الاسم الكامل (لالتسجيل)" style="display:none;">
                 <input type="text" id="loginPhone" placeholder="رقم الجوال (للتسجيل)" style="display:none;">
                 <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
                 <input type="password" id="loginPassword" placeholder="كلمة المرور">
@@ -684,10 +475,10 @@
         </div>
     </div>
 
-    <!-- ===== الحاوية الرئيسية ===== -->
+    <!-- ===== الحاوية الهيكلية الكبرى ===== -->
     <div class="container" id="mainApp">
 
-        <!-- ===== الرأس ===== -->
+        <!-- واجهة الرأس -->
         <div class="header">
             <h1><i class="fas fa-gem"></i> NEXORA</h1>
             <div class="settings-icon" onclick="openSettings()" title="الإعدادات">
@@ -696,7 +487,7 @@
         </div>
         <div class="welcome-message" id="welcomeMessage">مرحباً، ضيف</div>
 
-        <!-- ===== شريط التحذير ===== -->
+        <!-- شريط التحديثات الحي التلقائي -->
         <div class="ticker-wrap">
             <div class="ticker" id="tickerText">
                 <span>🔄</span> قام أحمد بشراء خطة VIP بقيمة 100 USDT <span>💰</span>
@@ -705,13 +496,13 @@
             </div>
         </div>
 
-        <!-- ===== القسم 1: الرئيسية ===== -->
+        <!-- ===== القسم 1: الرئيسية (نظام التعدين المطور) ===== -->
         <div id="section-dashboard" class="section active">
             <div class="card" style="text-align:center; margin-top:8px;">
                 <p style="color:#8a7fa0; font-size:clamp(13px,2.5vw,15px);">إجمالي الرصيد الاستثماري</p>
                 <div class="balance" id="liveBalance">0.000000 <small>USDT</small></div>
 
-                <!-- نظام التعدين اليدوي الجديد -->
+                <!-- التعدين اليدوي بالنقر المحمي -->
                 <div style="background:var(--glass-bg); padding:12px; border-radius:12px; margin:10px 0; border:1px solid var(--glass-border);">
                     <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-hammer"></i> التعدين اليدوي</h4>
                     <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">اضغط على زر التعدين لكسب 0.001 USDT لكل ضغطة</p>
@@ -729,9 +520,7 @@
                     <button class="btn btn-green" id="harvestMiningBtn" style="width:100%; margin-top:4px;">
                         <i class="fas fa-hand-holding-heart"></i> احصد الأرباح
                     </button>
-                    <div id="miningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px;">
-                        ⏸️ انتظر بدء التعدين
-                    </div>
+                    <div id="miningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px;">⏸️ انتظر بدء التعدين</div>
                 </div>
             </div>
 
@@ -740,7 +529,7 @@
                 <button class="btn btn-red" onclick="navigateTo('wallet')" style="flex:1;"><i class="fas fa-arrow-up"></i> سحب</button>
             </div>
 
-            <!-- التعدين المجاني -->
+            <!-- التعدين المجاني المستقر -->
             <div class="card">
                 <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-free-brands"></i> التعدين المجاني</h4>
                 <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">احصل على 0.005 USDT يومياً</p>
@@ -751,7 +540,7 @@
                 <div id="freeMiningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:6px; text-align:center;"></div>
             </div>
 
-            <!-- التعدين المدفوع المرن -->
+            <!-- التعدين المدفوع المرن المحدث بالمعادلات الرياضية القياسية -->
             <div class="card">
                 <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-rocket"></i> التعدين المدفوع المرن</h4>
                 <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">اختر مبلغ الاستثمار (الحد الأدنى 3 USDT)</p>
@@ -773,14 +562,14 @@
                 <div id="flexMiningStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:6px; text-align:center;"></div>
             </div>
 
-            <!-- خطط الترقية -->
+            <!-- حاوية الخطط الثابتة لتوليد الـ DOM الديناميكي -->
             <div class="card">
                 <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-layer-group"></i> خطط الترقية</h4>
                 <div id="plansContainer"></div>
             </div>
         </div>
 
-        <!-- ===== القسم 2: المحفظة ===== -->
+        <!-- ===== القسم 2: المحفظة والعمليات المالية المتحكم بها إدارياً ===== -->
         <div id="section-wallet" class="section">
             <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-wallet"></i> المحفظة</h2>
             <div class="card" style="text-align:center;">
@@ -790,7 +579,7 @@
                 <div class="withdrawal-status" id="withdrawalStatus">✅ السحب متاح</div>
             </div>
 
-            <!-- تحويل إلى الكازينو -->
+            <!-- جسر التحويل الداخلي للكازينو -->
             <div class="card">
                 <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-exchange-alt"></i> تحويل إلى الكازينو</h4>
                 <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
@@ -799,73 +588,73 @@
                 </div>
             </div>
 
+            <!-- الإيداع المباشر (BEP20) بدون وسطاء P2P -->
             <div class="card">
                 <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-arrow-down"></i> الإيداع</h4>
-                <p style="font-size:clamp(12px,2.5vw,14px); color:#2ecc71; font-weight:700;">عنوان الإيداع (BEP20):</p>
+                <p style="font-size:clamp(12px,2.5vw,14px); color:#2ecc71; font-weight:700;">عنوان الإيداع الموحد للمنصة (BEP20):</p>
                 <input type="text" id="walletAddress" value="0x2975dc1f8188c30b2a4be0ec27e33494da66cb46" readonly style="text-align:center; color:var(--gold); font-weight:bold; font-size:12px;">
-                <button class="btn btn-gold" onclick="copyAddress()" style="width:100%; margin-top:6px;"><i class="fas fa-copy"></i> نسخ</button>
+                <button class="btn btn-gold" onclick="copyAddress()" style="width:100%; margin-top:6px;"><i class="fas fa-copy"></i> نسخ العنوان</button>
                 <div style="font-size:clamp(12px,2.5vw,14px); color:#e74c3c; margin-top:6px; text-align:center; background:rgba(231,76,60,0.1); padding:8px; border-radius:8px; border:1px solid rgba(231,76,60,0.2);">
                     ⚠️ تنبيه هام: الإيداع يتم حصرياً عبر شبكة Smart Chain (BEP20). إرسال الأموال عبر أي شبكة أخرى سيتسبب في فقدانها بشكل دائم.
                 </div>
             </div>
 
+            <!-- طلب السحب اليدوي والمقيد للموافقة الإدارية البحتة -->
             <div class="card">
-                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-arrow-up"></i> طلب سحب</h4>
-                <input type="text" id="withdrawAddress" placeholder="عنوان محفظة السحب (BEP20)">
+                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-arrow-up"></i> طلب سحب أموال</h4>
+                <input type="text" id="withdrawAddress" placeholder="عنوان محفظة السحب الخاصة بك (BEP20)">
                 <input type="number" id="withdrawAmount" placeholder="الكمية (الحد الأدنى 10 USDT)" min="10">
-                <button class="btn btn-red" onclick="submitWithdraw()" style="width:100%; margin-top:6px;"><i class="fas fa-check"></i> تأكيد السحب</button>
+                <button class="btn btn-red" onclick="submitWithdraw()" style="width:100%; margin-top:6px;"><i class="fas fa-check"></i> تأكيد إرسال الطلب</button>
                 <div id="withdrawResult" style="font-size:clamp(12px,2.5vw,14px); margin-top:4px; text-align:center;"></div>
-                <div style="font-size:clamp(12px,2.5vw,14px); color:#e74c3c; margin-top:6px; text-align:center; background:rgba(231,76,60,0.1); padding:8px; border-radius:8px; border:1px solid rgba(231,76,60,0.2);">
-                    ⚠️ تنبيه هام: السحب يتم حصرياً عبر شبكة Smart Chain (BEP20). إرسال الأموال عبر أي شبكة أخرى سيتسبب في فقدانها بشكل دائم.
-                </div>
             </div>
 
+            <!-- التبادل المباشر للنقاط مع الخزينة المركزية للمنصة -->
             <div class="card">
-                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-exchange-alt"></i> تبادل النقاط</h4>
-                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">بيع نقاطك للمنصة مباشرة</p>
+                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-exchange-alt"></i> تبادل النقاط الفوري</h4>
+                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">قم ببيع نقاطك مباشرة إلى المنصة بسعر الصرف الرسمي</p>
                 <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                    <input type="number" id="pointsToSell" placeholder="عدد النقاط" style="flex:2; min-width:80px;">
-                    <button class="btn btn-gold" onclick="sellPoints()" style="flex:1; min-width:60px;"><i class="fas fa-coins"></i> بيع</button>
+                    <input type="number" id="pointsToSell" placeholder="عدد النقاط المراد بيعها">
+                    <button class="btn btn-gold" onclick="sellPoints()" style="flex:1; min-width:60px;"><i class="fas fa-coins"></i> بيع فوراً</button>
                 </div>
                 <div style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;">
-                    سعر الصرف: 1000 نقطة = <span id="exchangeRateDisplay">1.00</span> USDT
+                    سعر الصرف المركزي: 1000 نقطة = <span id="exchangeRateDisplay">1.00</span> USDT
                 </div>
             </div>
 
-            <!-- سجل المعاملات -->
+            <!-- السجل المحلي للمعاملات المالية -->
             <div class="card">
                 <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-history"></i> سجل المعاملات</h4>
                 <div id="transactionsList" class="transactions-list">
-                    <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);">لا توجد معاملات</p>
+                    <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);">لا توجد معاملات مسجلة حالياً</p>
                 </div>
             </div>
         </div>
 
-        <!-- ===== القسم 3: الكازينو (لعبة الدجاجة) ===== -->
+        <!-- ===== القسم 3: الكازينو (لعبة الدجاجة والمخاطرة) ===== -->
         <div id="section-casino" class="section">
             <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-dice"></i> الكازينو</h2>
             <div class="card" style="text-align:center; background:rgba(212,175,55,0.05); border-color:var(--gold);">
-                <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);"><i class="fas fa-gift"></i> رصيد اللعب</p>
+                <p style="color:#8a7fa0; font-size:clamp(12px,2.5vw,14px);"><i class="fas fa-gift"></i> رصيد اللعب الفعلي</p>
                 <div class="balance" id="casinoBalance" style="font-size:clamp(24px,6vw,34px);">0.000000 <small>USDT</small></div>
-                <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">الجولات المجانية: <span id="freeRoundsDisplay">0</span></p>
+                <p style="font-size:clamp(10px,2vw,12px); color:#8a7fa0;">الجولات المجانية المتاحة: <span id="freeRoundsDisplay">0</span></p>
             </div>
 
-            <!-- لعبة الدجاجة -->
+            <!-- لوحة تحكم لعبة الدجاجة والقنابل -->
             <div class="game-container" style="border-color:var(--gold);">
-                <div class="game-title"><i class="fas fa-egg"></i> لعبة الدجاجة</div>
-                <div class="game-desc">اختر مستوى الصعوبة واكتشف الخلايا. كل خلية آمنة تزيد المضاعف!</div>
+                <div class="game-title"><i class="fas fa-egg"></i> لعبة الدجاجة والقنابل</div>
+                <div class="game-desc">اختر درجة الصعوبة واكشف الخلايا بعناية لتجنب المتفجرات ومضاعفة رصيدك.</div>
 
                 <div style="display:flex; gap:8px; align-items:center; margin:6px 0; flex-wrap:wrap;">
                     <label style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0; display:flex; align-items:center; gap:6px;">
-                        <input type="checkbox" id="useFreeRound"> استخدم جولة مجانية
+                        <input type="checkbox" id="useFreeRound"> تفعيل الجولة المجانية
                     </label>
                     <span style="font-size:clamp(11px,2vw,13px); color:#8a7fa0;">(المتبقي: <span id="freeRoundsDisplay2">0</span>)</span>
                 </div>
 
-                <!-- اختيار مستوى الصعوبة (بدلاً من شريط التمرير) -->
+                <!-- مستويات الصعوبة المعتمدة على محرك الاحتساب -->
                 <div style="margin: 8px 0;">
-                    <label style="font-size:clamp(13px,3vw,15px); color:#8a7fa0;">مستوى الصعوبة:</label>
-                    <select id="difficultySelect" onchange="updateDifficultyDisplay()" style="direction: rtl;">
+                    <label style="font-size:clamp(13px,3vw,15px); color:#8a7fa0;">مستوى الصعوبة الاستراتيجي:</label>
+                    <select id="difficultySelect" onchange="updateDifficultyDisplay()">
                         <option value="normal">عادي (1.3x)</option>
                         <option value="medium" selected>متوسط (1.6x)</option>
                         <option value="hard">صعب (2.0x)</option>
@@ -875,108 +664,103 @@
 
                 <div class="risk-slider-container">
                     <label>
-                        <span>القنابل: <span id="climbRiskLabel">5</span></span>
-                        <span>أقصى مضاعف: <span id="climbProfitLabel">2.60</span>x</span>
+                        <span>القنابل المزروعة: <span id="climbRiskLabel">5</span></span>
+                        <span>أقصى مضاعف ممكن: <span id="climbProfitLabel">2.60</span>x</span>
                     </label>
                 </div>
 
                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
-                    <input type="number" id="climbBet" placeholder="الرهان" value="0.3" step="0.1" style="flex:2; min-width:80px;">
-                    <button class="btn btn-gold" onclick="startClimbGame()" style="flex:1;"><i class="fas fa-play"></i> بدء</button>
+                    <input type="number" id="climbBet" placeholder="قيمة الرهان" value="0.3" step="0.1" style="flex:2; min-width:80px;">
+                    <button class="btn btn-gold" onclick="startClimbGame()" style="flex:1;"><i class="fas fa-play"></i> بدء الجولة</button>
                 </div>
 
+                <!-- شبكة اللعب الديناميكية 5x5 -->
                 <div class="climb-grid" id="climbGrid"></div>
+                
                 <div class="game-stats" style="display:flex; justify-content:space-between; margin:4px 0;">
-                    <span>الخطوة: <span id="climbStep">0</span></span>
-                    <span>المضاعف: <span id="climbMultiplier">1.60x</span></span>
+                    <span>الخطوة الحالية: <span id="climbStep">0</span></span>
+                    <span>المضاعف الفعلي: <span id="climbMultiplier">1.60x</span></span>
                 </div>
-                <button class="btn btn-green" id="climbCashoutBtn" onclick="cashoutClimb()" disabled style="width:100%;"><i class="fas fa-hand-holding-usd"></i> سحب الأرباح</button>
+                <button class="btn btn-green" id="climbCashoutBtn" onclick="cashoutClimb()" disabled style="width:100%;"><i class="fas fa-hand-holding-usd"></i> جني الأرباح والانسحاب</button>
                 <div id="climbResult" class="game-result"></div>
-            </div>
-
-            <!-- زر تسجيل الدخول إلى الإدارة -->
-            <div style="text-align:center; margin:16px 0; padding:8px; border-top:1px solid rgba(255,255,255,0.05);">
-                <button class="btn btn-outline" onclick="showAdminLoginModal()" style="font-size:clamp(10px,2vw,12px); padding:6px 12px;">
-                    <i class="fas fa-lock"></i> تسجيل الدخول إلى الإدارة
-                </button>
             </div>
         </div>
 
-        <!-- ===== القسم 4: سوق النقاط ===== -->
+        <!-- ===== القسم 4: سوق الوكلاء الماليين ونظام تصنيف الأسعار التنافسي ===== -->
         <div id="section-market" class="section">
-            <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-store"></i> سوق النقاط</h2>
+            <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-store"></i> سوق النقاط اللامركزي</h2>
 
             <div class="card">
-                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-exchange-alt"></i> أسعار الصرف</h4>
-                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">أسعار الوكلاء الحالية (مرتبة تنافسياً)</p>
+                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-exchange-alt"></i> عروض الوكلاء الحالية</h4>
+                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">أسعار الصرف المحددة من قبل الوكلاء المعتمدين (مرتبة تنافسياً لتوفير أفضل سعر للمستخدم)</p>
                 <div class="market-grid">
                     <div class="market-card">
-                        <h4>🟢 بيع النقاط</h4>
-                        <div class="market-counter">👥 البائعون النشطون: <span id="sellCount">0</span></div>
-                        <div id="sellOrdersList"><p style="color:#8a7fa0;">جاري التحميل...</p></div>
+                        <h4>🟢 بيع النقاط للمستخدمين</h4>
+                        <div class="market-counter">👥 الوكلاء النشطون: <span id="sellCount">0</span></div>
+                        <div id="sellOrdersList"><p style="color:#8a7fa0;">جاري تحديث العروض...</p></div>
                     </div>
                     <div class="market-card">
-                        <h4>🔴 شراء النقاط</h4>
+                        <h4>🔴 شراء النقاط من المستخدمين</h4>
                         <div class="market-counter">👥 المشترون النشطون: <span id="buyCount">0</span></div>
-                        <div id="buyOrdersList"><p style="color:#8a7fa0;">جاري التحميل...</p></div>
+                        <div id="buyOrdersList"><p style="color:#8a7fa0;">جاري تحديث الطلبات...</p></div>
                     </div>
                 </div>
             </div>
 
-            <!-- لوحة الوكيل -->
+            <!-- لوحة التحكم الحصرية بالوكيل لضبط الهوامش السعرية -->
             <div class="card">
-                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-user-tie"></i> لوحة الوكيل</h4>
+                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-user-tie"></i> لوحة تحكم الوكيل المعمد</h4>
                 <div id="agentPanel">
                     <div style="display:flex; gap:8px; flex-wrap:wrap; margin:6px 0;">
-                        <input type="number" id="agentSellPrice" placeholder="سعر البيع" step="0.0001" value="0.01" style="flex:1;">
-                        <input type="number" id="agentBuyPrice" placeholder="سعر الشراء" step="0.0001" value="0.009" style="flex:1;">
-                        <button class="btn btn-gold" onclick="setAgentPrices(parseFloat(document.getElementById('agentSellPrice').value), parseFloat(document.getElementById('agentBuyPrice').value))" style="flex:1;"><i class="fas fa-save"></i> تحديث</button>
+                        <input type="number" id="agentSellPrice" placeholder="سعر البيع المقترح" step="0.0001" value="0.01" style="flex:1;">
+                        <input type="number" id="agentBuyPrice" placeholder="سعر الشراء المقترح" step="0.0001" value="0.009" style="flex:1;">
+                        <button class="btn btn-gold" onclick="setAgentPrices(parseFloat(document.getElementById('agentSellPrice').value), parseFloat(document.getElementById('agentBuyPrice').value))" style="flex:1;"><i class="fas fa-save"></i> تحديث أسعاري</button>
                     </div>
                     <div style="margin-top:8px;">
-                        <h5 style="color:var(--gold); font-size:clamp(14px,3vw,16px);">⏳ العمليات المعلقة:</h5>
-                        <div id="agentPendingOrders"><p style="color:#8a7fa0;">لا توجد عمليات معلقة</p></div>
+                        <h5 style="color:var(--gold); font-size:clamp(14px,3vw,16px);">⏳ العمليات المالية المعلقة لديك:</h5>
+                        <div id="agentPendingOrders"><p style="color:#8a7fa0;">لا توجد عمليات بانتظار موافقتك</p></div>
                     </div>
                 </div>
             </div>
 
-            <!-- طلب التاجر -->
+            <!-- نظام طلبات ترقية العضوية للوكلاء -->
             <div class="card">
-                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-handshake"></i> طلب التاجر</h4>
-                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">تقدم بطلبك لتصبح وكيلاً معتمداً (يلزم 30 يوم من التسجيل واستثمار 100 دولار)</p>
-                <button class="btn btn-purple" onclick="requestAgent()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> تقديم طلب الوكالة</button>
+                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-handshake"></i> طلب الانضمام لشبكة التوافق</h4>
+                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">تقدم بطلبك لتصبح وكيلاً معتمداً في المنصة (الشروط: عمر الحساب 30 يوماً كحد أدنى مع استثمار لا يقل عن 100 USDT)</p>
+                <button class="btn btn-purple" onclick="requestAgent()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> تقديم طلب الوكالة للإدارة</button>
                 <div id="agentRequestStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;"></div>
             </div>
         </div>
 
-        <!-- ===== القسم 5: الإعلانات ===== -->
+        <!-- ===== القسم 5: نظام الإعلانات التفاعلي والممول ===== -->
         <div id="section-ads" class="section">
-            <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-bullhorn"></i> الإعلانات الممولة</h2>
+            <h2 style="margin-top:12px; font-size:clamp(20px,5vw,28px); color:var(--gold);"><i class="fas fa-bullhorn"></i> شبكة الإعلانات الممولة</h2>
             <div class="ad-container">
-                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-eye"></i> مشاهدة الإعلانات</h4>
-                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">شاهد الإعلانات واكسب نقاطاً مجانية (كل 30 مشاهدة = جولة مجانية)</p>
-                <div id="activeAdsContainer"><p style="color:#8a7fa0; text-align:center;">جاري التحميل...</p></div>
+                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-eye"></i> جدار المهام والمشاهدات</h4>
+                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">شاهد الإعلانات الممولة واكسب نقاطاً فورية (كل 30 مشاهدة تمنحك جولة كازينو مجانية كاملة)</p>
+                <div id="activeAdsContainer"><p style="color:#8a7fa0; text-align:center;">جاري جلب الحملات النشطة...</p></div>
                 <div id="adMessage" style="font-size:clamp(11px,2vw,13px); margin-top:6px; color:#8a7fa0; text-align:center;"></div>
             </div>
 
-            <!-- نشر إعلان -->
+            <!-- نشر وتمويل حملة إعلانية جديدة من خلال الرصيد -->
             <div class="card">
-                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-ad"></i> نشر إعلان ممول</h4>
-                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">ادفع 0.001 دولار لكل مشاهدة</p>
-                <input type="text" id="adTitle" placeholder="عنوان الإعلان">
-                <textarea id="adContent" placeholder="محتوى الإعلان" rows="3"></textarea>
-                <input type="url" id="adLink" placeholder="رابط الفيديو أو الصفحة">
-                <input type="number" id="adTargetViews" placeholder="عدد المشاهدات المطلوبة" min="1" value="1000" oninput="updateAdCost()">
+                <h4 style="color:var(--gold); font-size:clamp(16px,3.5vw,20px);"><i class="fas fa-ad"></i> إنشاء وتدشين حملة ممولة</h4>
+                <p style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0;">التكلفة المعتمدة للحملات: تقتطع الخزينة 0.001 USDT لكل مشاهدة فريدة يتم تسليمها لحسابك.</p>
+                <input type="text" id="adTitle" placeholder="عنوان الحملة الإعلانية">
+                <textarea id="adContent" placeholder="المحتوى النصي أو الترويجي للحملة" rows="3"></textarea>
+                <input type="url" id="adLink" placeholder="رابط المقصد (الفيديو أو الموقع المستهدف)">
+                <input type="number" id="adTargetViews" placeholder="عدد المشاهدات المستهدفة المطلوبة" min="1" value="1000" oninput="updateAdCost()">
                 <div style="font-size:clamp(12px,2.5vw,14px); color:#8a7fa0; margin-top:6px; text-align:center; background:rgba(212,175,55,0.05); padding:8px; border-radius:8px;">
-                    💰 التكلفة الإجمالية: <span id="adCostDisplay" style="color:var(--gold); font-weight:700;">1.00</span> USDT
+                    💰 التكلفة الحسابية الإجمالية: <span id="adCostDisplay" style="color:var(--gold); font-weight:700;">1.00</span> USDT
                 </div>
-                <button class="btn btn-purple" onclick="submitAd()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> نشر الإعلان</button>
+                <button class="btn btn-purple" onclick="submitAd()" style="width:100%; margin-top:6px;"><i class="fas fa-paper-plane"></i> إطلاق وتفعيل الحملة فوراً</button>
                 <div id="adSubmitStatus" style="font-size:clamp(11px,2vw,13px); color:#8a7fa0; margin-top:4px; text-align:center;"></div>
             </div>
         </div>
 
     </div>
 
-    <!-- ===== شريط التنقل السفلي ===== -->
+    <!-- ===== شريط التنقل السفلي الثابت للتحكم بالواجهات ===== -->
     <div class="bottom-nav">
         <button class="nav-item active" data-section="dashboard" onclick="navigateTo('dashboard')">
             <i class="fas fa-home"></i><span>الرئيسية</span>
@@ -995,6 +779,7 @@
         </button>
     </div>
 
+    <!-- استدعاء ملف المعالجة البرمجية الخلفي الموحد -->
     <script src="app.js"></script>
 </body>
-                </html>
+</html>
