@@ -183,12 +183,25 @@ app.post('/api/auth/login', async (req, res) => {
         const { email, password } = req.body;
         const user = await User.findOne({ email, password });
         if (user) {
-            res.json({ success: true, user });
+            const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+            res.json({ success: true, user, token });
         } else {
             res.status(401).json({ success: false, message: 'بيانات خاطئة' });
         }
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/auth/verify-session', async (req, res) => {
+    try {
+        const { token } = req.body;
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'جلسة غير صالحة' });
     }
 });
 
@@ -217,11 +230,65 @@ app.post('/api/wallet/transfer-to-casino', async (req, res) => {
         if (user.balance < amount) {
             return res.status(400).json({ success: false, message: 'الرصيد غير كافٍ' });
         }
+        if (amount <= 0) {
+            return res.status(400).json({ success: false, message: 'المبلغ غير صالح' });
+        }
         user.balance -= amount;
         user.casinoBalance += amount;
         await user.save();
         await createTransaction(userId, 'transfer_to_casino', amount, 'completed', 'تحويل إلى الكازينو');
         res.json({ success: true, message: 'تم التحويل', user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ===== واجهات الكازينو (الجديدة) =====
+app.post('/api/casino/win', async (req, res) => {
+    try {
+        const { userId, amount, multiplier, useFreeRound } = req.body;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+
+        if (useFreeRound) {
+            if (user.freeRounds <= 0) {
+                return res.status(400).json({ success: false, message: 'لا توجد جولات مجانية' });
+            }
+            user.freeRounds -= 1;
+            // الربح من الجولة المجانية = الرهان الأساسي × المضاعف (يضاف للرصيد المجاني)
+            const winnings = amount * multiplier;
+            user.casinoBalance += winnings;
+            await createTransaction(userId, 'free_round_win', winnings, 'completed', `ربح جولة مجانية (${multiplier}x)`);
+        } else {
+            if (user.casinoBalance < amount) {
+                return res.status(400).json({ success: false, message: 'رصيد الكازينو غير كافٍ' });
+            }
+            user.casinoBalance -= amount;
+            const winnings = amount * multiplier;
+            user.casinoBalance += winnings;
+            await createTransaction(userId, 'casino_win', winnings, 'completed', `ربح كازينو (${multiplier}x)`);
+        }
+
+        await user.save();
+        res.json({ success: true, message: 'تم تحديث الرصيد', user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post('/api/casino/lose', async (req, res) => {
+    try {
+        const { userId, amount } = req.body;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+
+        if (user.casinoBalance < amount) {
+            return res.status(400).json({ success: false, message: 'رصيد الكازينو غير كافٍ' });
+        }
+        user.casinoBalance -= amount;
+        await user.save();
+        await createTransaction(userId, 'casino_lose', amount, 'completed', 'خسارة كازينو');
+        res.json({ success: true, message: 'تم خصم الرهان', user });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -273,7 +340,8 @@ app.post('/api/mining/click', async (req, res) => {
             miningClicks: user.miningClicks,
             remaining: user.miningMaxClicks - user.miningClicks,
             bonus,
-            freeRound
+            freeRound,
+            lastReset: user.miningLastReset
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -319,7 +387,8 @@ app.post('/api/mining/status', async (req, res) => {
             miningClicks: user.miningClicks,
             remaining: user.miningMaxClicks - user.miningClicks,
             resetIn: Math.ceil(resetIn),
-            freeRounds: user.freeRounds
+            freeRounds: user.freeRounds,
+            lastReset: user.miningLastReset
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -421,14 +490,23 @@ app.post('/api/ads/view', async (req, res) => {
         await ad.save();
 
         const user = await User.findById(userId);
+        let freeRoundAwarded = false;
         if (user) {
             user.points += 0.5;
-            // كل 30 مشاهدة = جولة مجانية
+            // كل 30 مشاهدة = جولة مجانية (يُمنح عند كل مضاعف للعدد 30)
             if (ad.currentViews % 30 === 0) {
                 user.freeRounds += 1;
-                await createTransaction(userId, 'free_round_reward', 0, 'completed', 'مكافأة 30 مشاهدة (جولة مجانية)');
+                freeRoundAwarded = true;
+                await createTransaction(userId, 'free_round_reward', 0, 'completed', `مكافأة 30 مشاهدة للإعلان (جولة مجانية)`);
             }
             await user.save();
+        }
+
+        // إذا اكتملت المشاهدات
+        if (ad.currentViews >= ad.targetViews) {
+            ad.status = 'completed';
+            ad.completedAt = new Date();
+            await ad.save();
         }
 
         res.json({
@@ -436,7 +514,8 @@ app.post('/api/ads/view', async (req, res) => {
             message: 'تم تسجيل المشاهدة',
             currentViews: ad.currentViews,
             targetViews: ad.targetViews,
-            completed: ad.currentViews >= ad.targetViews
+            completed: ad.currentViews >= ad.targetViews,
+            freeRoundAwarded
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
