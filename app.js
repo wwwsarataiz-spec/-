@@ -7,12 +7,22 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// ------------------------------------------------------------------
+// 🔥 هذا هو الجزء الجديد الذي سيحل مشكلة الشاشة البيضاء
+// يقوم بإخبار السيرفر أين يوجد ملف الواجهة (index.html)
+// ------------------------------------------------------------------
+app.use(express.static(__dirname));
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+// ------------------------------------------------------------------
+
 // 1. الاتصال بقاعدة البيانات
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ تم الاتصال بقاعدة بيانات MongoDB'))
   .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err));
 
-// 2. تعريف خطط التعدين
+// 2. تعريف خطط التعدين (مجاني ومدفوع)
 const MINING_PLANS = {
     free: { name: "مجاني", rate: 1, cost: 0 },
     starter: { name: "مبتدئ", rate: 5, cost: 50 },
@@ -30,7 +40,7 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// 4. تسجيل الدخول
+// 4. تسجيل الدخول (إنشاء حساب أو تسجيل الدخول)
 app.post('/login', async (req, res) => {
   const { name, email } = req.body;
   try {
@@ -45,7 +55,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// 5. عملية التعدين
+// 5. عملية التعدين (جمع النقاط)
 app.post('/mine', async (req, res) => {
   const { email } = req.body;
   try {
@@ -55,13 +65,15 @@ app.post('/mine', async (req, res) => {
     const now = new Date();
     let rate = MINING_PLANS.free.rate;
 
+    // التحقق من صلاحية الخطة المدفوعة
     if (user.miningPlan !== 'free' && user.planExpiresAt && user.planExpiresAt > now) {
         rate = MINING_PLANS[user.miningPlan].rate;
     } else {
-        user.miningPlan = 'free';
+        user.miningPlan = 'free'; // تنتهي الخطة تعود مجانية
         user.planExpiresAt = null;
     }
 
+    // حساب الوقت المنقضي منذ آخر تعدين
     const timeDiffMinutes = (now - user.lastMiningCheck) / 1000 / 60;
     const pointsToAdd = Math.floor(timeDiffMinutes * rate);
 
@@ -77,7 +89,7 @@ app.post('/mine', async (req, res) => {
   }
 });
 
-// 6. شراء خطط التعدين
+// 6. شراء خطط التعدين المدفوعة
 app.post('/buy-plan', async (req, res) => {
   const { email, planKey } = req.body;
   const plan = MINING_PLANS[planKey];
@@ -91,6 +103,7 @@ app.post('/buy-plan', async (req, res) => {
       return res.status(400).json({ error: 'رصيدك لا يكفي لشراء هذه الخطة' });
     }
 
+    // خصم النقاط وتفعيل الخطة (صلاحية الخطة: 7 أيام)
     user.points -= plan.cost;
     user.miningPlan = planKey;
     user.planExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -126,7 +139,7 @@ app.post('/buy-points', async (req, res) => {
   }
 });
 
-// 8. لعبة الكازينو
+// 8. لعبة الكازينو (Slot Machine)
 app.post('/casino-spin', async (req, res) => {
   const { email, bet } = req.body;
   try {
@@ -134,14 +147,19 @@ app.post('/casino-spin', async (req, res) => {
     if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
     if (user.points < bet) return res.status(400).json({ error: 'رصيدك لا يكفي لهذا الرهان' });
 
+    // خصم الرهان
     user.points -= bet;
+
+    // محاكاة دوران العجلة (أرقام عشوائية)
     const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '⭐', '💎'];
     const result = [
       symbols[Math.floor(Math.random() * symbols.length)],
       symbols[Math.floor(Math.random() * symbols.length)],
       symbols[Math.floor(Math.random() * symbols.length)]
     ];
+
     let winAmount = 0;
+    // منطق الربح (تطابق 3 أو 2 رموز)
     if (result[0] === result[1] && result[1] === result[2]) winAmount = bet * 10;
     else if (result[0] === result[1] || result[1] === result[2]) winAmount = bet * 2;
 
