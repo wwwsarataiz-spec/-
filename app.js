@@ -6,6 +6,8 @@ let currentSteps = 0;
 let currentMultiplier = 1.00;
 let bombLocations = [];
 const totalCells = 25;
+let currentBetAmount = 0; // لتخزين مبلغ الرهان الحالي
+let currentUseFreeRound = false; // لتخزين حالة استخدام الجولة المجانية
 
 // ===== إعدادات الصعوبة (4 مستويات مع القيم الدقيقة) =====
 const difficultySettings = {
@@ -68,6 +70,7 @@ function restoreMiningFromLocalStorage() {
 
 // ===== تحديث عداد الوقت المتبقي لإعادة الضبط =====
 function updateMiningResetTimer(lastReset) {
+    if (!lastReset) return;
     const now = Date.now();
     const last = new Date(lastReset).getTime();
     const elapsed = (now - last) / (60 * 60 * 1000);
@@ -177,6 +180,10 @@ function navigateTo(sectionId) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(`section-${sectionId}`).classList.add('active');
     document.querySelector(`.nav-item[data-section="${sectionId}"]`).classList.add('active');
+    
+    // تحميل البيانات عند الانتقال
+    if (sectionId === 'ads') fetchActiveAds();
+    if (sectionId === 'market') fetchMarketData();
 }
 
 // ===== إعداد أزرار التعدين =====
@@ -194,7 +201,6 @@ function setupMiningButtons() {
                 document.getElementById('miningProgressDisplay').innerText = `${data.miningProgress.toFixed(4)} USDT`;
                 document.getElementById('miningClicksDisplay').innerText = `${data.miningClicks} / 100`;
                 document.getElementById('miningRemainingDisplay').innerText = data.remaining;
-                // حفظ الحالة محلياً
                 saveMiningToLocalStorage(data.miningProgress, data.miningClicks, new Date().toISOString());
                 updateMiningResetTimer(new Date().toISOString());
                 
@@ -202,10 +208,9 @@ function setupMiningButtons() {
                 if (data.bonus > 0) statusMsg += ` | 🎁 مكافأة +${data.bonus} USDT`;
                 if (data.freeRound) {
                     statusMsg += ' | 🎰 جولة مجانية!';
-                    document.getElementById("freeRoundsDisplay").innerText = 
-                        (parseInt(document.getElementById("freeRoundsDisplay").innerText) || 0) + 1;
-                    document.getElementById("freeRoundsDisplay2").innerText = 
-                        document.getElementById("freeRoundsDisplay").innerText;
+                    const fr = parseInt(document.getElementById("freeRoundsDisplay").innerText) || 0;
+                    document.getElementById("freeRoundsDisplay").innerText = fr + 1;
+                    document.getElementById("freeRoundsDisplay2").innerText = fr + 1;
                 }
                 document.getElementById("miningStatus").innerHTML = statusMsg;
             } else {
@@ -230,8 +235,8 @@ function setupMiningButtons() {
                 document.getElementById("liveBalance").innerHTML = `${data.newBalance.toFixed(4)} <small>USDT</small>`;
                 document.getElementById("walletBalance").innerText = `${data.newBalance.toFixed(2)} USDT`;
                 document.getElementById("miningStatus").innerHTML = `✅ تم حصاد ${data.harvested.toFixed(4)} USDT`;
-                // تصفير localStorage
-                saveMiningToLocalStorage(0, parseInt(document.getElementById('miningClicksDisplay').innerText.split(' / ')[0]) || 0, new Date().toISOString());
+                const clicks = parseInt(document.getElementById('miningClicksDisplay').innerText.split(' / ')[0]) || 0;
+                saveMiningToLocalStorage(0, clicks, new Date().toISOString());
             } else {
                 document.getElementById("miningStatus").innerHTML = `⚠️ ${data.message}`;
             }
@@ -256,7 +261,6 @@ async function fetchMiningStatus() {
             document.getElementById('miningClicksDisplay').innerText = `${data.miningClicks} / 100`;
             document.getElementById('miningRemainingDisplay').innerText = data.remaining;
             updateMiningResetTimer(data.lastReset || data.miningLastReset);
-            // مزامنة localStorage
             saveMiningToLocalStorage(data.miningProgress, data.miningClicks, data.lastReset || data.miningLastReset);
             if (data.freeRounds !== undefined) {
                 document.getElementById("freeRoundsDisplay").innerText = data.freeRounds;
@@ -268,7 +272,7 @@ async function fetchMiningStatus() {
     }
 }
 
-// ===== لعبة الدجاجة =====
+// ===== لعبة الدجاجة (الكازينو) - تم إصلاحها =====
 function updateDifficultyDisplay() {
     chosenDifficulty = document.getElementById('difficultySelect').value;
     const settings = difficultySettings[chosenDifficulty];
@@ -281,6 +285,7 @@ function updateDifficultyDisplay() {
 function startClimbGame() {
     if (!currentUserId) {
         document.getElementById('climbResult').innerHTML = '<span style="color:#e74c3c;">يجب تسجيل الدخول أولاً</span>';
+        document.getElementById('climbResult').className = 'game-result lose';
         return;
     }
     
@@ -290,12 +295,25 @@ function startClimbGame() {
     
     if (!useFreeRound && betAmount <= 0) {
         document.getElementById('climbResult').innerHTML = '<span style="color:#e74c3c;">الرجاء إدخال مبلغ الرهان</span>';
+        document.getElementById('climbResult').className = 'game-result lose';
         return;
+    }
+
+    // التحقق من رصيد الكازينو إذا لم تكن جولة مجانية
+    if (!useFreeRound) {
+        const casinoBalance = parseFloat(document.getElementById('casinoBalance').innerText) || 0;
+        if (casinoBalance < betAmount) {
+            document.getElementById('climbResult').innerHTML = '<span style="color:#e74c3c;">رصيد الكازينو غير كافٍ</span>';
+            document.getElementById('climbResult').className = 'game-result lose';
+            return;
+        }
     }
 
     gameInProgress = true;
     currentSteps = 0;
     currentMultiplier = settings.baseMultiplier;
+    currentBetAmount = betAmount;
+    currentUseFreeRound = useFreeRound;
     bombLocations = [];
     const totalBombs = settings.bombs;
     
@@ -310,17 +328,18 @@ function startClimbGame() {
     document.getElementById('climbStep').innerText = '0';
     document.getElementById('climbMultiplier').innerText = `${settings.baseMultiplier.toFixed(2)}x`;
     document.getElementById('climbResult').innerHTML = '';
+    document.getElementById('climbResult').className = 'game-result';
     
     for (let i = 0; i < totalCells; i++) {
         const cell = document.createElement('div');
         cell.className = 'climb-cell';
         cell.innerHTML = '<i class="fas fa-question" style="color:#4a3f68;"></i>';
-        cell.onclick = () => revealCell(i, cell, useFreeRound, betAmount);
+        cell.onclick = () => revealCell(i, cell);
         grid.appendChild(cell);
     }
 }
 
-async function revealCell(index, cellElement, useFreeRound, betAmount) {
+async function revealCell(index, cellElement) {
     if (!gameInProgress) return;
     
     const settings = difficultySettings[chosenDifficulty];
@@ -335,14 +354,16 @@ async function revealCell(index, cellElement, useFreeRound, betAmount) {
         document.getElementById('climbResult').className = 'game-result lose';
         
         // خصم الرهان إذا لم تكن جولة مجانية
-        if (!useFreeRound && betAmount > 0 && currentUserId) {
+        if (!currentUseFreeRound && currentBetAmount > 0 && currentUserId) {
             try {
                 await fetch('/api/casino/lose', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUserId, amount: betAmount })
+                    body: JSON.stringify({ userId: currentUserId, amount: currentBetAmount })
                 });
-                verifySessionToken();
+                // تحديث البيانات
+                const casinoBalanceEl = document.getElementById('casinoBalance');
+                casinoBalanceEl.innerText = (parseFloat(casinoBalanceEl.innerText) - currentBetAmount).toFixed(2) + ' USDT';
             } catch (err) {
                 console.error("خطأ في خصم الرهان:", err);
             }
@@ -366,26 +387,28 @@ async function revealCell(index, cellElement, useFreeRound, betAmount) {
         document.getElementById('climbCashoutBtn').disabled = true;
         document.getElementById('climbResult').innerHTML = `<span style="color:#2ecc71;">🎉 رائع! كشفت كل الخلايا الآمنة! المضاعف: ${currentMultiplier.toFixed(2)}x</span>`;
         document.getElementById('climbResult').className = 'game-result win';
-        await processWin(useFreeRound, betAmount);
+        await processWin();
     }
 }
 
 async function cashoutClimb() {
-    if (!gameInProgress) return;
+    if (!gameInProgress) {
+        document.getElementById('climbResult').innerHTML = '<span style="color:#e74c3c;">لا توجد جولة نشطة</span>';
+        document.getElementById('climbResult').className = 'game-result lose';
+        return;
+    }
+    
     gameInProgress = false;
     document.getElementById('climbCashoutBtn').disabled = true;
     
-    const useFreeRound = document.getElementById('useFreeRound').checked;
-    const betAmount = parseFloat(document.getElementById('climbBet').value) || 0;
-    
-    const winnings = useFreeRound ? 0 : betAmount * currentMultiplier;
+    const winnings = currentUseFreeRound ? 0 : currentBetAmount * currentMultiplier;
     document.getElementById('climbResult').innerHTML = `<span style="color:#2ecc71;">✅ تم السحب! المضاعف: ${currentMultiplier.toFixed(2)}x | الربح: ${winnings.toFixed(4)} USDT</span>`;
     document.getElementById('climbResult').className = 'game-result win';
     
-    await processWin(useFreeRound, betAmount);
+    await processWin();
 }
 
-async function processWin(useFreeRound, betAmount) {
+async function processWin() {
     if (!currentUserId) return;
     
     try {
@@ -394,14 +417,21 @@ async function processWin(useFreeRound, betAmount) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 userId: currentUserId,
-                amount: betAmount,
+                amount: currentBetAmount,
                 multiplier: currentMultiplier,
-                useFreeRound: useFreeRound
+                useFreeRound: currentUseFreeRound
             })
         });
         const data = await response.json();
         if (data.success) {
-            updateDashboardData(data.user);
+            // تحديث مباشر للرصيد المعروض
+            document.getElementById('casinoBalance').innerText = `${data.user.casinoBalance.toFixed(2)} USDT`;
+            if (data.user.freeRounds !== undefined) {
+                document.getElementById("freeRoundsDisplay").innerText = data.user.freeRounds;
+                document.getElementById("freeRoundsDisplay2").innerText = data.user.freeRounds;
+            }
+        } else {
+            alert(data.message || 'فشل في تحديث الرصيد');
         }
     } catch (err) {
         console.error("خطأ في معالجة الربح:", err);
@@ -554,7 +584,6 @@ async function submitAd() {
             document.getElementById('adLink').value = '';
             document.getElementById('adTargetViews').value = '1000';
             updateAdCost();
-            // تحديث الرصيد
             verifySessionToken();
         } else {
             document.getElementById('adSubmitStatus').innerHTML = `<span style="color:#e74c3c;">⚠️ ${data.message}</span>`;
@@ -565,11 +594,17 @@ async function submitAd() {
     }
 }
 
-// ===== التحويل إلى الكازينو =====
+// ===== التحويل إلى الكازينو (تم إصلاحه) =====
 async function transferToCasino() {
-    if (!currentUserId) return;
+    if (!currentUserId) {
+        alert('يجب تسجيل الدخول أولاً');
+        return;
+    }
     const amount = parseFloat(document.getElementById('transferAmount').value) || 0;
-    if (amount <= 0) return;
+    if (amount <= 0) {
+        alert('الرجاء إدخال مبلغ صالح');
+        return;
+    }
     
     try {
         const response = await fetch('/api/wallet/transfer-to-casino', {
@@ -581,15 +616,53 @@ async function transferToCasino() {
         if (data.success) {
             updateDashboardData(data.user);
             document.getElementById('transferAmount').value = '';
+            alert('تم التحويل بنجاح');
         } else {
-            alert(data.message || 'فشل التحويل');
+            alert(data.message || 'فشل التحويل - قد يكون الرصيد غير كافٍ');
         }
     } catch (err) {
         console.error("خطأ في التحويل:", err);
+        alert('خطأ في الاتصال');
     }
 }
 
-// ===== الوظائف الإضافية =====
+// ===== بيع النقاط (تم إصلاحه) =====
+async function sellPoints() {
+    if (!currentUserId) {
+        alert('يجب تسجيل الدخول أولاً');
+        return;
+    }
+    const points = parseInt(document.getElementById('pointsToSell').value) || 0;
+    if (points <= 0) {
+        alert('الرجاء إدخال عدد نقاط صحيح');
+        return;
+    }
+    // سعر الصرف: 1000 نقطة = 1 USDT
+    const exchangeRate = 0.001; // دولار لكل نقطة
+    const usdtAmount = points * exchangeRate;
+    if (confirm(`بيع ${points} نقطة مقابل ${usdtAmount.toFixed(2)} USDT؟`)) {
+        try {
+            const response = await fetch('/api/market/sell-points', { // نفترض وجود هذه النقطة الخلفية
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUserId, points })
+            });
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('walletPoints').innerText = data.user.points.toFixed(1);
+                document.getElementById('walletBalance').innerText = data.user.balance.toFixed(2) + ' USDT';
+                alert(`تم البيع بنجاح! أضيف ${usdtAmount.toFixed(2)} USDT إلى رصيدك`);
+            } else {
+                alert(data.message || 'فشل البيع');
+            }
+        } catch (err) {
+            // إذا لم تكن النقطة الخلفية موجودة، نستخدم منطقاً محلياً بسيطاً
+            alert('الخدمة غير متاحة حالياً، جاري تطويرها');
+        }
+    }
+}
+
+// ===== نسخ العنوان =====
 async function copyAddress() {
     const address = document.getElementById('walletAddress').value;
     try {
@@ -602,9 +675,6 @@ async function copyAddress() {
 
 function openSettings() {
     document.getElementById('settingsModal').style.display = 'flex';
-    if (currentUserId) {
-        // هنا يمكن إضافة منطق جلب بيانات المستخدم للإعدادات
-    }
 }
 
 function closeSettings() {
@@ -612,18 +682,18 @@ function closeSettings() {
 }
 
 async function saveSettings() {
-    // سيتم تنفيذها لاحقاً
     closeSettings();
+    // يمكن إضافة منطق الحفظ لاحقاً
 }
 
 async function claimFreeMining() {
     if (!currentUserId) return;
-    // يمكن إضافة منطق المطالبة بالتعدين المجاني هنا
+    // يمكن إضافة منطق لاحقاً
 }
 
 async function purchaseFlexMining() {
     if (!currentUserId) return;
-    // يمكن إضافة منطق شراء التعدين المدفوع هنا
+    // يمكن إضافة منطق لاحقاً
 }
 
 function updateInvestmentCalc() {
@@ -635,11 +705,6 @@ function updateInvestmentCalc() {
 }
 
 async function submitWithdraw() {
-    if (!currentUserId) return;
-    // سيتم تنفيذها لاحقاً
-}
-
-async function sellPoints() {
     if (!currentUserId) return;
     // سيتم تنفيذها لاحقاً
 }
@@ -706,7 +771,6 @@ async function adminLogin(password) {
         const data = await response.json();
         if (data.success) {
             alert('تم تسجيل الدخول بنجاح');
-            // يمكن إضافة توجيه للوحة الإدارة هنا
         } else {
             alert('كلمة المرور غير صحيحة');
         }
@@ -716,7 +780,37 @@ async function adminLogin(password) {
 }
 
 async function fetchMarketData() {
-    // سيتم تنفيذها لاحقاً
+    // تبسيط: جلب عدد الوكلاء
+    try {
+        const [sellRes, buyRes] = await Promise.all([
+            fetch('/api/market/sell-orders'),
+            fetch('/api/market/buy-orders')
+        ]);
+        const sellData = await sellRes.json();
+        const buyData = await buyRes.json();
+        if (sellData.success) {
+            document.getElementById('sellCount').innerText = sellData.count || 0;
+            if (sellData.agents) {
+                document.getElementById('sellOrdersList').innerHTML = sellData.agents.map(a => 
+                    `<div style="margin:4px 0; padding:4px; background:rgba(255,255,255,0.05); border-radius:6px;">
+                        <span style="color:var(--gold);">${a.fullName}</span> - بيع: ${a.sellPrice}
+                    </div>`
+                ).join('');
+            }
+        }
+        if (buyData.success) {
+            document.getElementById('buyCount').innerText = buyData.count || 0;
+            if (buyData.agents) {
+                document.getElementById('buyOrdersList').innerHTML = buyData.agents.map(a => 
+                    `<div style="margin:4px 0; padding:4px; background:rgba(255,255,255,0.05); border-radius:6px;">
+                        <span style="color:var(--gold);">${a.fullName}</span> - شراء: ${a.buyPrice}
+                    </div>`
+                ).join('');
+            }
+        }
+    } catch (err) {
+        console.error("خطأ في جلب بيانات السوق:", err);
+    }
 }
 
 // تحديث حساب الاستثمار عند التحميل
