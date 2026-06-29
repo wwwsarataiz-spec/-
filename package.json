@@ -1,14 +1,15 @@
 {
-  "name": "telegram-mining-game",
+  "name": "nexora",
   "version": "1.0.0",
+  "description": "Nexora backend with authentication and token",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "mongoose": "^8.0.3"
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "jsonwebtoken": "^9.0.2"
   }
 }
