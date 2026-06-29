@@ -26,7 +26,7 @@
       min-height: 100vh;
     }
 
-    /* ===== SIDEBAR (ثابت) ===== */
+    /* ===== SIDEBAR (ثابت على اليمين) ===== */
     .sidebar {
       width: 260px;
       background: rgba(20, 18, 18, 0.98);
@@ -86,6 +86,27 @@
     .sidebar .user-section .balance span {
       color: #d4af37;
       font-weight: 600;
+    }
+    .sidebar .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .sidebar .nav-links a {
+      color: #b0a48a;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 2rem;
+      transition: 0.2s;
+      font-size: 0.95rem;
+      text-align: center;
+      border: 1px solid transparent;
+    }
+    .sidebar .nav-links a:hover {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: rgba(212, 175, 55, 0.2);
+      color: #f5e6c8;
     }
     .sidebar .logout-btn {
       background: rgba(212, 175, 55, 0.1);
@@ -407,6 +428,16 @@
         font-size: 1.6rem;
         margin: 0;
       }
+      .sidebar .nav-links {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.3rem;
+      }
+      .sidebar .nav-links a {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+      }
       .sidebar .logout-btn {
         margin-top: 0;
         padding: 0.4rem 1rem;
@@ -450,6 +481,11 @@
         <div class="balance" style="font-size:0.8rem; margin-top:0.1rem;">كازينو: <span id="sidebarCasinoBalance">٠</span></div>
       </div>
     </div>
+    <nav class="nav-links">
+      <a href="#" class="active">📊 لوحة التحكم</a>
+      <a href="#">🎰 الكازينو</a>
+      <a href="#">⚙️ الإعدادات</a>
+    </nav>
     <button class="logout-btn" id="logoutBtn">🚪 تسجيل الخروج</button>
   </aside>
 
