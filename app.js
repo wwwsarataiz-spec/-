@@ -1,176 +1,167 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+// ===== app.js - عميل Nexora =====
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+const API_BASE = 'http://localhost:3000/api'; // غيّر إلى رابط السيرفر في الإنتاج
 
-// ------------------------------------------------------------------
-// 🔥 هذا هو الجزء الجديد الذي سيحل مشكلة الشاشة البيضاء
-// يقوم بإخبار السيرفر أين يوجد ملف الواجهة (index.html)
-// ------------------------------------------------------------------
-app.use(express.static(__dirname));
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
-// ------------------------------------------------------------------
+// عناصر الـ DOM
+const loginOverlay = document.getElementById('loginOverlay');
+const sidebarUsername = document.getElementById('sidebarUsername');
+const sidebarBalance = document.getElementById('sidebarBalance');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+const loginError = document.getElementById('loginError');
+const signupError = document.getElementById('signupError');
+const tabLogin = document.getElementById('tabLogin');
+const tabSignup = document.getElementById('tabSignup');
 
-// 1. الاتصال بقاعدة البيانات
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ تم الاتصال بقاعدة بيانات MongoDB'))
-  .catch(err => console.error('❌ فشل الاتصال بقاعدة البيانات:', err));
+// ===== دوال مساعدة =====
 
-// 2. تعريف خطط التعدين (مجاني ومدفوع)
-const MINING_PLANS = {
-    free: { name: "مجاني", rate: 1, cost: 0 },
-    starter: { name: "مبتدئ", rate: 5, cost: 50 },
-    pro: { name: "محترف", rate: 15, cost: 200 }
-};
+// تخزين بيانات الجلسة
+function setSession(token, user) {
+  localStorage.setItem('nexora_token', token);
+  localStorage.setItem('nexora_user', JSON.stringify(user));
+}
 
-// 3. نموذج المستخدم في قاعدة البيانات
-const UserSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, required: true, unique: true },
-  points: { type: Number, default: 0 },
-  miningPlan: { type: String, default: 'free' },
-  planExpiresAt: Date,
-  lastMiningCheck: { type: Date, default: Date.now }
-});
-const User = mongoose.model('User', UserSchema);
+// إنهاء الجلسة (تسجيل الخروج)
+function clearSession() {
+  localStorage.removeItem('nexora_token');
+  localStorage.removeItem('nexora_user');
+  loginOverlay.style.display = 'flex';
+  sidebarUsername.textContent = 'زائر';
+  sidebarBalance.textContent = '٠';
+}
 
-// 4. تسجيل الدخول (إنشاء حساب أو تسجيل الدخول)
-app.post('/login', async (req, res) => {
-  const { name, email } = req.body;
-  try {
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = new User({ name, email });
-      await user.save();
-    }
-    res.json({ success: true, user: { name: user.name, points: user.points, plan: user.miningPlan } });
-  } catch (error) {
-    res.status(500).json({ error: 'خطأ في تسجيل الدخول' });
+// تحديث الواجهة الجانبية وعرض اسم المستخدم
+function updateSidebar(user) {
+  if (user && user.name) {
+    sidebarUsername.textContent = user.name;
+    sidebarBalance.textContent = user.balance || 0;
+  } else {
+    sidebarUsername.textContent = 'زائر';
+    sidebarBalance.textContent = '٠';
   }
-});
+}
 
-// 5. عملية التعدين (جمع النقاط)
-app.post('/mine', async (req, res) => {
-  const { email } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
+// فتح نافذة تسجيل الدخول (إظهار الـ overlay)
+function showLoginOverlay() {
+  loginOverlay.style.display = 'flex';
+}
 
-    const now = new Date();
-    let rate = MINING_PLANS.free.rate;
+// إخفاء نافذة تسجيل الدخول
+function hideLoginOverlay() {
+  loginOverlay.style.display = 'none';
+}
 
-    // التحقق من صلاحية الخطة المدفوعة
-    if (user.miningPlan !== 'free' && user.planExpiresAt && user.planExpiresAt > now) {
-        rate = MINING_PLANS[user.miningPlan].rate;
-    } else {
-        user.miningPlan = 'free'; // تنتهي الخطة تعود مجانية
-        user.planExpiresAt = null;
+// ===== التحقق من الجلسة عند بدء التشغيل =====
+
+function initApp() {
+  const token = localStorage.getItem('nexora_token');
+  const storedUser = localStorage.getItem('nexora_user');
+
+  if (token && storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      // يمكننا التحقق من صحة التوكن عبر طلب /api/user (اختياري)
+      // لكن سنكتفي بالبيانات المخزنة حالياً
+      updateSidebar(user);
+      hideLoginOverlay();
+    } catch (e) {
+      clearSession();
     }
-
-    // حساب الوقت المنقضي منذ آخر تعدين
-    const timeDiffMinutes = (now - user.lastMiningCheck) / 1000 / 60;
-    const pointsToAdd = Math.floor(timeDiffMinutes * rate);
-
-    if (pointsToAdd > 0) {
-        user.points += pointsToAdd;
-        user.lastMiningCheck = now;
-        await user.save();
-    }
-
-    res.json({ success: true, minedPoints: pointsToAdd, totalPoints: user.points, plan: user.miningPlan });
-  } catch (error) {
-    res.status(500).json({ error: 'خطأ في التعدين' });
+  } else {
+    showLoginOverlay();
   }
-});
+}
 
-// 6. شراء خطط التعدين المدفوعة
-app.post('/buy-plan', async (req, res) => {
-  const { email, planKey } = req.body;
-  const plan = MINING_PLANS[planKey];
-  if (!plan || plan.cost === 0) return res.status(400).json({ error: 'خطة غير صالحة' });
+// ===== دوال تسجيل الدخول والتسجيل =====
 
+// تسجيل الدخول
+async function loginUser(email, password) {
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
-    
-    if (user.points < plan.cost) {
-      return res.status(400).json({ error: 'رصيدك لا يكفي لشراء هذه الخطة' });
+    const response = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'فشل تسجيل الدخول');
     }
 
-    // خصم النقاط وتفعيل الخطة (صلاحية الخطة: 7 أيام)
-    user.points -= plan.cost;
-    user.miningPlan = planKey;
-    user.planExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    user.lastMiningCheck = new Date();
-    await user.save();
-
-    res.json({ success: true, message: `تم تفعيل خطة ${plan.name} لمدة 7 أيام!`, user });
+    // نجاح
+    setSession(data.token, data.user);
+    updateSidebar(data.user);
+    hideLoginOverlay();
+    loginError.textContent = '';
+    return true;
   } catch (error) {
-    res.status(500).json({ error: 'خطأ في الشراء' });
+    loginError.textContent = error.message;
+    return false;
   }
-});
+}
 
-// 7. متجر بيع النقاط
-app.post('/buy-points', async (req, res) => {
-  const { email, packageId } = req.body;
-  const packages = {
-    '100p': { points: 100, price: 5 },
-    '500p': { points: 500, price: 20 },
-    '1000p': { points: 1000, price: 35 }
-  };
-
-  const pkg = packages[packageId];
-  if (!pkg) return res.status(400).json({ error: 'الباقة غير موجودة' });
-
+// إنشاء حساب جديد
+async function registerUser(name, phone, email, password) {
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
-    user.points += pkg.points;
-    await user.save();
-    res.json({ success: true, message: `تم شراء ${pkg.points} نقطة بنجاح!`, totalPoints: user.points });
+    const response = await fetch(`${API_BASE}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, email, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'فشل إنشاء الحساب');
+    }
+
+    // تسجيل دخول تلقائي بعد التسجيل
+    setSession(data.token, data.user);
+    updateSidebar(data.user);
+    hideLoginOverlay();
+    signupError.textContent = '';
+    return true;
   } catch (error) {
-    res.status(500).json({ error: 'فشل عملية الشراء' });
+    signupError.textContent = error.message;
+    return false;
   }
+}
+
+// ===== ربط الأحداث =====
+
+// نموذج تسجيل الدخول
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  if (!email || !password) {
+    loginError.textContent = 'يرجى ملء جميع الحقول';
+    return;
+  }
+  await loginUser(email, password);
 });
 
-// 8. لعبة الكازينو (Slot Machine)
-app.post('/casino-spin', async (req, res) => {
-  const { email, bet } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
-    if (user.points < bet) return res.status(400).json({ error: 'رصيدك لا يكفي لهذا الرهان' });
-
-    // خصم الرهان
-    user.points -= bet;
-
-    // محاكاة دوران العجلة (أرقام عشوائية)
-    const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '⭐', '💎'];
-    const result = [
-      symbols[Math.floor(Math.random() * symbols.length)],
-      symbols[Math.floor(Math.random() * symbols.length)],
-      symbols[Math.floor(Math.random() * symbols.length)]
-    ];
-
-    let winAmount = 0;
-    // منطق الربح (تطابق 3 أو 2 رموز)
-    if (result[0] === result[1] && result[1] === result[2]) winAmount = bet * 10;
-    else if (result[0] === result[1] || result[1] === result[2]) winAmount = bet * 2;
-
-    if (winAmount > 0) user.points += winAmount;
-    await user.save();
-
-    res.json({ success: true, symbols: result, winAmount, totalPoints: user.points });
-  } catch (error) {
-    res.status(500).json({ error: 'خطأ في اللعبة' });
+// نموذج إنشاء الحساب
+signupForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('signupName').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value.trim();
+  if (!name || !phone || !email || !password) {
+    signupError.textContent = 'يرجى ملء جميع الحقول';
+    return;
   }
+  await registerUser(name, phone, email, password);
 });
 
-// تصدير ملف app.js ليتم تشغيله في ملف server.js
-module.exports = app;
+// التبديل بين التبويبات (لا حاجة لإضافات، لأننا نستخدم الـ radio buttons)
+
+// زر تسجيل الخروج (يمكن إضافته في الـ Sidebar)
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+  clearSession();
+});
+
+// تهيئة التطبيق عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', initApp);
