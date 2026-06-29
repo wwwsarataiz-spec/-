@@ -23,14 +23,16 @@ function writeDatabase(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
+// دالة توليد التوكن
 function generateToken(user) {
-    return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    return jwt.sign(
+        { id: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+    );
 }
 
-// استيراد دالة التعدين الآلي من mining.js
-const { calculateAutoMining } = require('./mining');
-
-// ===== تسجيل مستخدم جديد =====
+// ===== تسجيل مستخدم جديد (يرجع رسالة نجاح فقط، لا يدخله تلقائياً) =====
 router.post('/register', (req, res) => {
     const { name, phone, email, password } = req.body;
     if (!name || !phone || !email || !password) {
@@ -38,53 +40,49 @@ router.post('/register', (req, res) => {
     }
     let db = readDatabase();
     const users = db.users;
+    // التحقق من عدم تكرار البريد
     if (users.find(u => u.email === email)) {
         return res.status(400).json({ message: 'البريد مستخدم بالفعل' });
     }
+    // إنشاء المستخدم الجديد
     const newUser = {
         id: db.nextId++,
         name,
         phone,
         email,
-        password,
+        password, // في الإنتاج يجب تشفيرها
         balance: 0,
         casinoBalance: 0,
         miningEarnings: 0,
         lastAutoMiningUpdate: Date.now(),
+        lastHarvestTime: 0,
         transactions: [],
     };
     users.push(newUser);
     writeDatabase(db);
-    const token = generateToken(newUser);
+    // إرجاع رسالة نجاح فقط (لا نرسل توكن، ولا ندخله تلقائياً)
     res.status(201).json({
-        message: 'تم إنشاء الحساب',
-        token,
-        user: {
-            id: newUser.id,
-            name: newUser.name,
-            email: newUser.email,
-            balance: newUser.balance,
-            casinoBalance: newUser.casinoBalance,
-            miningEarnings: newUser.miningEarnings,
-            transactions: newUser.transactions.slice(-10).reverse(),
-        }
+        message: 'تم إنشاء الحساب بنجاح، يرجى تسجيل الدخول',
     });
 });
 
-// ===== تسجيل الدخول =====
+// ===== تسجيل الدخول (يفحص البيانات ويعيد التوكن) =====
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'البريد وكلمة المرور مطلوبان' });
+    }
     let db = readDatabase();
     const user = db.users.find(u => u.email === email && u.password === password);
     if (!user) {
-        return res.status(401).json({ message: 'بيانات غير صحيحة' });
+        return res.status(401).json({ message: 'بيانات الدخول غير صحيحة' });
     }
-    // تحديث التعدين الآلي
-    calculateAutoMining(user);
-    writeDatabase(db);
+    // تحديث التعدين الآلي (اختياري)
+    // يمكن استيراد دالة التعدين من mining.js إذا أردت
+    // لكن نكتفي هنا بتوليد التوكن
     const token = generateToken(user);
     res.json({
-        message: 'تم تسجيل الدخول',
+        message: 'تم تسجيل الدخول بنجاح',
         token,
         user: {
             id: user.id,
@@ -98,7 +96,7 @@ router.post('/login', (req, res) => {
     });
 });
 
-// ===== جلب بيانات المستخدم (مع تحديث التعدين) =====
+// ===== جلب بيانات المستخدم (محمي بالتوكن) =====
 router.get('/user', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -112,8 +110,7 @@ router.get('/user', (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'المستخدم غير موجود' });
         }
-        calculateAutoMining(user);
-        writeDatabase(db);
+        // يمكن تحديث التعدين هنا إذا أردت
         res.json({
             id: user.id,
             name: user.name,
