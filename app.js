@@ -11,7 +11,6 @@ const loginError = document.getElementById('loginError');
 const signupError = document.getElementById('signupError');
 
 // عناصر التعدين
-const miningCounterDisplay = document.getElementById('miningCounterDisplay');
 const miningEarningsDisplay = document.getElementById('miningEarningsDisplay');
 const mineBtn = document.getElementById('mineBtn');
 const harvestBtn = document.getElementById('harvestBtn');
@@ -32,7 +31,6 @@ const depositStatus = document.getElementById('depositStatus');
 const copyAddressBtn = document.getElementById('copyAddressBtn');
 const transactionsList = document.getElementById('transactionsList');
 
-// عنوان الإيداع الثابت
 const DEPOSIT_ADDRESS = '0x2975dc1f8188c30b2a4be0ec27e33494da66cb46';
 
 // ===== دوال مساعدة =====
@@ -49,7 +47,11 @@ function clearSession() {
   sidebarUsername.textContent = 'زائر';
   sidebarBalance.textContent = '٠';
   sidebarCasinoBalance.textContent = '٠';
-  // إخفاء البطاقات (سيتم إعادة تعبئتها عند تسجيل الدخول)
+  // إعادة تعيين البطاقات
+  updateSidebar(null);
+  updateWalletUI(null);
+  updateMiningUI(null);
+  transactionsList.innerHTML = `<li style="color:#6a5f4e; text-align:center; justify-content:center;">لا توجد معاملات</li>`;
 }
 
 function updateSidebar(user) {
@@ -65,22 +67,55 @@ function updateSidebar(user) {
 }
 
 function updateWalletUI(user) {
-  if (!user) return;
+  if (!user) {
+    walletBalanceDisplay.textContent = '0.0000';
+    casinoBalanceDisplay.textContent = '0.0000';
+    return;
+  }
   walletBalanceDisplay.textContent = (user.balance || 0).toFixed(4);
   casinoBalanceDisplay.textContent = (user.casinoBalance || 0).toFixed(4);
 }
 
 function updateMiningUI(user) {
-  if (!user) return;
-  miningCounterDisplay.textContent = user.miningCounter || 0;
+  if (!user) {
+    miningEarningsDisplay.textContent = '0.0000';
+    return;
+  }
   miningEarningsDisplay.textContent = (user.miningEarnings || 0).toFixed(4);
 }
 
 function showLoginOverlay() { loginOverlay.style.display = 'flex'; }
 function hideLoginOverlay() { loginOverlay.style.display = 'none'; }
 
+// ===== جلب بيانات المستخدم من السيرفر (تحديث) =====
+
+async function fetchUserData() {
+  const token = localStorage.getItem('nexora_token');
+  if (!token) return null;
+  try {
+    const response = await fetch('/api/user', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+      if (response.status === 401) {
+        clearSession();
+        return null;
+      }
+      throw new Error('فشل جلب البيانات');
+    }
+    const user = await response.json();
+    // تحديث التخزين المحلي
+    localStorage.setItem('nexora_user', JSON.stringify(user));
+    return user;
+  } catch (error) {
+    console.error('خطأ في جلب البيانات:', error);
+    return null;
+  }
+}
+
 // ===== دوال التعدين =====
 
+// التعدين اليدوي (نقرة)
 async function handleMine() {
   const token = localStorage.getItem('nexora_token');
   if (!token) { showLoginOverlay(); return; }
@@ -95,11 +130,9 @@ async function handleMine() {
       miningMessage.style.color = '#e74c3c';
       return;
     }
-    // تحديث الواجهة
     const user = {
       balance: data.balance,
       casinoBalance: data.casinoBalance,
-      miningCounter: data.miningCounter,
       miningEarnings: data.miningEarnings
     };
     updateSidebar(user);
@@ -117,6 +150,7 @@ async function handleMine() {
   }
 }
 
+// حصاد الأرباح
 async function handleHarvest() {
   const token = localStorage.getItem('nexora_token');
   if (!token) { showLoginOverlay(); return; }
@@ -134,7 +168,6 @@ async function handleHarvest() {
     const user = {
       balance: data.balance,
       casinoBalance: data.casinoBalance,
-      miningCounter: data.miningCounter,
       miningEarnings: data.miningEarnings
     };
     updateSidebar(user);
@@ -144,7 +177,6 @@ async function handleHarvest() {
     miningMessage.style.color = '#2ecc71';
     // تحديث المعاملات
     loadTransactions();
-    // حفظ localStorage
     const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
     Object.assign(stored, user);
     stored.transactions = data.transactions || [];
@@ -157,7 +189,6 @@ async function handleHarvest() {
 
 // ===== دوال المحفظة =====
 
-// التحويل إلى الكازينو
 async function transferToCasino() {
   const token = localStorage.getItem('nexora_token');
   if (!token) { showLoginOverlay(); return; }
@@ -186,7 +217,6 @@ async function transferToCasino() {
     walletStatus.style.color = '#2ecc71';
     transferAmount.value = '';
     loadTransactions();
-    // حفظ localStorage
     const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
     stored.balance = data.balance;
     stored.casinoBalance = data.casinoBalance;
@@ -198,7 +228,6 @@ async function transferToCasino() {
   }
 }
 
-// طلب السحب
 async function requestWithdraw() {
   const token = localStorage.getItem('nexora_token');
   if (!token) { showLoginOverlay(); return; }
@@ -245,7 +274,6 @@ async function requestWithdraw() {
   }
 }
 
-// الإيداع اليدوي (إرسال TxID)
 async function submitDeposit() {
   const token = localStorage.getItem('nexora_token');
   if (!token) { showLoginOverlay(); return; }
@@ -270,7 +298,6 @@ async function submitDeposit() {
     depositStatus.textContent = '✅ ' + data.message;
     depositStatus.style.color = '#2ecc71';
     depositTxId.value = '';
-    // نحدّث المعاملات (قد تظهر كمعاملة معلقة)
     loadTransactions();
   } catch (error) {
     depositStatus.textContent = 'خطأ في الاتصال';
@@ -278,7 +305,6 @@ async function submitDeposit() {
   }
 }
 
-// نسخ عنوان الإيداع
 function copyAddress() {
   navigator.clipboard.writeText(DEPOSIT_ADDRESS).then(() => {
     depositStatus.textContent = '✅ تم نسخ العنوان';
@@ -290,7 +316,6 @@ function copyAddress() {
   });
 }
 
-// تحميل قائمة المعاملات
 async function loadTransactions() {
   const token = localStorage.getItem('nexora_token');
   if (!token) return;
@@ -388,6 +413,43 @@ async function registerUser(name, phone, email, password) {
   }
 }
 
+// ===== تهيئة التطبيق (استعادة الجلسة) =====
+
+async function initApp() {
+  const token = localStorage.getItem('nexora_token');
+  const storedUser = localStorage.getItem('nexora_user');
+
+  if (token && storedUser) {
+    try {
+      // نحاول جلب البيانات الحية من السيرفر
+      const user = await fetchUserData();
+      if (user) {
+        updateSidebar(user);
+        updateWalletUI(user);
+        updateMiningUI(user);
+        hideLoginOverlay();
+        loadTransactions();
+        return;
+      }
+    } catch (e) {
+      // في حال فشل الجلب، نستخدم المخزنة مؤقتاً
+      try {
+        const user = JSON.parse(storedUser);
+        updateSidebar(user);
+        updateWalletUI(user);
+        updateMiningUI(user);
+        hideLoginOverlay();
+        loadTransactions();
+        return;
+      } catch (err) {
+        clearSession();
+      }
+    }
+  }
+  // إذا لم توجد جلسة
+  showLoginOverlay();
+}
+
 // ===== ربط الأحداث =====
 
 loginForm.addEventListener('submit', async (e) => {
@@ -421,31 +483,7 @@ withdrawBtn.addEventListener('click', requestWithdraw);
 depositBtn.addEventListener('click', submitDeposit);
 copyAddressBtn.addEventListener('click', copyAddress);
 
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  clearSession();
-  // إعادة تعيين الشاشة
-  updateSidebar(null);
-  updateWalletUI(null);
-  updateMiningUI(null);
-  transactionsList.innerHTML = `<li style="color:#6a5f4e; text-align:center; justify-content:center;">لا توجد معاملات</li>`;
-});
+document.getElementById('logoutBtn').addEventListener('click', clearSession);
 
-// ===== التهيئة =====
-document.addEventListener('DOMContentLoaded', () => {
-  const token = localStorage.getItem('nexora_token');
-  const storedUser = localStorage.getItem('nexora_user');
-  if (token && storedUser) {
-    try {
-      const user = JSON.parse(storedUser);
-      updateSidebar(user);
-      updateWalletUI(user);
-      updateMiningUI(user);
-      hideLoginOverlay();
-      loadTransactions();
-    } catch (e) {
-      clearSession();
-    }
-  } else {
-    showLoginOverlay();
-  }
-});
+// ===== بدء التطبيق =====
+document.addEventListener('DOMContentLoaded', initApp);
