@@ -6,7 +6,6 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
@@ -16,14 +15,14 @@ const authRoutes = require('./routes/auth');
 const miningRoutes = require('./routes/mining');
 const walletRoutes = require('./routes/wallet');
 const marketRoutes = require('./routes/market');
+const gamesRoutes = require('./routes/games');
 
-// تفعيل المسارات
 app.use('/api', authRoutes);
 app.use('/api', miningRoutes);
 app.use('/api', walletRoutes);
 app.use('/api', marketRoutes);
+app.use('/api/games', gamesRoutes);
 
-// الصفحة الرئيسية
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
