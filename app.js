@@ -1,6 +1,6 @@
 // ===== app.js - عميل Nexora =====
 
-// عناصر DOM الأساسية
+// ===== عناصر DOM الأساسية مع فحص الوجود =====
 const loginOverlay = document.getElementById('loginOverlay');
 const sidebarUsername = document.getElementById('sidebarUsername');
 const sidebarBalance = document.getElementById('sidebarBalance');
@@ -42,7 +42,7 @@ const buyPointsBtn = document.getElementById('buyPointsBtn');
 const sellPointsBtn = document.getElementById('sellPointsBtn');
 const marketStatus = document.getElementById('marketStatus');
 
-// عناصر الألعاب (كما هي)
+// عناصر الألعاب
 const gameSelectors = document.querySelectorAll('.game-selector');
 const riskSlider = document.getElementById('riskSlider');
 const riskValue = document.getElementById('riskValue');
@@ -56,42 +56,47 @@ let cooldownInterval = null;
 
 const DEPOSIT_ADDRESS = '0x2975dc1f8188c30b2a4be0ec27e33494da66cb46';
 
-// ===== دوال تحديث الواجهة =====
+// ===== دوال تحديث الواجهة مع فحص وجود العناصر =====
 
 function updateSidebar(user) {
     if (user && user.name) {
-        sidebarUsername.textContent = user.name;
-        sidebarBalance.textContent = (user.balance || 0).toFixed(4);
-        sidebarCasinoBalance.textContent = (user.casino_balance || 0).toFixed(4);
+        if (sidebarUsername) sidebarUsername.textContent = user.name;
+        if (sidebarBalance) sidebarBalance.textContent = (user.balance || 0).toFixed(4);
+        if (sidebarCasinoBalance) sidebarCasinoBalance.textContent = (user.casino_balance || 0).toFixed(4);
     } else {
-        sidebarUsername.textContent = 'زائر';
-        sidebarBalance.textContent = '٠';
-        sidebarCasinoBalance.textContent = '٠';
+        if (sidebarUsername) sidebarUsername.textContent = 'زائر';
+        if (sidebarBalance) sidebarBalance.textContent = '٠';
+        if (sidebarCasinoBalance) sidebarCasinoBalance.textContent = '٠';
     }
 }
 
 function updateWalletUI(user) {
     if (!user) {
-        walletBalanceDisplay.textContent = '0.0000';
-        pointsBalanceDisplay.textContent = '0.0000';
-        casinoBalanceDisplay.textContent = '0.0000';
+        if (walletBalanceDisplay) walletBalanceDisplay.textContent = '0.0000';
+        if (pointsBalanceDisplay) pointsBalanceDisplay.textContent = '0.0000';
+        if (casinoBalanceDisplay) casinoBalanceDisplay.textContent = '0.0000';
         return;
     }
-    walletBalanceDisplay.textContent = (user.balance || 0).toFixed(4);
-    pointsBalanceDisplay.textContent = (user.points_balance || 0).toFixed(4);
-    casinoBalanceDisplay.textContent = (user.casino_balance || 0).toFixed(4);
+    if (walletBalanceDisplay) walletBalanceDisplay.textContent = (user.balance || 0).toFixed(4);
+    if (pointsBalanceDisplay) pointsBalanceDisplay.textContent = (user.points_balance || 0).toFixed(4);
+    if (casinoBalanceDisplay) casinoBalanceDisplay.textContent = (user.casino_balance || 0).toFixed(4);
 }
 
 function updateMiningUI(user) {
     if (!user) {
-        miningEarningsDisplay.textContent = '0.0000';
+        if (miningEarningsDisplay) miningEarningsDisplay.textContent = '0.0000';
         return;
     }
-    miningEarningsDisplay.textContent = (user.miningEarnings || 0).toFixed(4);
+    if (miningEarningsDisplay) miningEarningsDisplay.textContent = (user.miningEarnings || 0).toFixed(4);
 }
 
-function showLoginOverlay() { loginOverlay.style.display = 'flex'; }
-function hideLoginOverlay() { loginOverlay.style.display = 'none'; }
+function showLoginOverlay() {
+    if (loginOverlay) loginOverlay.style.display = 'flex';
+}
+
+function hideLoginOverlay() {
+    if (loginOverlay) loginOverlay.style.display = 'none';
+}
 
 // ===== إدارة الجلسة =====
 
@@ -103,14 +108,13 @@ function setSession(token, user) {
 function clearSession() {
     localStorage.removeItem('nexora_token');
     localStorage.removeItem('nexora_user');
-    loginOverlay.style.display = 'flex';
-    sidebarUsername.textContent = 'زائر';
-    sidebarBalance.textContent = '٠';
-    sidebarCasinoBalance.textContent = '٠';
+    showLoginOverlay();
     updateSidebar(null);
     updateWalletUI(null);
     updateMiningUI(null);
-    transactionsList.innerHTML = `<li style="color:#6a5f4e; text-align:center; justify-content:center;">لا توجد معاملات</li>`;
+    if (transactionsList) {
+        transactionsList.innerHTML = `<li style="color:#6a5f4e; text-align:center; justify-content:center;">لا توجد معاملات</li>`;
+    }
     if (cooldownInterval) {
         clearInterval(cooldownInterval);
         cooldownInterval = null;
@@ -179,19 +183,23 @@ async function updateMiningUIFromStatus(status) {
         miningEarningsDisplay.textContent = (status.miningEarnings || 0).toFixed(4);
     }
     if (status.canMine) {
-        mineBtn.disabled = false;
-        mineBtn.textContent = '⛏️ تعدين (يدوي)';
+        if (mineBtn) {
+            mineBtn.disabled = false;
+            mineBtn.textContent = '⛏️ تعدين (يدوي)';
+        }
         if (cooldownInterval) {
             clearInterval(cooldownInterval);
             cooldownInterval = null;
         }
-        miningMessage.textContent = '';
+        if (miningMessage) miningMessage.textContent = '';
     } else {
-        mineBtn.disabled = true;
-        const remaining = status.cooldownRemaining || 0;
-        updateCooldownButton(remaining);
+        if (mineBtn) {
+            mineBtn.disabled = true;
+            const remaining = status.cooldownRemaining || 0;
+            updateCooldownButton(remaining);
+        }
         if (cooldownInterval) clearInterval(cooldownInterval);
-        let remainingSeconds = remaining;
+        let remainingSeconds = status.cooldownRemaining || 0;
         cooldownInterval = setInterval(async () => {
             remainingSeconds--;
             if (remainingSeconds <= 0) {
@@ -217,14 +225,18 @@ async function handleMine() {
         const data = await response.json();
         if (!response.ok) {
             if (response.status === 403 && data.cooldownRemaining) {
-                miningMessage.textContent = data.message || 'في مهلة الانتظار';
-                miningMessage.style.color = '#f1c40f';
+                if (miningMessage) {
+                    miningMessage.textContent = data.message || 'في مهلة الانتظار';
+                    miningMessage.style.color = '#f1c40f';
+                }
                 const status = await fetchMiningStatus();
                 if (status) updateMiningUIFromStatus(status);
                 return;
             }
-            miningMessage.textContent = data.message || 'فشل التعدين';
-            miningMessage.style.color = '#e74c3c';
+            if (miningMessage) {
+                miningMessage.textContent = data.message || 'فشل التعدين';
+                miningMessage.style.color = '#e74c3c';
+            }
             return;
         }
         const user = {
@@ -236,16 +248,20 @@ async function handleMine() {
         updateSidebar(user);
         updateWalletUI(user);
         updateMiningUI(user);
-        miningMessage.textContent = '✅ ' + data.message;
-        miningMessage.style.color = '#2ecc71';
+        if (miningMessage) {
+            miningMessage.textContent = '✅ ' + data.message;
+            miningMessage.style.color = '#2ecc71';
+        }
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
         localStorage.setItem('nexora_user', JSON.stringify(stored));
         const status = await fetchMiningStatus();
         if (status) updateMiningUIFromStatus(status);
     } catch (error) {
-        miningMessage.textContent = 'خطأ في الاتصال';
-        miningMessage.style.color = '#e74c3c';
+        if (miningMessage) {
+            miningMessage.textContent = 'خطأ في الاتصال';
+            miningMessage.style.color = '#e74c3c';
+        }
     }
 }
 
@@ -259,8 +275,10 @@ async function handleHarvest() {
         });
         const data = await response.json();
         if (!response.ok) {
-            miningMessage.textContent = data.message || 'فشل الحصاد';
-            miningMessage.style.color = '#e74c3c';
+            if (miningMessage) {
+                miningMessage.textContent = data.message || 'فشل الحصاد';
+                miningMessage.style.color = '#e74c3c';
+            }
             return;
         }
         const user = {
@@ -272,8 +290,10 @@ async function handleHarvest() {
         updateSidebar(user);
         updateWalletUI(user);
         updateMiningUI(user);
-        miningMessage.textContent = '✅ ' + data.message;
-        miningMessage.style.color = '#2ecc71';
+        if (miningMessage) {
+            miningMessage.textContent = '✅ ' + data.message;
+            miningMessage.style.color = '#2ecc71';
+        }
         loadTransactions();
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
@@ -283,20 +303,24 @@ async function handleHarvest() {
         const status = await fetchMiningStatus();
         if (status) updateMiningUIFromStatus(status);
     } catch (error) {
-        miningMessage.textContent = 'خطأ في الاتصال';
-        miningMessage.style.color = '#e74c3c';
+        if (miningMessage) {
+            miningMessage.textContent = 'خطأ في الاتصال';
+            miningMessage.style.color = '#e74c3c';
+        }
     }
 }
 
-// ===== دوال المحفظة (الإيداع، السحب، التحويلات) =====
+// ===== دوال المحفظة (الإيداع، السحب، التحويلات) مع فحص العناصر =====
 
 async function transferToCasino() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
-    const amount = parseFloat(transferAmount.value);
+    const amount = parseFloat(transferAmount ? transferAmount.value : '0');
     if (!amount || amount <= 0) {
-        walletStatus.textContent = 'أدخل مبلغاً صحيحاً';
-        walletStatus.style.color = '#e74c3c';
+        if (walletStatus) {
+            walletStatus.textContent = 'أدخل مبلغاً صحيحاً';
+            walletStatus.style.color = '#e74c3c';
+        }
         return;
     }
     try {
@@ -307,40 +331,50 @@ async function transferToCasino() {
         });
         const data = await response.json();
         if (!response.ok) {
-            walletStatus.textContent = data.message || 'فشل التحويل';
-            walletStatus.style.color = '#e74c3c';
+            if (walletStatus) {
+                walletStatus.textContent = data.message || 'فشل التحويل';
+                walletStatus.style.color = '#e74c3c';
+            }
             return;
         }
         const user = { balance: data.balance, points_balance: data.points_balance, casino_balance: data.casino_balance };
         updateSidebar(user);
         updateWalletUI(user);
-        walletStatus.textContent = '✅ ' + data.message;
-        walletStatus.style.color = '#2ecc71';
-        transferAmount.value = '';
+        if (walletStatus) {
+            walletStatus.textContent = '✅ ' + data.message;
+            walletStatus.style.color = '#2ecc71';
+        }
+        if (transferAmount) transferAmount.value = '';
         loadTransactions();
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
         stored.transactions = data.transactions || [];
         localStorage.setItem('nexora_user', JSON.stringify(stored));
     } catch (error) {
-        walletStatus.textContent = 'خطأ في الاتصال';
-        walletStatus.style.color = '#e74c3c';
+        if (walletStatus) {
+            walletStatus.textContent = 'خطأ في الاتصال';
+            walletStatus.style.color = '#e74c3c';
+        }
     }
 }
 
 async function requestWithdraw() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
-    const address = withdrawAddress.value.trim();
-    const amount = parseFloat(withdrawAmount.value);
+    const address = withdrawAddress ? withdrawAddress.value.trim() : '';
+    const amount = parseFloat(withdrawAmount ? withdrawAmount.value : '0');
     if (!address) {
-        walletStatus.textContent = 'أدخل عنوان المحفظة';
-        walletStatus.style.color = '#e74c3c';
+        if (walletStatus) {
+            walletStatus.textContent = 'أدخل عنوان المحفظة';
+            walletStatus.style.color = '#e74c3c';
+        }
         return;
     }
     if (!amount || amount < 4) {
-        walletStatus.textContent = 'الحد الأدنى للسحب 4 USDT';
-        walletStatus.style.color = '#e74c3c';
+        if (walletStatus) {
+            walletStatus.textContent = 'الحد الأدنى للسحب 4 USDT';
+            walletStatus.style.color = '#e74c3c';
+        }
         return;
     }
     try {
@@ -351,35 +385,43 @@ async function requestWithdraw() {
         });
         const data = await response.json();
         if (!response.ok) {
-            walletStatus.textContent = data.message || 'فشل السحب';
-            walletStatus.style.color = '#e74c3c';
+            if (walletStatus) {
+                walletStatus.textContent = data.message || 'فشل السحب';
+                walletStatus.style.color = '#e74c3c';
+            }
             return;
         }
         const user = { balance: data.balance, points_balance: data.points_balance, casino_balance: data.casino_balance };
         updateSidebar(user);
         updateWalletUI(user);
-        walletStatus.textContent = '✅ ' + data.message;
-        walletStatus.style.color = '#2ecc71';
-        withdrawAddress.value = '';
-        withdrawAmount.value = '';
+        if (walletStatus) {
+            walletStatus.textContent = '✅ ' + data.message;
+            walletStatus.style.color = '#2ecc71';
+        }
+        if (withdrawAddress) withdrawAddress.value = '';
+        if (withdrawAmount) withdrawAmount.value = '';
         loadTransactions();
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
         stored.transactions = data.transactions || [];
         localStorage.setItem('nexora_user', JSON.stringify(stored));
     } catch (error) {
-        walletStatus.textContent = 'خطأ في الاتصال';
-        walletStatus.style.color = '#e74c3c';
+        if (walletStatus) {
+            walletStatus.textContent = 'خطأ في الاتصال';
+            walletStatus.style.color = '#e74c3c';
+        }
     }
 }
 
 async function submitDeposit() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
-    const txid = depositTxId.value.trim();
+    const txid = depositTxId ? depositTxId.value.trim() : '';
     if (!txid) {
-        depositStatus.textContent = 'الرجاء إدخال رقم العملية';
-        depositStatus.style.color = '#e74c3c';
+        if (depositStatus) {
+            depositStatus.textContent = 'الرجاء إدخال رقم العملية';
+            depositStatus.style.color = '#e74c3c';
+        }
         return;
     }
     try {
@@ -390,28 +432,38 @@ async function submitDeposit() {
         });
         const data = await response.json();
         if (!response.ok) {
-            depositStatus.textContent = data.message || 'فشل تسجيل الإيداع';
-            depositStatus.style.color = '#e74c3c';
+            if (depositStatus) {
+                depositStatus.textContent = data.message || 'فشل تسجيل الإيداع';
+                depositStatus.style.color = '#e74c3c';
+            }
             return;
         }
-        depositStatus.textContent = '✅ ' + data.message;
-        depositStatus.style.color = '#2ecc71';
-        depositTxId.value = '';
+        if (depositStatus) {
+            depositStatus.textContent = '✅ ' + data.message;
+            depositStatus.style.color = '#2ecc71';
+        }
+        if (depositTxId) depositTxId.value = '';
         loadTransactions();
     } catch (error) {
-        depositStatus.textContent = 'خطأ في الاتصال';
-        depositStatus.style.color = '#e74c3c';
+        if (depositStatus) {
+            depositStatus.textContent = 'خطأ في الاتصال';
+            depositStatus.style.color = '#e74c3c';
+        }
     }
 }
 
 function copyAddress() {
     navigator.clipboard.writeText(DEPOSIT_ADDRESS).then(() => {
-        depositStatus.textContent = '✅ تم نسخ العنوان';
-        depositStatus.style.color = '#2ecc71';
-        setTimeout(() => { depositStatus.textContent = ''; }, 3000);
+        if (depositStatus) {
+            depositStatus.textContent = '✅ تم نسخ العنوان';
+            depositStatus.style.color = '#2ecc71';
+            setTimeout(() => { if (depositStatus) depositStatus.textContent = ''; }, 3000);
+        }
     }).catch(() => {
-        depositStatus.textContent = '⚠️ فشل النسخ، حاول يدوياً';
-        depositStatus.style.color = '#e67e22';
+        if (depositStatus) {
+            depositStatus.textContent = '⚠️ فشل النسخ، حاول يدوياً';
+            depositStatus.style.color = '#e67e22';
+        }
     });
 }
 
@@ -479,10 +531,12 @@ function renderTransactions(transactions) {
 async function transferPointsToCasino() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
-    const amount = parseFloat(internalTransferAmount.value);
+    const amount = parseFloat(internalTransferAmount ? internalTransferAmount.value : '0');
     if (!amount || amount <= 0) {
-        internalTransferStatus.textContent = 'أدخل مبلغاً صحيحاً';
-        internalTransferStatus.style.color = '#e74c3c';
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = 'أدخل مبلغاً صحيحاً';
+            internalTransferStatus.style.color = '#e74c3c';
+        }
         return;
     }
     try {
@@ -493,34 +547,42 @@ async function transferPointsToCasino() {
         });
         const data = await response.json();
         if (!response.ok) {
-            internalTransferStatus.textContent = data.message || 'فشل التحويل';
-            internalTransferStatus.style.color = '#e74c3c';
+            if (internalTransferStatus) {
+                internalTransferStatus.textContent = data.message || 'فشل التحويل';
+                internalTransferStatus.style.color = '#e74c3c';
+            }
             return;
         }
         const user = { balance: data.balance, points_balance: data.points_balance, casino_balance: data.casino_balance };
         updateSidebar(user);
         updateWalletUI(user);
-        internalTransferStatus.textContent = '✅ ' + data.message;
-        internalTransferStatus.style.color = '#2ecc71';
-        internalTransferAmount.value = '';
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = '✅ ' + data.message;
+            internalTransferStatus.style.color = '#2ecc71';
+        }
+        if (internalTransferAmount) internalTransferAmount.value = '';
         loadTransactions();
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
         stored.transactions = data.transactions || [];
         localStorage.setItem('nexora_user', JSON.stringify(stored));
     } catch (error) {
-        internalTransferStatus.textContent = 'خطأ في الاتصال';
-        internalTransferStatus.style.color = '#e74c3c';
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = 'خطأ في الاتصال';
+            internalTransferStatus.style.color = '#e74c3c';
+        }
     }
 }
 
 async function transferCasinoToPoints() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
-    const amount = parseFloat(internalTransferAmount.value);
+    const amount = parseFloat(internalTransferAmount ? internalTransferAmount.value : '0');
     if (!amount || amount <= 0) {
-        internalTransferStatus.textContent = 'أدخل مبلغاً صحيحاً';
-        internalTransferStatus.style.color = '#e74c3c';
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = 'أدخل مبلغاً صحيحاً';
+            internalTransferStatus.style.color = '#e74c3c';
+        }
         return;
     }
     try {
@@ -531,24 +593,30 @@ async function transferCasinoToPoints() {
         });
         const data = await response.json();
         if (!response.ok) {
-            internalTransferStatus.textContent = data.message || 'فشل التحويل';
-            internalTransferStatus.style.color = '#e74c3c';
+            if (internalTransferStatus) {
+                internalTransferStatus.textContent = data.message || 'فشل التحويل';
+                internalTransferStatus.style.color = '#e74c3c';
+            }
             return;
         }
         const user = { balance: data.balance, points_balance: data.points_balance, casino_balance: data.casino_balance };
         updateSidebar(user);
         updateWalletUI(user);
-        internalTransferStatus.textContent = '✅ ' + data.message;
-        internalTransferStatus.style.color = '#2ecc71';
-        internalTransferAmount.value = '';
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = '✅ ' + data.message;
+            internalTransferStatus.style.color = '#2ecc71';
+        }
+        if (internalTransferAmount) internalTransferAmount.value = '';
         loadTransactions();
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
         stored.transactions = data.transactions || [];
         localStorage.setItem('nexora_user', JSON.stringify(stored));
     } catch (error) {
-        internalTransferStatus.textContent = 'خطأ في الاتصال';
-        internalTransferStatus.style.color = '#e74c3c';
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = 'خطأ في الاتصال';
+            internalTransferStatus.style.color = '#e74c3c';
+        }
     }
 }
 
@@ -557,10 +625,12 @@ async function transferCasinoToPoints() {
 async function buyPoints() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
-    const usdtAmount = parseFloat(marketAmount.value);
+    const usdtAmount = parseFloat(marketAmount ? marketAmount.value : '0');
     if (!usdtAmount || usdtAmount <= 0) {
-        marketStatus.textContent = 'أدخل مبلغ USDT صحيح';
-        marketStatus.style.color = '#e74c3c';
+        if (marketStatus) {
+            marketStatus.textContent = 'أدخل مبلغ USDT صحيح';
+            marketStatus.style.color = '#e74c3c';
+        }
         return;
     }
     try {
@@ -571,34 +641,42 @@ async function buyPoints() {
         });
         const data = await response.json();
         if (!response.ok) {
-            marketStatus.textContent = data.message || 'فشل الشراء';
-            marketStatus.style.color = '#e74c3c';
+            if (marketStatus) {
+                marketStatus.textContent = data.message || 'فشل الشراء';
+                marketStatus.style.color = '#e74c3c';
+            }
             return;
         }
         const user = { balance: data.balance, points_balance: data.points_balance, casino_balance: data.casino_balance };
         updateSidebar(user);
         updateWalletUI(user);
-        marketStatus.textContent = '✅ ' + data.message;
-        marketStatus.style.color = '#2ecc71';
-        marketAmount.value = '';
+        if (marketStatus) {
+            marketStatus.textContent = '✅ ' + data.message;
+            marketStatus.style.color = '#2ecc71';
+        }
+        if (marketAmount) marketAmount.value = '';
         loadTransactions();
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
         stored.transactions = data.transactions || [];
         localStorage.setItem('nexora_user', JSON.stringify(stored));
     } catch (error) {
-        marketStatus.textContent = 'خطأ في الاتصال';
-        marketStatus.style.color = '#e74c3c';
+        if (marketStatus) {
+            marketStatus.textContent = 'خطأ في الاتصال';
+            marketStatus.style.color = '#e74c3c';
+        }
     }
 }
 
 async function sellPoints() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
-    const pointsAmount = parseFloat(marketAmount.value);
+    const pointsAmount = parseFloat(marketAmount ? marketAmount.value : '0');
     if (!pointsAmount || pointsAmount <= 0) {
-        marketStatus.textContent = 'أدخل عدد النقاط الصحيح';
-        marketStatus.style.color = '#e74c3c';
+        if (marketStatus) {
+            marketStatus.textContent = 'أدخل عدد النقاط الصحيح';
+            marketStatus.style.color = '#e74c3c';
+        }
         return;
     }
     try {
@@ -609,85 +687,107 @@ async function sellPoints() {
         });
         const data = await response.json();
         if (!response.ok) {
-            marketStatus.textContent = data.message || 'فشل البيع';
-            marketStatus.style.color = '#e74c3c';
+            if (marketStatus) {
+                marketStatus.textContent = data.message || 'فشل البيع';
+                marketStatus.style.color = '#e74c3c';
+            }
             return;
         }
         const user = { balance: data.balance, points_balance: data.points_balance, casino_balance: data.casino_balance };
         updateSidebar(user);
         updateWalletUI(user);
-        marketStatus.textContent = '✅ ' + data.message;
-        marketStatus.style.color = '#2ecc71';
-        marketAmount.value = '';
+        if (marketStatus) {
+            marketStatus.textContent = '✅ ' + data.message;
+            marketStatus.style.color = '#2ecc71';
+        }
+        if (marketAmount) marketAmount.value = '';
         loadTransactions();
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         Object.assign(stored, user);
         stored.transactions = data.transactions || [];
         localStorage.setItem('nexora_user', JSON.stringify(stored));
     } catch (error) {
-        marketStatus.textContent = 'خطأ في الاتصال';
-        marketStatus.style.color = '#e74c3c';
+        if (marketStatus) {
+            marketStatus.textContent = 'خطأ في الاتصال';
+            marketStatus.style.color = '#e74c3c';
+        }
     }
 }
 
 // ===== دوال ألعاب الكازينو =====
 
-gameSelectors.forEach(btn => {
-    btn.addEventListener('click', function() {
-        gameSelectors.forEach(b => b.classList.remove('active-game'));
-        this.classList.add('active-game');
-        selectedGame = this.dataset.game;
-    });
-});
-
-riskSlider.addEventListener('input', function() {
-    riskValue.textContent = this.value;
-});
-
-playGameBtn.addEventListener('click', async function() {
-    const token = localStorage.getItem('nexora_token');
-    if (!token) { showLoginOverlay(); return; }
-    const betAmount = parseFloat(betAmountInput.value);
-    const risk = parseInt(riskSlider.value);
-    if (!betAmount || betAmount <= 0) {
-        gameResult.textContent = '⚠️ أدخل مبلغ رهان صحيح';
-        gameResult.style.color = '#e74c3c';
-        return;
-    }
-    this.disabled = true;
-    this.textContent = '⏳ جارٍ التشغيل...';
-
-    try {
-        const response = await fetch('/api/games/play', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ gameType: selectedGame, betAmount, risk })
+if (gameSelectors) {
+    gameSelectors.forEach(btn => {
+        btn.addEventListener('click', function() {
+            gameSelectors.forEach(b => b.classList.remove('active-game'));
+            this.classList.add('active-game');
+            selectedGame = this.dataset.game;
         });
-        const data = await response.json();
-        if (!response.ok) {
-            gameResult.textContent = '❌ ' + (data.message || 'فشل اللعب');
-            gameResult.style.color = '#e74c3c';
-            gameDetails.textContent = '';
+    });
+}
+
+if (riskSlider) {
+    riskSlider.addEventListener('input', function() {
+        if (riskValue) riskValue.textContent = this.value;
+    });
+}
+
+if (playGameBtn) {
+    playGameBtn.addEventListener('click', async function() {
+        const token = localStorage.getItem('nexora_token');
+        if (!token) { showLoginOverlay(); return; }
+        const betAmount = parseFloat(betAmountInput ? betAmountInput.value : '0');
+        const risk = parseInt(riskSlider ? riskSlider.value : '50');
+        if (!betAmount || betAmount <= 0) {
+            if (gameResult) {
+                gameResult.textContent = '⚠️ أدخل مبلغ رهان صحيح';
+                gameResult.style.color = '#e74c3c';
+            }
             return;
         }
-        gameResult.textContent = data.resultMessage;
-        gameResult.style.color = data.win ? '#2ecc71' : '#e74c3c';
-        gameDetails.textContent = `المضاعف: ${data.multiplier}x | فرصة الفوز: ${data.winProbability}% | الرقم: ${data.randomNumber}`;
-        const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
-        stored.casino_balance = data.newCasinoBalance;
-        localStorage.setItem('nexora_user', JSON.stringify(stored));
-        updateSidebar(stored);
-        updateWalletUI(stored);
-        loadTransactions();
-    } catch (error) {
-        gameResult.textContent = '⚠️ خطأ في الاتصال بالسيرفر';
-        gameResult.style.color = '#e74c3c';
-        gameDetails.textContent = '';
-    } finally {
-        this.disabled = false;
-        this.textContent = '▶ تشغيل';
-    }
-});
+        this.disabled = true;
+        this.textContent = '⏳ جارٍ التشغيل...';
+
+        try {
+            const response = await fetch('/api/games/play', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gameType: selectedGame, betAmount, risk })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                if (gameResult) {
+                    gameResult.textContent = '❌ ' + (data.message || 'فشل اللعب');
+                    gameResult.style.color = '#e74c3c';
+                }
+                if (gameDetails) gameDetails.textContent = '';
+                return;
+            }
+            if (gameResult) {
+                gameResult.textContent = data.resultMessage;
+                gameResult.style.color = data.win ? '#2ecc71' : '#e74c3c';
+            }
+            if (gameDetails) {
+                gameDetails.textContent = `المضاعف: ${data.multiplier}x | فرصة الفوز: ${data.winProbability}% | الرقم: ${data.randomNumber}`;
+            }
+            const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
+            stored.casino_balance = data.newCasinoBalance;
+            localStorage.setItem('nexora_user', JSON.stringify(stored));
+            updateSidebar(stored);
+            updateWalletUI(stored);
+            loadTransactions();
+        } catch (error) {
+            if (gameResult) {
+                gameResult.textContent = '⚠️ خطأ في الاتصال بالسيرفر';
+                gameResult.style.color = '#e74c3c';
+            }
+            if (gameDetails) gameDetails.textContent = '';
+        } finally {
+            this.disabled = false;
+            this.textContent = '▶ تشغيل';
+        }
+    });
+}
 
 // ===== دوال تسجيل الدخول والتسجيل =====
 
@@ -702,19 +802,23 @@ async function loginUser(email, password) {
         if (!response.ok) {
             throw new Error(data.message || 'فشل تسجيل الدخول');
         }
+        // حفظ التوكن وبيانات المستخدم
         setSession(data.token, data.user);
         const user = data.user;
         updateSidebar(user);
         updateWalletUI(user);
         updateMiningUI(user);
         hideLoginOverlay();
-        loginError.textContent = '';
+        if (loginError) loginError.textContent = '';
         loadTransactions();
         const status = await fetchMiningStatus();
         if (status) updateMiningUIFromStatus(status);
         return true;
     } catch (error) {
-        loginError.textContent = error.message;
+        if (loginError) {
+            loginError.textContent = error.message;
+            loginError.style.color = '#e74c3c';
+        }
         return false;
     }
 }
@@ -730,15 +834,24 @@ async function registerUser(name, phone, email, password) {
         if (!response.ok) {
             throw new Error(data.message || 'فشل إنشاء الحساب');
         }
-        signupError.textContent = '✅ ' + data.message + '، يرجى تسجيل الدخول الآن';
-        signupError.style.color = '#2ecc71';
-        document.getElementById('tabLogin').checked = true;
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('loginPassword').value = '';
+        // عرض رسالة نجاح وتوجيه المستخدم لتسجيل الدخول
+        if (signupError) {
+            signupError.textContent = '✅ ' + data.message + '، يرجى تسجيل الدخول الآن';
+            signupError.style.color = '#2ecc71';
+        }
+        // التبديل إلى تبويب تسجيل الدخول
+        const tabLogin = document.getElementById('tabLogin');
+        if (tabLogin) tabLogin.checked = true;
+        const loginEmail = document.getElementById('loginEmail');
+        if (loginEmail) loginEmail.value = email;
+        const loginPassword = document.getElementById('loginPassword');
+        if (loginPassword) loginPassword.value = '';
         return true;
     } catch (error) {
-        signupError.textContent = error.message;
-        signupError.style.color = '#e74c3c';
+        if (signupError) {
+            signupError.textContent = error.message;
+            signupError.style.color = '#e74c3c';
+        }
         return false;
     }
 }
@@ -785,46 +898,56 @@ async function initApp() {
     await checkAutoLogin();
 }
 
-// ===== ربط الأحداث =====
+// ===== ربط الأحداث مع فحص وجود العناصر =====
 
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-    if (!email || !password) {
-        loginError.textContent = 'يرجى ملء جميع الحقول';
-        return;
-    }
-    await loginUser(email, password);
-});
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail')?.value?.trim() || '';
+        const password = document.getElementById('loginPassword')?.value?.trim() || '';
+        if (!email || !password) {
+            if (loginError) {
+                loginError.textContent = 'يرجى ملء جميع الحقول';
+                loginError.style.color = '#e74c3c';
+            }
+            return;
+        }
+        await loginUser(email, password);
+    });
+}
 
-signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('signupName').value.trim();
-    const phone = document.getElementById('signupPhone').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value.trim();
-    if (!name || !phone || !email || !password) {
-        signupError.textContent = 'يرجى ملء جميع الحقول';
-        signupError.style.color = '#e74c3c';
-        return;
-    }
-    await registerUser(name, phone, email, password);
-});
+if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('signupName')?.value?.trim() || '';
+        const phone = document.getElementById('signupPhone')?.value?.trim() || '';
+        const email = document.getElementById('signupEmail')?.value?.trim() || '';
+        const password = document.getElementById('signupPassword')?.value?.trim() || '';
+        if (!name || !phone || !email || !password) {
+            if (signupError) {
+                signupError.textContent = 'يرجى ملء جميع الحقول';
+                signupError.style.color = '#e74c3c';
+            }
+            return;
+        }
+        await registerUser(name, phone, email, password);
+    });
+}
 
-mineBtn.addEventListener('click', handleMine);
-harvestBtn.addEventListener('click', handleHarvest);
-transferBtn.addEventListener('click', transferToCasino);
-withdrawBtn.addEventListener('click', requestWithdraw);
-depositBtn.addEventListener('click', submitDeposit);
-copyAddressBtn.addEventListener('click', copyAddress);
+if (mineBtn) mineBtn.addEventListener('click', handleMine);
+if (harvestBtn) harvestBtn.addEventListener('click', handleHarvest);
+if (transferBtn) transferBtn.addEventListener('click', transferToCasino);
+if (withdrawBtn) withdrawBtn.addEventListener('click', requestWithdraw);
+if (depositBtn) depositBtn.addEventListener('click', submitDeposit);
+if (copyAddressBtn) copyAddressBtn.addEventListener('click', copyAddress);
 
-transferPointsToCasinoBtn.addEventListener('click', transferPointsToCasino);
-transferCasinoToPointsBtn.addEventListener('click', transferCasinoToPoints);
-buyPointsBtn.addEventListener('click', buyPoints);
-sellPointsBtn.addEventListener('click', sellPoints);
+if (transferPointsToCasinoBtn) transferPointsToCasinoBtn.addEventListener('click', transferPointsToCasino);
+if (transferCasinoToPointsBtn) transferCasinoToPointsBtn.addEventListener('click', transferCasinoToPoints);
+if (buyPointsBtn) buyPointsBtn.addEventListener('click', buyPoints);
+if (sellPointsBtn) sellPointsBtn.addEventListener('click', sellPoints);
 
-document.getElementById('logoutBtn').addEventListener('click', clearSession);
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) logoutBtn.addEventListener('click', clearSession);
 
 // ===== بدء التطبيق =====
 document.addEventListener('DOMContentLoaded', initApp);
