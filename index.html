@@ -234,6 +234,11 @@
     .btn-secondary:hover {
       background: rgba(212, 175, 55, 0.2);
     }
+    .btn-secondary.active-game {
+      background: rgba(212, 175, 55, 0.3);
+      border-color: #d4af37;
+      color: #f5e6c8;
+    }
 
     input, .input-field {
       background: rgba(255, 255, 255, 0.05);
@@ -252,6 +257,26 @@
     }
     input::placeholder {
       color: #6a5f4e;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255,255,255,0.1);
+      height: 6px;
+      border-radius: 3px;
+      outline: none;
+      padding: 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #d4af37;
+      cursor: pointer;
+      border: 2px solid #f5e6c8;
     }
 
     .status-msg {
@@ -564,7 +589,7 @@
           <div class="status-msg" id="depositStatus"></div>
         </div>
 
-        <!-- ===== تحويل النقاط (Market) ===== -->
+        <!-- تحويل النقاط (Market) -->
         <div style="margin-top:0.8rem; border-top:1px solid rgba(212,175,55,0.1); padding-top:0.8rem;">
           <h4 style="color:#f5e6c8; margin-bottom:0.3rem;">🔄 تحويل النقاط (سنتات)</h4>
           <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
@@ -574,6 +599,30 @@
           </div>
           <div class="status-msg" id="transferPointsStatus"></div>
         </div>
+      </div>
+
+      <!-- بطاقة ألعاب الكازينو -->
+      <div class="card-module" id="gamesCard">
+        <h3>🎰 ألعاب الكازينو</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+          <button class="btn-secondary game-selector active-game" data-game="chicken" style="flex:1;">🐔 الدجاجة</button>
+          <button class="btn-secondary game-selector" data-game="dice" style="flex:1;">🎲 النرد</button>
+          <button class="btn-secondary game-selector" data-game="wall" style="flex:1;">🧱 كسر الحائط</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+          <div style="flex:1; min-width:120px;">
+            <label style="color:#a3947a; font-size:0.85rem;">المخاطرة (1-100)</label>
+            <input type="range" id="riskSlider" min="1" max="100" value="50" style="width:100%;" />
+            <span id="riskValue" style="color:#d4af37; font-weight:600;">50</span>
+          </div>
+          <div style="flex:1; min-width:120px;">
+            <label style="color:#a3947a; font-size:0.85rem;">الرهان (USDT)</label>
+            <input type="number" id="betAmount" placeholder="0.00" step="0.0001" min="0.0001" style="width:100%;" />
+          </div>
+        </div>
+        <button class="btn-primary" id="playGameBtn" style="width:100%; margin-top:0.5rem;">▶ تشغيل</button>
+        <div id="gameResult" style="margin-top:0.8rem; text-align:center; font-size:1.2rem; min-height:2.5rem; color:#f5e6c8;"></div>
+        <div id="gameDetails" style="font-size:0.85rem; color:#b0a48a; text-align:center;"></div>
       </div>
 
       <!-- بطاقة المعاملات -->
