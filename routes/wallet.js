@@ -22,7 +22,7 @@ function writeDatabase(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
-// ===== التحويل من نقاط التعدين إلى رصيد الكازينو =====
+// ===== تحويل نقاط التعدين → رصيد الكازينو =====
 router.post('/wallet/transfer-points-to-casino', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -43,7 +43,6 @@ router.post('/wallet/transfer-points-to-casino', (req, res) => {
         if (amount > user.points_balance) {
             return res.status(400).json({ message: 'رصيد نقاط التعدين غير كافٍ' });
         }
-        // خصم من نقاط التعدين وإضافة إلى رصيد الكازينو
         user.points_balance = parseFloat((user.points_balance - amount).toFixed(4));
         user.casino_balance = parseFloat((user.casino_balance + amount).toFixed(4));
         user.transactions.push({
@@ -65,7 +64,7 @@ router.post('/wallet/transfer-points-to-casino', (req, res) => {
     }
 });
 
-// ===== التحويل من رصيد الكازينو إلى نقاط التعدين =====
+// ===== تحويل رصيد الكازينو → نقاط التعدين =====
 router.post('/wallet/transfer-casino-to-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -107,8 +106,7 @@ router.post('/wallet/transfer-casino-to-points', (req, res) => {
     }
 });
 
-// ===== التحويل من المحفظة الرئيسية (USDT) إلى نقاط التعدين (شراء نقاط) =====
-// (هذا المسار قد يُستخدم أيضاً في سوق الاستبدال، لكننا نضعه هنا للتكامل)
+// ===== شراء نقاط (USDT → نقاط) =====
 router.post('/wallet/buy-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -126,10 +124,8 @@ router.post('/wallet/buy-points', (req, res) => {
         if (!usdtAmount || isNaN(usdtAmount) || usdtAmount <= 0) {
             return res.status(400).json({ message: 'المبلغ غير صحيح' });
         }
-        // سعر النقطة: 1 USDT = 10 نقاط (مثال، يمكن تغييره)
         const exchangeRate = 10;
         const pointsToAdd = usdtAmount * exchangeRate;
-        // خصم USDT من المحفظة الرئيسية
         if (usdtAmount > user.balance) {
             return res.status(400).json({ message: 'رصيد USDT غير كافٍ' });
         }
@@ -137,7 +133,7 @@ router.post('/wallet/buy-points', (req, res) => {
         user.points_balance = parseFloat((user.points_balance + pointsToAdd).toFixed(4));
         user.transactions.push({
             type: 'buy_points',
-            amount: usdtAmount,
+            usdtAmount,
             pointsAdded: pointsToAdd,
             status: 'completed',
             timestamp: new Date().toISOString(),
@@ -155,7 +151,7 @@ router.post('/wallet/buy-points', (req, res) => {
     }
 });
 
-// ===== بيع النقاط مقابل USDT (مع عمولة 5% تُخصم تلقائياً) =====
+// ===== بيع نقاط (نقاط → USDT) مع عمولة 5% =====
 router.post('/wallet/sell-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -176,19 +172,15 @@ router.post('/wallet/sell-points', (req, res) => {
         if (pointsAmount > user.points_balance) {
             return res.status(400).json({ message: 'رصيد النقاط غير كافٍ' });
         }
-        // سعر النقطة: 1 USDT = 10 نقاط
         const exchangeRate = 10;
-        let usdtToAdd = pointsAmount / exchangeRate;
-        // خصم العمولة 5%
-        const commission = usdtToAdd * 0.05;
-        const usdtAfterCommission = usdtToAdd - commission;
-        // خصم النقاط وإضافة USDT
+        let usdtBeforeCommission = pointsAmount / exchangeRate;
+        const commission = usdtBeforeCommission * 0.05;
+        const usdtAfterCommission = usdtBeforeCommission - commission;
         user.points_balance = parseFloat((user.points_balance - pointsAmount).toFixed(4));
         user.balance = parseFloat((user.balance + usdtAfterCommission).toFixed(4));
-        // تسجيل العمولة في معاملة منفصلة أو ضمن التفاصيل
         user.transactions.push({
             type: 'sell_points',
-            amount: pointsAmount,
+            pointsSold: pointsAmount,
             usdtReceived: usdtAfterCommission,
             commission,
             status: 'completed',
@@ -207,7 +199,7 @@ router.post('/wallet/sell-points', (req, res) => {
     }
 });
 
-// ===== جلب المعاملات (كما هو) =====
+// ===== جلب المعاملات =====
 router.get('/wallet/transactions', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
