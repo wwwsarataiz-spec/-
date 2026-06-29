@@ -22,7 +22,7 @@ function writeDatabase(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
-// ===== شراء نقاط (USDT → نقاط) بدون عمولة على الشراء (نضعها هنا للتوحيد) =====
+// ===== شراء نقاط (USDT → نقاط) =====
 router.post('/market/buy-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -40,7 +40,6 @@ router.post('/market/buy-points', (req, res) => {
         if (!usdtAmount || isNaN(usdtAmount) || usdtAmount <= 0) {
             return res.status(400).json({ message: 'المبلغ غير صحيح' });
         }
-        // سعر الصرف: 1 USDT = 10 نقاط
         const exchangeRate = 10;
         const pointsToAdd = usdtAmount * exchangeRate;
         if (usdtAmount > user.balance) {
@@ -68,7 +67,7 @@ router.post('/market/buy-points', (req, res) => {
     }
 });
 
-// ===== بيع نقاط (نقاط → USDT) مع خصم عمولة 5% =====
+// ===== بيع نقاط (نقاط → USDT) مع عمولة 5% =====
 router.post('/market/sell-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -91,11 +90,10 @@ router.post('/market/sell-points', (req, res) => {
         }
         const exchangeRate = 10;
         let usdtBeforeCommission = pointsAmount / exchangeRate;
-        const commission = usdtBeforeCommission * 0.05; // 5%
+        const commission = usdtBeforeCommission * 0.05;
         const usdtAfterCommission = usdtBeforeCommission - commission;
         user.points_balance = parseFloat((user.points_balance - pointsAmount).toFixed(4));
         user.balance = parseFloat((user.balance + usdtAfterCommission).toFixed(4));
-        // تسجيل معاملة البيع مع العمولة
         user.transactions.push({
             type: 'market_sell',
             pointsSold: pointsAmount,
