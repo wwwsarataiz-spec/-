@@ -31,11 +31,22 @@ const depositStatus = document.getElementById('depositStatus');
 const copyAddressBtn = document.getElementById('copyAddressBtn');
 const transactionsList = document.getElementById('transactionsList');
 
-// عناصر تحويل النقاط (Market) - سنفترض وجودها في HTML
+// عناصر تحويل النقاط
 const transferRecipientEmail = document.getElementById('transferRecipientEmail');
 const transferPointsAmount = document.getElementById('transferPointsAmount');
 const transferPointsBtn = document.getElementById('transferPointsBtn');
 const transferPointsStatus = document.getElementById('transferPointsStatus');
+
+// عناصر الألعاب
+const gameSelectors = document.querySelectorAll('.game-selector');
+const riskSlider = document.getElementById('riskSlider');
+const riskValue = document.getElementById('riskValue');
+const betAmountInput = document.getElementById('betAmount');
+const playGameBtn = document.getElementById('playGameBtn');
+const gameResult = document.getElementById('gameResult');
+const gameDetails = document.getElementById('gameDetails');
+
+let selectedGame = 'chicken';
 
 const DEPOSIT_ADDRESS = '0x2975dc1f8188c30b2a4be0ec27e33494da66cb46';
 
@@ -350,13 +361,17 @@ function renderTransactions(transactions) {
             'harvest': 'حصاد',
             'deposit': 'إيداع',
             'transfer_sent': 'تحويل مرسل',
-            'transfer_received': 'تحويل مستقبل'
+            'transfer_received': 'تحويل مستقبل',
+            'game_chicken': 'لعبة الدجاجة',
+            'game_dice': 'لعبة النرد',
+            'game_wall': 'لعبة كسر الحائط'
         };
         const typeText = typeMap[tx.type] || tx.type;
+        const amountDisplay = tx.amount >= 0 ? `+${tx.amount.toFixed(4)}` : `${tx.amount.toFixed(4)}`;
         html += `
             <li>
                 <span>${typeText}</span>
-                <span style="color:#d4af37;">${(tx.amount || 0).toFixed(4)} USDT</span>
+                <span style="color:${tx.amount >= 0 ? '#2ecc71' : '#e74c3c'};">${amountDisplay} USDT</span>
                 <span class="${statusClass}">${statusText}</span>
                 <span style="color:#6a5f4e; font-size:0.7rem;">${new Date(tx.timestamp).toLocaleString()}</span>
             </li>
@@ -394,7 +409,6 @@ async function transferPoints() {
             transferPointsStatus.style.color = '#e74c3c';
             return;
         }
-        // تحديث الرصيد
         const user = { balance: data.balance };
         updateSidebar(user);
         updateWalletUI(user);
@@ -403,7 +417,6 @@ async function transferPoints() {
         transferRecipientEmail.value = '';
         transferPointsAmount.value = '';
         loadTransactions();
-        // تحديث localStorage
         const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
         stored.balance = data.balance;
         stored.transactions = data.transactions || [];
@@ -413,6 +426,75 @@ async function transferPoints() {
         transferPointsStatus.style.color = '#e74c3c';
     }
 }
+
+// ===== دوال ألعاب الكازينو =====
+
+// اختيار اللعبة
+gameSelectors.forEach(btn => {
+    btn.addEventListener('click', function() {
+        gameSelectors.forEach(b => b.classList.remove('active-game'));
+        this.classList.add('active-game');
+        selectedGame = this.dataset.game;
+    });
+});
+
+// شريط المخاطرة
+riskSlider.addEventListener('input', function() {
+    riskValue.textContent = this.value;
+});
+
+// زر التشغيل
+playGameBtn.addEventListener('click', async function() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const betAmount = parseFloat(betAmountInput.value);
+    const risk = parseInt(riskSlider.value);
+    if (!betAmount || betAmount <= 0) {
+        gameResult.textContent = '⚠️ أدخل مبلغ رهان صحيح';
+        gameResult.style.color = '#e74c3c';
+        return;
+    }
+    // تعطيل الزر مؤقتاً
+    this.disabled = true;
+    this.textContent = '⏳ جارٍ التشغيل...';
+
+    try {
+        const response = await fetch('/api/games/play', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ gameType: selectedGame, betAmount, risk })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            gameResult.textContent = '❌ ' + (data.message || 'فشل اللعب');
+            gameResult.style.color = '#e74c3c';
+            gameDetails.textContent = '';
+            return;
+        }
+        // عرض النتيجة
+        gameResult.textContent = data.resultMessage;
+        gameResult.style.color = data.win ? '#2ecc71' : '#e74c3c';
+        gameDetails.textContent = `المضاعف: ${data.multiplier}x | فرصة الفوز: ${data.winProbability}% | الرقم: ${data.randomNumber}`;
+        // تحديث رصيد الكازينو
+        const userUpdate = { casinoBalance: data.newCasinoBalance };
+        // نستدعي updateWalletUI و updateSidebar مع البيانات الجديدة
+        // نحتاج لجلب كامل بيانات المستخدم من localStorage وتحديثها
+        const stored = JSON.parse(localStorage.getItem('nexora_user') || '{}');
+        stored.casinoBalance = data.newCasinoBalance;
+        localStorage.setItem('nexora_user', JSON.stringify(stored));
+        updateSidebar(stored);
+        updateWalletUI(stored);
+        // تحديث المعاملات
+        loadTransactions();
+    } catch (error) {
+        gameResult.textContent = '⚠️ خطأ في الاتصال بالسيرفر';
+        gameResult.style.color = '#e74c3c';
+        gameDetails.textContent = '';
+    } finally {
+        this.disabled = false;
+        this.textContent = '▶ تشغيل';
+    }
+});
 
 // ===== دوال تسجيل الدخول والتسجيل =====
 
@@ -531,7 +613,6 @@ withdrawBtn.addEventListener('click', requestWithdraw);
 depositBtn.addEventListener('click', submitDeposit);
 copyAddressBtn.addEventListener('click', copyAddress);
 
-// ربط أحداث تحويل النقاط (إذا كانت العناصر موجودة)
 if (transferPointsBtn) {
     transferPointsBtn.addEventListener('click', transferPoints);
 }
