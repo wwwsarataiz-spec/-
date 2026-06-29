@@ -22,8 +22,8 @@ function writeDatabase(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
-// ===== تحويل النقاط إلى مستخدم آخر =====
-router.post('/market/transfer-points', (req, res) => {
+// ===== شراء نقاط (USDT → نقاط) بدون عمولة على الشراء (نضعها هنا للتوحيد) =====
+router.post('/market/buy-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'غير مصرح' });
@@ -32,56 +32,86 @@ router.post('/market/transfer-points', (req, res) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         let db = readDatabase();
-        const sender = db.users.find(u => u.id === decoded.id);
-        if (!sender) {
-            return res.status(404).json({ message: 'المرسل غير موجود' });
+        const user = db.users.find(u => u.id === decoded.id);
+        if (!user) {
+            return res.status(404).json({ message: 'المستخدم غير موجود' });
         }
-
-        const { recipientEmail, amount } = req.body;
-        if (!recipientEmail || !amount || isNaN(amount) || amount <= 0) {
-            return res.status(400).json({ message: 'بيانات غير صحيحة' });
+        const { usdtAmount } = req.body;
+        if (!usdtAmount || isNaN(usdtAmount) || usdtAmount <= 0) {
+            return res.status(400).json({ message: 'المبلغ غير صحيح' });
         }
-
-        // البحث عن المستلم بالبريد
-        const recipient = db.users.find(u => u.email === recipientEmail);
-        if (!recipient) {
-            return res.status(404).json({ message: 'المستلم غير موجود' });
+        // سعر الصرف: 1 USDT = 10 نقاط
+        const exchangeRate = 10;
+        const pointsToAdd = usdtAmount * exchangeRate;
+        if (usdtAmount > user.balance) {
+            return res.status(400).json({ message: 'رصيد USDT غير كافٍ' });
         }
-        if (recipient.id === sender.id) {
-            return res.status(400).json({ message: 'لا يمكن التحويل لنفسك' });
-        }
-        if (amount > sender.balance) {
-            return res.status(400).json({ message: 'رصيد غير كافٍ' });
-        }
-
-        // خصم من المرسل وإضافة للمستلم
-        sender.balance = parseFloat((sender.balance - amount).toFixed(8));
-        recipient.balance = parseFloat((recipient.balance + amount).toFixed(8));
-
-        // تسجيل المعاملات لكلا الطرفين
-        sender.transactions.push({
-            type: 'transfer_sent',
-            amount: amount,
-            to: recipient.email,
+        user.balance = parseFloat((user.balance - usdtAmount).toFixed(4));
+        user.points_balance = parseFloat((user.points_balance + pointsToAdd).toFixed(4));
+        user.transactions.push({
+            type: 'market_buy',
+            usdtAmount,
+            pointsAdded: pointsToAdd,
             status: 'completed',
             timestamp: new Date().toISOString(),
         });
-        recipient.transactions.push({
-            type: 'transfer_received',
-            amount: amount,
-            from: sender.email,
-            status: 'completed',
-            timestamp: new Date().toISOString(),
-        });
-
         writeDatabase(db);
-
         res.json({
-            message: 'تم التحويل بنجاح',
-            balance: sender.balance,
-            transactions: sender.transactions.slice(-10).reverse(),
+            message: `تم شراء ${pointsToAdd} نقطة مقابل ${usdtAmount} USDT`,
+            balance: user.balance,
+            points_balance: user.points_balance,
+            casino_balance: user.casino_balance,
+            transactions: user.transactions.slice(-10).reverse(),
         });
+    } catch (err) {
+        return res.status(401).json({ message: 'توكن غير صالح' });
+    }
+});
 
+// ===== بيع نقاط (نقاط → USDT) مع خصم عمولة 5% =====
+router.post('/market/sell-points', (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'غير مصرح' });
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        let db = readDatabase();
+        const user = db.users.find(u => u.id === decoded.id);
+        if (!user) {
+            return res.status(404).json({ message: 'المستخدم غير موجود' });
+        }
+        const { pointsAmount } = req.body;
+        if (!pointsAmount || isNaN(pointsAmount) || pointsAmount <= 0) {
+            return res.status(400).json({ message: 'المبلغ غير صحيح' });
+        }
+        if (pointsAmount > user.points_balance) {
+            return res.status(400).json({ message: 'رصيد النقاط غير كافٍ' });
+        }
+        const exchangeRate = 10;
+        let usdtBeforeCommission = pointsAmount / exchangeRate;
+        const commission = usdtBeforeCommission * 0.05; // 5%
+        const usdtAfterCommission = usdtBeforeCommission - commission;
+        user.points_balance = parseFloat((user.points_balance - pointsAmount).toFixed(4));
+        user.balance = parseFloat((user.balance + usdtAfterCommission).toFixed(4));
+        // تسجيل معاملة البيع مع العمولة
+        user.transactions.push({
+            type: 'market_sell',
+            pointsSold: pointsAmount,
+            usdtReceived: usdtAfterCommission,
+            commission,
+            status: 'completed',
+            timestamp: new Date().toISOString(),
+        });
+        writeDatabase(db);
+        res.json({
+            message: `تم بيع ${pointsAmount} نقطة، استلمت ${usdtAfterCommission.toFixed(4)} USDT (بعد خصم 5% عمولة)`,
+            balance: user.balance,
+            points_balance: user.points_balance,
+            casino_balance: user.casino_balance,
+            transactions: user.transactions.slice(-10).reverse(),
+        });
     } catch (err) {
         return res.status(401).json({ message: 'توكن غير صالح' });
     }
