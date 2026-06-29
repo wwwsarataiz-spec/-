@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,6 +10,10 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// ===== خدمة الملفات الثابتة =====
+// نخدم جميع الملفات في نفس المجلد (index.html, app.js, إلخ)
+app.use(express.static(path.join(__dirname)));
 
 // ===== قاعدة بيانات مؤقتة (في الذاكرة) =====
 const users = [];       // كل مستخدم: { id, name, phone, email, password, balance }
@@ -120,7 +125,12 @@ app.get('/api/user', (req, res) => {
   }
 });
 
-// تشغيل السيرفر
+// ===== توجيه الرابط الرئيسي لفتح ملف index.html =====
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ===== تشغيل السيرفر =====
 app.listen(PORT, () => {
   console.log(`🚀 Nexora server running on port ${PORT}`);
 });
