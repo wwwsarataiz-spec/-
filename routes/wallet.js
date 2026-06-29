@@ -22,8 +22,8 @@ function writeDatabase(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
-// ===== التحويل إلى الكازينو =====
-router.post('/wallet/transfer-to-casino', (req, res) => {
+// ===== التحويل من نقاط التعدين إلى رصيد الكازينو =====
+router.post('/wallet/transfer-points-to-casino', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'غير مصرح' });
@@ -38,24 +38,26 @@ router.post('/wallet/transfer-to-casino', (req, res) => {
         }
         const { amount } = req.body;
         if (!amount || isNaN(amount) || amount <= 0) {
-            return res.status(400).json({ message: 'مبلغ غير صحيح' });
+            return res.status(400).json({ message: 'المبلغ غير صحيح' });
         }
-        if (amount > user.balance) {
-            return res.status(400).json({ message: 'رصيد غير كافٍ' });
+        if (amount > user.points_balance) {
+            return res.status(400).json({ message: 'رصيد نقاط التعدين غير كافٍ' });
         }
-        user.balance = parseFloat((user.balance - amount).toFixed(8));
-        user.casinoBalance = parseFloat((user.casinoBalance + amount).toFixed(8));
+        // خصم من نقاط التعدين وإضافة إلى رصيد الكازينو
+        user.points_balance = parseFloat((user.points_balance - amount).toFixed(4));
+        user.casino_balance = parseFloat((user.casino_balance + amount).toFixed(4));
         user.transactions.push({
-            type: 'transfer_to_casino',
+            type: 'transfer_points_to_casino',
             amount,
             status: 'completed',
             timestamp: new Date().toISOString(),
         });
         writeDatabase(db);
         res.json({
-            message: 'تم التحويل للكازينو',
+            message: 'تم تحويل النقاط إلى رصيد الكازينو',
+            points_balance: user.points_balance,
+            casino_balance: user.casino_balance,
             balance: user.balance,
-            casinoBalance: user.casinoBalance,
             transactions: user.transactions.slice(-10).reverse(),
         });
     } catch (err) {
@@ -63,8 +65,8 @@ router.post('/wallet/transfer-to-casino', (req, res) => {
     }
 });
 
-// ===== طلب السحب (الحد الأدنى 4 USDT) =====
-router.post('/wallet/withdraw', (req, res) => {
+// ===== التحويل من رصيد الكازينو إلى نقاط التعدين =====
+router.post('/wallet/transfer-casino-to-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'غير مصرح' });
@@ -77,29 +79,27 @@ router.post('/wallet/withdraw', (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'المستخدم غير موجود' });
         }
-        const { walletAddress, amount } = req.body;
-        if (!walletAddress || walletAddress.trim() === '') {
-            return res.status(400).json({ message: 'عنوان المحفظة مطلوب' });
+        const { amount } = req.body;
+        if (!amount || isNaN(amount) || amount <= 0) {
+            return res.status(400).json({ message: 'المبلغ غير صحيح' });
         }
-        if (!amount || isNaN(amount) || amount < 4) {
-            return res.status(400).json({ message: 'الحد الأدنى 4 USDT' });
+        if (amount > user.casino_balance) {
+            return res.status(400).json({ message: 'رصيد الكازينو غير كافٍ' });
         }
-        if (amount > user.balance) {
-            return res.status(400).json({ message: 'رصيد غير كافٍ' });
-        }
-        user.balance = parseFloat((user.balance - amount).toFixed(8));
+        user.casino_balance = parseFloat((user.casino_balance - amount).toFixed(4));
+        user.points_balance = parseFloat((user.points_balance + amount).toFixed(4));
         user.transactions.push({
-            type: 'withdraw',
+            type: 'transfer_casino_to_points',
             amount,
-            walletAddress: walletAddress.trim(),
-            status: 'pending',
+            status: 'completed',
             timestamp: new Date().toISOString(),
         });
         writeDatabase(db);
         res.json({
-            message: 'تم تقديم طلب السحب، قيد المعالجة',
+            message: 'تم تحويل رصيد الكازينو إلى نقاط التعدين',
+            points_balance: user.points_balance,
+            casino_balance: user.casino_balance,
             balance: user.balance,
-            casinoBalance: user.casinoBalance,
             transactions: user.transactions.slice(-10).reverse(),
         });
     } catch (err) {
@@ -107,8 +107,9 @@ router.post('/wallet/withdraw', (req, res) => {
     }
 });
 
-// ===== الإيداع اليدوي (تسجيل TxID) =====
-router.post('/wallet/deposit', (req, res) => {
+// ===== التحويل من المحفظة الرئيسية (USDT) إلى نقاط التعدين (شراء نقاط) =====
+// (هذا المسار قد يُستخدم أيضاً في سوق الاستبدال، لكننا نضعه هنا للتكامل)
+router.post('/wallet/buy-points', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'غير مصرح' });
@@ -121,31 +122,32 @@ router.post('/wallet/deposit', (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'المستخدم غير موجود' });
         }
-        const { txid } = req.body;
-        if (!txid || txid.trim() === '') {
-            return res.status(400).json({ message: 'رقم العملية مطلوب' });
+        const { usdtAmount } = req.body;
+        if (!usdtAmount || isNaN(usdtAmount) || usdtAmount <= 0) {
+            return res.status(400).json({ message: 'المبلغ غير صحيح' });
         }
-        // إضافة إلى قائمة الإيداعات المنتظرة
-        const deposit = {
-            id: db.depositIdCounter++,
-            userId: user.id,
-            userEmail: user.email,
-            txid: txid.trim(),
-            amount: 0,
-            status: 'pending',
-            timestamp: new Date().toISOString(),
-        };
-        db.pendingDeposits.push(deposit);
+        // سعر النقطة: 1 USDT = 10 نقاط (مثال، يمكن تغييره)
+        const exchangeRate = 10;
+        const pointsToAdd = usdtAmount * exchangeRate;
+        // خصم USDT من المحفظة الرئيسية
+        if (usdtAmount > user.balance) {
+            return res.status(400).json({ message: 'رصيد USDT غير كافٍ' });
+        }
+        user.balance = parseFloat((user.balance - usdtAmount).toFixed(4));
+        user.points_balance = parseFloat((user.points_balance + pointsToAdd).toFixed(4));
         user.transactions.push({
-            type: 'deposit',
-            amount: 0,
-            txid: txid.trim(),
-            status: 'pending',
+            type: 'buy_points',
+            amount: usdtAmount,
+            pointsAdded: pointsToAdd,
+            status: 'completed',
             timestamp: new Date().toISOString(),
         });
         writeDatabase(db);
         res.json({
-            message: 'تم استلام طلب الإيداع، سيتم مراجعته من الإدارة',
+            message: `تم شراء ${pointsToAdd} نقطة مقابل ${usdtAmount} USDT`,
+            balance: user.balance,
+            points_balance: user.points_balance,
+            casino_balance: user.casino_balance,
             transactions: user.transactions.slice(-10).reverse(),
         });
     } catch (err) {
@@ -153,7 +155,59 @@ router.post('/wallet/deposit', (req, res) => {
     }
 });
 
-// ===== جلب المعاملات =====
+// ===== بيع النقاط مقابل USDT (مع عمولة 5% تُخصم تلقائياً) =====
+router.post('/wallet/sell-points', (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'غير مصرح' });
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        let db = readDatabase();
+        const user = db.users.find(u => u.id === decoded.id);
+        if (!user) {
+            return res.status(404).json({ message: 'المستخدم غير موجود' });
+        }
+        const { pointsAmount } = req.body;
+        if (!pointsAmount || isNaN(pointsAmount) || pointsAmount <= 0) {
+            return res.status(400).json({ message: 'المبلغ غير صحيح' });
+        }
+        if (pointsAmount > user.points_balance) {
+            return res.status(400).json({ message: 'رصيد النقاط غير كافٍ' });
+        }
+        // سعر النقطة: 1 USDT = 10 نقاط
+        const exchangeRate = 10;
+        let usdtToAdd = pointsAmount / exchangeRate;
+        // خصم العمولة 5%
+        const commission = usdtToAdd * 0.05;
+        const usdtAfterCommission = usdtToAdd - commission;
+        // خصم النقاط وإضافة USDT
+        user.points_balance = parseFloat((user.points_balance - pointsAmount).toFixed(4));
+        user.balance = parseFloat((user.balance + usdtAfterCommission).toFixed(4));
+        // تسجيل العمولة في معاملة منفصلة أو ضمن التفاصيل
+        user.transactions.push({
+            type: 'sell_points',
+            amount: pointsAmount,
+            usdtReceived: usdtAfterCommission,
+            commission,
+            status: 'completed',
+            timestamp: new Date().toISOString(),
+        });
+        writeDatabase(db);
+        res.json({
+            message: `تم بيع ${pointsAmount} نقطة، استلمت ${usdtAfterCommission.toFixed(4)} USDT (بعد خصم 5% عمولة)`,
+            balance: user.balance,
+            points_balance: user.points_balance,
+            casino_balance: user.casino_balance,
+            transactions: user.transactions.slice(-10).reverse(),
+        });
+    } catch (err) {
+        return res.status(401).json({ message: 'توكن غير صالح' });
+    }
+});
+
+// ===== جلب المعاملات (كما هو) =====
 router.get('/wallet/transactions', (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
