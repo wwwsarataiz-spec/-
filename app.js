@@ -1,4 +1,4 @@
-// ===== app.js - عميل Nexora (محدث للتبويبات وتأثيرات التعدين) =====
+// ===== app.js - عميل Nexora (محدث للعداد الحي والتأثيرات المشعة) =====
 
 // ===== عناصر DOM الأساسية =====
 const loginOverlay = document.getElementById('loginOverlay');
@@ -59,11 +59,13 @@ const tabPanels = {
 
 let selectedGame = 'chicken';
 let cooldownInterval = null;
+let miningCounterInterval = null; // مؤقت العداد الحي الجديد
 
 const DEPOSIT_ADDRESS = '0x2975dc1f8188c30b2a4be0ec27e33494da66cb46';
+const MAX_MINING_AMOUNT = 0.0040; // القيمة القصوى اليومية
+const MAX_MINING_DURATION = 86400; // 24 ساعة بالثواني
 
 // ===== دوال تحديث الواجهة =====
-
 function updateSidebar(user) {
     if (user && user.name) {
         if (sidebarUsername) sidebarUsername.textContent = user.name;
@@ -105,7 +107,6 @@ function hideLoginOverlay() {
 }
 
 // ===== إدارة الجلسة =====
-
 function setSession(token, user) {
     localStorage.setItem('nexora_token', token);
     localStorage.setItem('nexora_user', JSON.stringify(user));
@@ -125,11 +126,14 @@ function clearSession() {
         clearInterval(cooldownInterval);
         cooldownInterval = null;
     }
+    if (miningCounterInterval) {
+        clearInterval(miningCounterInterval);
+        miningCounterInterval = null;
+    }
     if (mineBtn) {
         mineBtn.disabled = false;
         mineBtn.textContent = '⛏️ تعدين (يدوي)';
     }
-    // إعادة تعيين العملة
     updateCoinState(false, 0);
 }
 
@@ -163,22 +167,59 @@ function updateCooldownButton(seconds) {
     mineBtn.textContent = `⏳ متبقي ${timeStr}`;
 }
 
+// ====== دوال العداد الحي (المضافة حديثاً) ======
+function startLiveMiningCounter(remainingSeconds) {
+    if (miningCounterInterval) clearInterval(miningCounterInterval);
+    
+    // حساب الوقت المنقضي الحالي
+    let totalElapsed = MAX_MINING_DURATION - remainingSeconds;
+    
+    miningCounterInterval = setInterval(() => {
+        totalElapsed++;
+        // أقصى حماية للبيانات
+        if (totalElapsed >= MAX_MINING_DURATION) {
+            totalElapsed = MAX_MINING_DURATION;
+            clearInterval(miningCounterInterval);
+            miningCounterInterval = null;
+        }
+        
+        // حساب التقدم تصاعدياً وضربه بالقيمة القصوى
+        const progress = totalElapsed / MAX_MINING_DURATION;
+        const currentEarnings = progress * MAX_MINING_AMOUNT;
+        
+        // تحديث الواجهة و حالة العملة
+        if (miningEarningsDisplay) {
+            miningEarningsDisplay.textContent = currentEarnings.toFixed(4);
+        }
+        updateCoinState(true, remainingSeconds - totalElapsed);
+    }, 50); // 50 مللي ثانية لسلاسة وسرعة رائعة
+}
+// =====================================================
+
 async function updateMiningUIFromStatus(status) {
     if (!status) return;
-    if (miningEarningsDisplay) {
-        miningEarningsDisplay.textContent = (status.miningEarnings || 0).toFixed(4);
+    
+    // إيقاف أي عدادات قديمة
+    if (miningCounterInterval) {
+        clearInterval(miningCounterInterval);
+        miningCounterInterval = null;
     }
+    if (cooldownInterval) {
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
+    }
+
     if (status.canMine) {
         if (mineBtn) {
             mineBtn.disabled = false;
             mineBtn.textContent = '⛏️ تعدين (يدوي)';
         }
-        if (cooldownInterval) {
-            clearInterval(cooldownInterval);
-            cooldownInterval = null;
-        }
         if (miningMessage) miningMessage.textContent = '';
         updateCoinState(true, 0);
+        // قيمة ثابتة عند انتهاء التعدين
+        if (miningEarningsDisplay) {
+            miningEarningsDisplay.textContent = (status.miningEarnings || 0).toFixed(4);
+        }
     } else {
         if (mineBtn) {
             mineBtn.disabled = true;
@@ -186,7 +227,11 @@ async function updateMiningUIFromStatus(status) {
             updateCooldownButton(remaining);
             updateCoinState(false, remaining);
         }
-        if (cooldownInterval) clearInterval(cooldownInterval);
+        
+        // بدء العداد الحي التصاعدي بناءً على الوقت المتبقي
+        startLiveMiningCounter(status.cooldownRemaining);
+        
+        // مؤقت التحديث العكسي للثواني
         let remainingSeconds = status.cooldownRemaining || 0;
         cooldownInterval = setInterval(async () => {
             remainingSeconds--;
@@ -209,7 +254,6 @@ async function updateMiningUIFromStatus(status) {
 }
 
 // ===== جلب البيانات =====
-
 async function fetchUserData() {
     const token = localStorage.getItem('nexora_token');
     if (!token) return null;
@@ -250,7 +294,6 @@ async function fetchMiningStatus() {
 }
 
 // ===== دوال التعدين =====
-
 async function handleMine() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
@@ -347,18 +390,19 @@ async function handleHarvest() {
     }
 }
 
-// ===== دوال المحفظة (مختصرة للاختصار، لكنها كاملة في الملف الأصلي) =====
-// ... (نفس الدوال السابقة: transferToCasino, requestWithdraw, submitDeposit, copyAddress, loadTransactions, renderTransactions)
-// تم حذفها للاختصار هنا، لكنها موجودة في الملف النهائي المرفق.
+// ===== دوال المحفظة, السوق, التحويل الداخلي, والألعاب =====
+// ⚠️ تنبيه صارم: في الكود الذي أرسلته لي سابقاً، هذه الدوال كانت مختصرة بـ "...". 
+// لقد وضعت لك مساحة هنا لإعادة لصق أكوادك القديمة الأصلية الخاصة بهذه الدوال (مثل: loadTransactions, transferToCasino, buyPoints, playGame)
+// لأنني لا أملكها. اتركها هنا كما هي ولصق أكوادك تحتها:
 
-// ===== دوال التحويل الداخلي وسوق الاستبدال =====
-// ... (نفس الدوال السابقة: transferPointsToCasino, transferCasinoToPoints, buyPoints, sellPoints)
+// [ ضع هنا دوال التحويل الداخلي: transferPointsToCasino, transferCasinoToPoints ]
+// [ ضع هنا دوال الإيداع والسحب: handleDeposit, handleWithdraw ]
+// [ ضع هنا دوال سوق الاستبدال: buyPoints, sellPoints ]
+// [ ضع هنا دوال الألعاب: playGame ]
+// [ ضع هنا دوال المعاملات: loadTransactions, renderTransactions ]
 
-// ===== دوال الألعاب =====
-// ... (نفس الدوال السابقة للألعاب)
 
 // ===== دوال تسجيل الدخول والتسجيل =====
-
 async function loginUser(email, password) {
     try {
         const response = await fetch('/api/login', {
@@ -422,7 +466,6 @@ async function registerUser(name, phone, email, password) {
 }
 
 // ===== التحقق التلقائي من الجلسة =====
-
 async function checkAutoLogin() {
     const token = localStorage.getItem('nexora_token');
     const storedUser = localStorage.getItem('nexora_user');
@@ -458,7 +501,6 @@ async function checkAutoLogin() {
 }
 
 // ===== إدارة التبويبات =====
-
 function switchTab(tabId) {
     // تحديث الأزرار
     tabBtns.forEach(btn => {
@@ -477,10 +519,15 @@ function switchTab(tabId) {
             }
         }
     });
+
+    // إضافة: إيقاف العداد إذا غادر المستخدم تبويبة التعدين للحفاظ على الأداء
+    if (tabId !== 'mining' && miningCounterInterval) {
+        clearInterval(miningCounterInterval);
+        miningCounterInterval = null;
+    }
 }
 
 // ===== تهيئة التطبيق =====
-
 async function initApp() {
     // ربط التبويبات
     tabBtns.forEach(btn => {
@@ -496,7 +543,7 @@ async function initApp() {
     // التحقق من الجلسة
     await checkAutoLogin();
 
-    // ربط الأحداث (نفس السابق مع فحص الوجود)
+    // ربط الأحداث (قم بربط أزرارك القديمة هنا)
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -534,7 +581,8 @@ async function initApp() {
     if (mineBtn) mineBtn.addEventListener('click', handleMine);
     if (harvestBtn) harvestBtn.addEventListener('click', handleHarvest);
 
-    // ... (باقي ربط الأحداث للتحويلات والألعاب كما في الملف السابق)
+    // [ هنا ضع روابط أزرار المحفظة والألعاب الخاصة بك في هذا الموقع ] 
+    // (مثال: if(transferPointsToCasinoBtn) transferPointsToCasinoBtn.addEventListener(...))
 
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) logoutBtn.addEventListener('click', clearSession);
