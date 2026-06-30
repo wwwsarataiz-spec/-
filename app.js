@@ -1,4 +1,4 @@
-// ===== app.js - عميل Nexora (محدث للعداد الحي والتأثيرات المشعة) =====
+// ===== app.js - عميل Nexora (محدث للتبويبات وتأثيرات التعدين) =====
 
 // ===== عناصر DOM الأساسية =====
 const loginOverlay = document.getElementById('loginOverlay');
@@ -59,13 +59,15 @@ const tabPanels = {
 
 let selectedGame = 'chicken';
 let cooldownInterval = null;
-let miningCounterInterval = null; // مؤقت العداد الحي الجديد
 
 const DEPOSIT_ADDRESS = '0x2975dc1f8188c30b2a4be0ec27e33494da66cb46';
-const MAX_MINING_AMOUNT = 0.0040; // القيمة القصوى اليومية
-const MAX_MINING_DURATION = 86400; // 24 ساعة بالثواني
+
+// ===== إعدادات التعدين الحي =====
+const MAX_DAILY_EARNINGS = 0.0080;
+const MINING_DURATION = 86400; // 24 ساعة بالثواني
 
 // ===== دوال تحديث الواجهة =====
+
 function updateSidebar(user) {
     if (user && user.name) {
         if (sidebarUsername) sidebarUsername.textContent = user.name;
@@ -107,6 +109,7 @@ function hideLoginOverlay() {
 }
 
 // ===== إدارة الجلسة =====
+
 function setSession(token, user) {
     localStorage.setItem('nexora_token', token);
     localStorage.setItem('nexora_user', JSON.stringify(user));
@@ -126,14 +129,11 @@ function clearSession() {
         clearInterval(cooldownInterval);
         cooldownInterval = null;
     }
-    if (miningCounterInterval) {
-        clearInterval(miningCounterInterval);
-        miningCounterInterval = null;
-    }
     if (mineBtn) {
         mineBtn.disabled = false;
         mineBtn.textContent = '⛏️ تعدين (يدوي)';
     }
+    // إعادة تعيين العملة
     updateCoinState(false, 0);
 }
 
@@ -167,59 +167,22 @@ function updateCooldownButton(seconds) {
     mineBtn.textContent = `⏳ متبقي ${timeStr}`;
 }
 
-// ====== دوال العداد الحي (المضافة حديثاً) ======
-function startLiveMiningCounter(remainingSeconds) {
-    if (miningCounterInterval) clearInterval(miningCounterInterval);
-    
-    // حساب الوقت المنقضي الحالي
-    let totalElapsed = MAX_MINING_DURATION - remainingSeconds;
-    
-    miningCounterInterval = setInterval(() => {
-        totalElapsed++;
-        // أقصى حماية للبيانات
-        if (totalElapsed >= MAX_MINING_DURATION) {
-            totalElapsed = MAX_MINING_DURATION;
-            clearInterval(miningCounterInterval);
-            miningCounterInterval = null;
-        }
-        
-        // حساب التقدم تصاعدياً وضربه بالقيمة القصوى
-        const progress = totalElapsed / MAX_MINING_DURATION;
-        const currentEarnings = progress * MAX_MINING_AMOUNT;
-        
-        // تحديث الواجهة و حالة العملة
-        if (miningEarningsDisplay) {
-            miningEarningsDisplay.textContent = currentEarnings.toFixed(4);
-        }
-        updateCoinState(true, remainingSeconds - totalElapsed);
-    }, 50); // 50 مللي ثانية لسلاسة وسرعة رائعة
-}
-// =====================================================
-
 async function updateMiningUIFromStatus(status) {
     if (!status) return;
-    
-    // إيقاف أي عدادات قديمة
-    if (miningCounterInterval) {
-        clearInterval(miningCounterInterval);
-        miningCounterInterval = null;
+    if (miningEarningsDisplay) {
+        miningEarningsDisplay.textContent = (status.miningEarnings || 0).toFixed(4);
     }
-    if (cooldownInterval) {
-        clearInterval(cooldownInterval);
-        cooldownInterval = null;
-    }
-
     if (status.canMine) {
         if (mineBtn) {
             mineBtn.disabled = false;
             mineBtn.textContent = '⛏️ تعدين (يدوي)';
         }
+        if (cooldownInterval) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+        }
         if (miningMessage) miningMessage.textContent = '';
         updateCoinState(true, 0);
-        // قيمة ثابتة عند انتهاء التعدين
-        if (miningEarningsDisplay) {
-            miningEarningsDisplay.textContent = (status.miningEarnings || 0).toFixed(4);
-        }
     } else {
         if (mineBtn) {
             mineBtn.disabled = true;
@@ -227,12 +190,19 @@ async function updateMiningUIFromStatus(status) {
             updateCooldownButton(remaining);
             updateCoinState(false, remaining);
         }
-        
-        // بدء العداد الحي التصاعدي بناءً على الوقت المتبقي
-        startLiveMiningCounter(status.cooldownRemaining);
-        
-        // مؤقت التحديث العكسي للثواني
+        if (cooldownInterval) clearInterval(cooldownInterval);
         let remainingSeconds = status.cooldownRemaining || 0;
+
+        // دالة تحديث الأرباح الحية
+        const updateLiveEarnings = () => {
+            const elapsedSeconds = MINING_DURATION - remainingSeconds;
+            const currentEarnings = Math.min((elapsedSeconds / MINING_DURATION) * MAX_DAILY_EARNINGS, MAX_DAILY_EARNINGS);
+            if (miningEarningsDisplay) {
+                miningEarningsDisplay.textContent = currentEarnings.toFixed(4);
+            }
+        };
+        updateLiveEarnings(); // تحديث فوري
+
         cooldownInterval = setInterval(async () => {
             remainingSeconds--;
             if (remainingSeconds <= 0) {
@@ -249,11 +219,13 @@ async function updateMiningUIFromStatus(status) {
                 const secs = remainingSeconds % 60;
                 cooldownTimer.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
+            updateLiveEarnings(); // تحديث الأرباح كل ثانية
         }, 1000);
     }
 }
 
 // ===== جلب البيانات =====
+
 async function fetchUserData() {
     const token = localStorage.getItem('nexora_token');
     if (!token) return null;
@@ -294,6 +266,7 @@ async function fetchMiningStatus() {
 }
 
 // ===== دوال التعدين =====
+
 async function handleMine() {
     const token = localStorage.getItem('nexora_token');
     if (!token) { showLoginOverlay(); return; }
@@ -390,19 +363,325 @@ async function handleHarvest() {
     }
 }
 
-// ===== دوال المحفظة, السوق, التحويل الداخلي, والألعاب =====
-// ⚠️ تنبيه صارم: في الكود الذي أرسلته لي سابقاً، هذه الدوال كانت مختصرة بـ "...". 
-// لقد وضعت لك مساحة هنا لإعادة لصق أكوادك القديمة الأصلية الخاصة بهذه الدوال (مثل: loadTransactions, transferToCasino, buyPoints, playGame)
-// لأنني لا أملكها. اتركها هنا كما هي ولصق أكوادك تحتها:
+// ===== دوال المحفظة =====
 
-// [ ضع هنا دوال التحويل الداخلي: transferPointsToCasino, transferCasinoToPoints ]
-// [ ضع هنا دوال الإيداع والسحب: handleDeposit, handleWithdraw ]
-// [ ضع هنا دوال سوق الاستبدال: buyPoints, sellPoints ]
-// [ ضع هنا دوال الألعاب: playGame ]
-// [ ضع هنا دوال المعاملات: loadTransactions, renderTransactions ]
+async function loadTransactions() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) return;
+    try {
+        const response = await fetch('/api/transactions', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('فشل تحميل المعاملات');
+        const data = await response.json();
+        renderTransactions(data.transactions || []);
+    } catch (error) {
+        console.error('خطأ في تحميل المعاملات:', error);
+    }
+}
 
+function renderTransactions(transactions) {
+    if (!transactionsList) return;
+    if (!transactions || transactions.length === 0) {
+        transactionsList.innerHTML = `<li style="color:#6a5f4e; text-align:center; justify-content:center;">لا توجد معاملات</li>`;
+        return;
+    }
+    transactionsList.innerHTML = transactions.map(tx => {
+        const statusClass = tx.status === 'completed' ? 'tx-status-completed' : (tx.status === 'pending' ? 'tx-status-pending' : 'tx-status-failed');
+        return `<li>
+            <span>${tx.type || 'معاملة'} - ${new Date(tx.created_at).toLocaleDateString('ar-SA')}</span>
+            <span class="${statusClass}">${tx.amount ? tx.amount.toFixed(4) : ''} ${tx.currency || ''}</span>
+        </li>`;
+    }).join('');
+}
+
+async function transferPointsToCasino() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const amount = parseFloat(internalTransferAmount?.value);
+    if (!amount || amount <= 0) {
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = 'يرجى إدخال مبلغ صحيح';
+            internalTransferStatus.style.color = '#e74c3c';
+        }
+        return;
+    }
+    try {
+        const response = await fetch('/api/transfer/points-to-casino', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'فشل التحويل');
+        const user = await fetchUserData();
+        if (user) {
+            updateSidebar(user);
+            updateWalletUI(user);
+        }
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = '✅ ' + data.message;
+            internalTransferStatus.style.color = '#2ecc71';
+        }
+        loadTransactions();
+    } catch (error) {
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = error.message;
+            internalTransferStatus.style.color = '#e74c3c';
+        }
+    }
+}
+
+async function transferCasinoToPoints() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const amount = parseFloat(internalTransferAmount?.value);
+    if (!amount || amount <= 0) {
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = 'يرجى إدخال مبلغ صحيح';
+            internalTransferStatus.style.color = '#e74c3c';
+        }
+        return;
+    }
+    try {
+        const response = await fetch('/api/transfer/casino-to-points', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'فشل التحويل');
+        const user = await fetchUserData();
+        if (user) {
+            updateSidebar(user);
+            updateWalletUI(user);
+        }
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = '✅ ' + data.message;
+            internalTransferStatus.style.color = '#2ecc71';
+        }
+        loadTransactions();
+    } catch (error) {
+        if (internalTransferStatus) {
+            internalTransferStatus.textContent = error.message;
+            internalTransferStatus.style.color = '#e74c3c';
+        }
+    }
+}
+
+async function buyPoints() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const amount = parseFloat(marketAmount?.value);
+    if (!amount || amount <= 0) {
+        if (marketStatus) {
+            marketStatus.textContent = 'يرجى إدخال مبلغ صحيح';
+            marketStatus.style.color = '#e74c3c';
+        }
+        return;
+    }
+    try {
+        const response = await fetch('/api/market/buy', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'فشل الشراء');
+        const user = await fetchUserData();
+        if (user) {
+            updateSidebar(user);
+            updateWalletUI(user);
+        }
+        if (marketStatus) {
+            marketStatus.textContent = '✅ ' + data.message;
+            marketStatus.style.color = '#2ecc71';
+        }
+        loadTransactions();
+    } catch (error) {
+        if (marketStatus) {
+            marketStatus.textContent = error.message;
+            marketStatus.style.color = '#e74c3c';
+        }
+    }
+}
+
+async function sellPoints() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const amount = parseFloat(marketAmount?.value);
+    if (!amount || amount <= 0) {
+        if (marketStatus) {
+            marketStatus.textContent = 'يرجى إدخال مبلغ صحيح';
+            marketStatus.style.color = '#e74c3c';
+        }
+        return;
+    }
+    try {
+        const response = await fetch('/api/market/sell', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'فشل البيع');
+        const user = await fetchUserData();
+        if (user) {
+            updateSidebar(user);
+            updateWalletUI(user);
+        }
+        if (marketStatus) {
+            marketStatus.textContent = '✅ ' + data.message;
+            marketStatus.style.color = '#2ecc71';
+        }
+        loadTransactions();
+    } catch (error) {
+        if (marketStatus) {
+            marketStatus.textContent = error.message;
+            marketStatus.style.color = '#e74c3c';
+        }
+    }
+}
+
+async function requestWithdraw() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const address = withdrawAddress?.value.trim();
+    const amount = parseFloat(withdrawAmount?.value);
+    if (!address || !amount || amount < 4) {
+        if (walletStatus) {
+            walletStatus.textContent = 'يرجى إدخال عنوان صحيح ومبلغ 4 USDT على الأقل';
+            walletStatus.style.color = '#e74c3c';
+        }
+        return;
+    }
+    try {
+        const response = await fetch('/api/withdraw', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address, amount })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'فشل طلب السحب');
+        if (walletStatus) {
+            walletStatus.textContent = '✅ ' + data.message;
+            walletStatus.style.color = '#2ecc71';
+        }
+        const user = await fetchUserData();
+        if (user) {
+            updateSidebar(user);
+            updateWalletUI(user);
+        }
+        loadTransactions();
+    } catch (error) {
+        if (walletStatus) {
+            walletStatus.textContent = error.message;
+            walletStatus.style.color = '#e74c3c';
+        }
+    }
+}
+
+async function submitDeposit() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const txId = depositTxId?.value.trim();
+    if (!txId) {
+        if (depositStatus) {
+            depositStatus.textContent = 'يرجى إدخال رقم العملية';
+            depositStatus.style.color = '#e74c3c';
+        }
+        return;
+    }
+    try {
+        const response = await fetch('/api/deposit', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ txId })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'فشل تأكيد الإيداع');
+        if (depositStatus) {
+            depositStatus.textContent = '✅ ' + data.message;
+            depositStatus.style.color = '#2ecc71';
+        }
+        const user = await fetchUserData();
+        if (user) {
+            updateSidebar(user);
+            updateWalletUI(user);
+        }
+        loadTransactions();
+    } catch (error) {
+        if (depositStatus) {
+            depositStatus.textContent = error.message;
+            depositStatus.style.color = '#e74c3c';
+        }
+    }
+}
+
+async function copyAddress() {
+    try {
+        await navigator.clipboard.writeText(DEPOSIT_ADDRESS);
+        alert('تم نسخ عنوان الإيداع');
+    } catch (err) {
+        prompt('انسخ العنوان يدوياً:', DEPOSIT_ADDRESS);
+    }
+}
+
+// ===== دوال الألعاب =====
+
+function updateGameSelection(game) {
+    selectedGame = game;
+    gameSelectors.forEach(btn => {
+        btn.classList.remove('active-game');
+        if (btn.dataset.game === game) {
+            btn.classList.add('active-game');
+        }
+    });
+}
+
+async function playGame() {
+    const token = localStorage.getItem('nexora_token');
+    if (!token) { showLoginOverlay(); return; }
+    const risk = parseInt(riskSlider?.value) || 50;
+    const bet = parseFloat(betAmountInput?.value);
+    if (!bet || bet <= 0) {
+        if (gameResult) {
+            gameResult.textContent = 'يرجى إدخال رهان صحيح';
+            gameResult.style.color = '#e74c3c';
+        }
+        return;
+    }
+    try {
+        const response = await fetch(`/api/games/${selectedGame}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ risk, bet })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'فشل تشغيل اللعبة');
+        if (gameResult) {
+            gameResult.textContent = data.win ? '🎉 ربحت!' : '😞 خسرت';
+            gameResult.style.color = data.win ? '#2ecc71' : '#e74c3c';
+        }
+        if (gameDetails) {
+            gameDetails.textContent = data.details || `النتيجة: ${data.result || ''}`;
+        }
+        const user = await fetchUserData();
+        if (user) {
+            updateSidebar(user);
+            updateWalletUI(user);
+        }
+        loadTransactions();
+    } catch (error) {
+        if (gameResult) {
+            gameResult.textContent = error.message;
+            gameResult.style.color = '#e74c3c';
+        }
+    }
+}
 
 // ===== دوال تسجيل الدخول والتسجيل =====
+
 async function loginUser(email, password) {
     try {
         const response = await fetch('/api/login', {
@@ -466,6 +745,7 @@ async function registerUser(name, phone, email, password) {
 }
 
 // ===== التحقق التلقائي من الجلسة =====
+
 async function checkAutoLogin() {
     const token = localStorage.getItem('nexora_token');
     const storedUser = localStorage.getItem('nexora_user');
@@ -501,6 +781,7 @@ async function checkAutoLogin() {
 }
 
 // ===== إدارة التبويبات =====
+
 function switchTab(tabId) {
     // تحديث الأزرار
     tabBtns.forEach(btn => {
@@ -519,15 +800,10 @@ function switchTab(tabId) {
             }
         }
     });
-
-    // إضافة: إيقاف العداد إذا غادر المستخدم تبويبة التعدين للحفاظ على الأداء
-    if (tabId !== 'mining' && miningCounterInterval) {
-        clearInterval(miningCounterInterval);
-        miningCounterInterval = null;
-    }
 }
 
 // ===== تهيئة التطبيق =====
+
 async function initApp() {
     // ربط التبويبات
     tabBtns.forEach(btn => {
@@ -543,7 +819,7 @@ async function initApp() {
     // التحقق من الجلسة
     await checkAutoLogin();
 
-    // ربط الأحداث (قم بربط أزرارك القديمة هنا)
+    // ربط الأحداث
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -581,8 +857,27 @@ async function initApp() {
     if (mineBtn) mineBtn.addEventListener('click', handleMine);
     if (harvestBtn) harvestBtn.addEventListener('click', handleHarvest);
 
-    // [ هنا ضع روابط أزرار المحفظة والألعاب الخاصة بك في هذا الموقع ] 
-    // (مثال: if(transferPointsToCasinoBtn) transferPointsToCasinoBtn.addEventListener(...))
+    if (transferPointsToCasinoBtn) transferPointsToCasinoBtn.addEventListener('click', transferPointsToCasino);
+    if (transferCasinoToPointsBtn) transferCasinoToPointsBtn.addEventListener('click', transferCasinoToPoints);
+    if (buyPointsBtn) buyPointsBtn.addEventListener('click', buyPoints);
+    if (sellPointsBtn) sellPointsBtn.addEventListener('click', sellPoints);
+    if (withdrawBtn) withdrawBtn.addEventListener('click', requestWithdraw);
+    if (depositBtn) depositBtn.addEventListener('click', submitDeposit);
+    if (copyAddressBtn) copyAddressBtn.addEventListener('click', copyAddress);
+
+    if (riskSlider) {
+        riskSlider.addEventListener('input', function() {
+            if (riskValue) riskValue.textContent = this.value;
+        });
+    }
+
+    gameSelectors.forEach(btn => {
+        btn.addEventListener('click', function() {
+            updateGameSelection(this.dataset.game);
+        });
+    });
+
+    if (playGameBtn) playGameBtn.addEventListener('click', playGame);
 
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) logoutBtn.addEventListener('click', clearSession);
