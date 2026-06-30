@@ -22,7 +22,7 @@ function writeDatabase(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
-// دالة حساب التعدين الآلي (نفس المعادلة السابقة)
+// دالة حساب التعدين الآلي
 function calculateAutoMining(user) {
     const now = Date.now();
     const lastUpdate = user.lastAutoMiningUpdate || now;
@@ -83,6 +83,9 @@ router.post('/mine', (req, res) => {
             miningEarnings: user.miningEarnings,
             balance: user.balance,
             casinoBalance: user.casinoBalance,
+            // [تعديل جديد] إرسال وقت بدء التعدين والأرباح المستهدفة للعداد الحي
+            miningStartTime: user.lastAutoMiningUpdate, 
+            targetEarnings: 0.004
         });
     } catch (err) {
         return res.status(401).json({ message: 'توكن غير صالح' });
@@ -133,6 +136,9 @@ router.post('/harvest', (req, res) => {
             miningEarnings: user.miningEarnings,
             lastHarvestTime: user.lastHarvestTime,
             transactions: user.transactions.slice(-10).reverse(),
+            // [تعديل جديد] إرسال وقت بدء التعدين والأرباح المستهدفة للعداد الحي
+            miningStartTime: user.lastAutoMiningUpdate,
+            targetEarnings: 0.004
         });
     } catch (err) {
         return res.status(401).json({ message: 'توكن غير صالح' });
@@ -174,6 +180,9 @@ router.get('/mining-status', (req, res) => {
             lastHarvestTime: user.lastHarvestTime,
             canMine,
             cooldownRemaining: remainingSeconds,
+            // [تعديل جديد] إرسال وقت بدء التعدين والأرباح المستهدفة للعداد الحي
+            miningStartTime: user.lastAutoMiningUpdate,
+            targetEarnings: 0.004
         });
     } catch (err) {
         return res.status(401).json({ message: 'توكن غير صالح' });
